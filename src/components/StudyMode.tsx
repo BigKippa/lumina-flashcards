@@ -24,7 +24,7 @@ interface StudyModeProps {
 type StudyPhase = 'setup' | 'manual_setup' | 'choice_setup' | 'learning' | 'finished';
 type InputMode = 'manual_self' | 'manual_type' | 'manual_choice' | 'voice';
 
-const ENCOURAGEMENTS = ["Great Job!", "Keep it Up!", "You're doing great!", "Fantastic!", "Spot on!", "Excellent!", "Awesome!"];
+// const ENCOURAGEMENTS = ["Great Job!", "Keep it Up!", "You're doing great!", "Fantastic!", "Spot on!", "Excellent!", "Awesome!"];
 
 const StudyMode: React.FC<StudyModeProps> = ({ cards, onExit, settings, onSaveSettings, onMarkKnown, isFavorite, onToggleFavorite, onReport, deckId, learningHistory, onSessionUpdate, onInputModeChange }) => {
     const { t } = useTranslation();

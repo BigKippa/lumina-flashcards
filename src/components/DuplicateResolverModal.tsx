@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Word, Deck } from '../data/vocabulary';
-import { X, Check, ArrowRight, Merge } from 'lucide-react';
+import { Word } from '../data/vocabulary';
+import { X, Check, Merge } from 'lucide-react';
 
 interface DuplicateResolverModalProps {
     isOpen: boolean;

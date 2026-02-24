@@ -495,14 +495,14 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
         showToast("Current email verified!", 'success');
     };
 
-    const startVerifyNewEmail = async (email: string) => {
+    /* const startVerifyNewEmail = async (email: string) => {
         setIsSendingCode(true);
         const code = generateVerificationCode();
         setVerificationCode(code);
         await simulateSendEmail(email, code);
         setIsSendingCode(false);
         showToast(`Code sent to NEW email (${email}): ${code}`, 'success');
-    };
+    }; */
 
     const verifyNewEmail = () => {
         if (userEnteredCode !== verificationCode) {

@@ -36,8 +36,8 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
     const [newDeckTitle, setNewDeckTitle] = useState('');
     const [newDeckDesc, setNewDeckDesc] = useState('');
     const [newDeckIsPublic, setNewDeckIsPublic] = useState(false);
-    const [sortBy, setSortBy] = useState<'az' | 'za'>('az');
-    const [filterCategory, setFilterCategory] = useState<string>('all');
+    const [sortBy, _setSortBy] = useState<'az' | 'za'>('az');
+    const [filterCategory, _setFilterCategory] = useState<string>('all');
     const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
 
     // Section State (Now Lifted)

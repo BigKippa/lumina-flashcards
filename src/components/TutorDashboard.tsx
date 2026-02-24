@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Student, Deck, AppSettings } from '../types';
 import { Word } from '../data/vocabulary';
-import { Search, Plus, UserCircle, ChevronDown, SortAsc, Clock, Archive, GraduationCap, Users, ArrowLeft, Layout } from 'lucide-react';
+import { Search, Plus, UserCircle, ChevronDown, SortAsc, Clock, Archive, GraduationCap, Users, Layout } from 'lucide-react';
 import { StudentProfile } from './StudentProfile';
 import { AddContentModal } from './AddContentModal';
 
