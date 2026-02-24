@@ -1,0 +1,314 @@
+{
+    "welcome": {
+        "greeting": {
+            "morning": "Buongiorno",
+            "afternoon": "Buon Pomeriggio",
+            "evening": "Buonasera"
+        },
+        "subtitle": "Cosa vorresti imparare oggi?",
+        "categories": {
+            "random": "Mix Casuale",
+            "vocabulary": "Vocabolario",
+            "idioms": "Modi di Dire",
+            "phrasal_verbs": "Verbi Frasali",
+            "collocations": "Frasi e Collocazioni",
+            "prepositions": "Preposizioni"
+        },
+        "start_session": "Inizia Sessione",
+        "quick_start": "Avvio Rapido",
+        "resume": "Riprendi {{deck}}",
+        "favorites": "Preferiti",
+        "favorites_subtitle": "I tuoi elementi salvati",
+        "no_favorites": "Nessun preferito ancora"
+    },
+    "common": {
+        "language": "Lingua",
+        "settings": "Impostazioni",
+        "profile": "Profilo",
+        "logout": "Log Out",
+        "home": "Home",
+        "back": "Back",
+        "next": "Next",
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "save": "Save",
+        "loading": "Loading...",
+        "error": "Error",
+        "success": "Success",
+        "or": "O"
+    },
+    "auth": {
+        "login": "Accedi",
+        "register": "Nuovo Utente",
+        "guest": "Continua come Ospite",
+        "choose_language": "Scegli la lingua",
+        "welcome_title": "Benvenuto in Lumina",
+        "welcome_subtitle": "Il tuo viaggio verso un bellissimo vocabolario inizia qui.",
+        "username": "Nome Utente",
+        "password": "Password",
+        "email": "Email (per verifica)",
+        "email_placeholder": "nome@esempio.com",
+        "username_placeholder": "Inserisci nome utente",
+        "password_placeholder": "Inserisci password",
+        "remember_me": "Ricordami",
+        "forgot_password": "Password dimenticata?",
+        "create_account": "Crea Account",
+        "choose_username": "Scegli Nome Utente",
+        "choose_password": "Scegli Password",
+        "verify_email": "Verifica Email",
+        "verification_code": "Codice di Verifica",
+        "verify_create": "Verifica e Crea Account",
+        "resend_code": "Reinvia Codice",
+        "back_to_login": "Torna al Login",
+        "role_learner": "Studente",
+        "role_tutor": "Tutor",
+        "i_am_a": "Sono un...",
+        "or": "O"
+    },
+    "topics": {
+        "selection": {
+            "title": "Gruppi di Vocabolario",
+            "subtitle": "Seleziona una categoria per esplorare argomenti specifici",
+            "back_to_home": "Torna alla Home",
+            "back_to_groups": "Torna ai Gruppi",
+            "student_library": "Biblioteca Studente",
+            "cards_count": "{{count}} Carte",
+            "surprise_me_title": "Sorprendimi (Tutto il Vocabolario)",
+            "surprise_me_subtitle": "Mischia parole da tutti gli argomenti di vocabolario",
+            "random_mix_title": "Mix Casuale di {{group}}",
+            "random_mix_subtitle": "Mischia parole da tutti gli argomenti in questo gruppo"
+        },
+        "daily_life": {
+            "title": "Vita Quotidiana & Sopravvivenza",
+            "description": "Le basi per qualsiasi studente principiante o intermedio.",
+            "home": {
+                "label": "La Casa",
+                "desc": "Mobili, elettrodomestici e faccende domestiche."
+            },
+            "food": {
+                "label": "Cibo & Bevande",
+                "desc": "Spesa, metodi di cottura e ordinazioni."
+            },
+            "transport": {
+                "label": "Trasporto",
+                "desc": "Muoversi con i mezzi pubblici, guidare e aeroporti."
+            },
+            "health": {
+                "label": "Salute & Benessere",
+                "desc": "Malattie comuni, parti del corpo ed esercizio fisico."
+            },
+            "shopping": {
+                "label": "Shopping",
+                "desc": "Abbigliamento, taglie, prezzi e resi."
+            }
+        },
+        "business": {
+            "title": "Inglese Professionale & Business",
+            "description": "Essenziale per chi usa l'inglese per avanzamento di carriera.",
+            "office": {
+                "label": "L'Ufficio",
+                "desc": "Cancelleria, tecnologia e gerarchia."
+            },
+            "meetings": {
+                "label": "Riunioni & Presentazioni",
+                "desc": "Modi di dire, frasi di transizione e linguaggio aziendale."
+            },
+            "finance": {
+                "label": "Negoziazione & Finanza",
+                "desc": "Contratti, banche e tendenze di mercato."
+            },
+            "job": {
+                "label": "Ricerca Lavoro",
+                "desc": "Parole chiave per CV, verbi per colloqui e soft skills."
+            }
+        },
+        "communication": {
+            "title": "Comunicazione & Socializzazione",
+            "description": "Si concentra sul 'collante' che tiene insieme le conversazioni.",
+            "phrasal": {
+                "label": "Verbi Frasali",
+                "desc": "Raggruppati per particella o azione."
+            },
+            "idioms": {
+                "label": "Modi di Dire Comuni",
+                "desc": "Linguaggio figurato nell'inglese quotidiano."
+            },
+            "social": {
+                "label": "Socializzazione",
+                "desc": "Saluti, chiacchiere e espressioni educate."
+            },
+            "emotions": {
+                "label": "Emozioni & Opinioni",
+                "desc": "Descrivere sentimenti ed esprimere accordo."
+            }
+        },
+        "academic": {
+            "title": "Accademico & Tecnico",
+            "description": "Per studenti che preparano esami come TOEFL o IELTS.",
+            "science": {
+                "label": "Scienza & Tecnologia",
+                "desc": "Biologia, chimica e terminologia IT."
+            },
+            "env": {
+                "label": "Ambiente & Natura",
+                "desc": "Cambiamento climatico, geografia e animali."
+            },
+            "arts": {
+                "label": "Le Arti",
+                "desc": "Letteratura, musica, cinema ed espressione creativa."
+            },
+            "edu": {
+                "label": "Istruzione",
+                "desc": "Vita universitaria, materie e abitudini di studio."
+            }
+        },
+        "grammar": {
+            "title": "Vocabolario Basato sulla Grammatica",
+            "description": "Imparare le parole in base al loro ruolo grammaticale.",
+            "temporal": {
+                "label": "Parole Temporali",
+                "desc": "Avverbi di frequenza e marcatori temporali."
+            },
+            "connectors": {
+                "label": "Connettori & Congiunzioni",
+                "desc": "Costruire frasi complesse."
+            },
+            "collocations": {
+                "label": "Collocazioni",
+                "desc": "Parole che vanno naturalmente insieme."
+            }
+        }
+    },
+    "roles": {
+        "admin": "Amministratore",
+        "adminTutor": "Admin (Modo Tutor)",
+        "adminLearner": "Admin (Modo Studente)"
+    },
+    "mode": {
+        "title": "Modalità Utente",
+        "subtitle": "Seleziona il tuo ruolo attivo per questa sessione.",
+        "learner": "Studente",
+        "learner_desc": "Padroneggia il vocabolario con flashcard interattive e quiz.",
+        "tutor": "Tutor",
+        "tutor_desc": "Gestisci studenti, assegna mazzi e monitora i progressi.",
+        "admin": "Admin",
+        "admin_desc": "Configura le impostazioni di sistema e gestisci i contenuti."
+    },
+    "admin": {
+        "dashboard_title": "Pannello di Amministrazione",
+        "tabs": {
+            "menu": "Menu",
+            "decks": "Mazzi",
+            "users": "Utenti",
+            "tickets": "Ticket"
+        },
+        "data_management": {
+            "title": "Gestione Dati",
+            "subtitle": "Backup e ripristino dei dati.",
+            "export": "Esporta Backup",
+            "export_desc": "Scarica tutto come JSON",
+            "import": "Importa Backup",
+            "import_desc": "Ripristina da file JSON",
+            "warning_title": "Nota Importante:",
+            "warning_desc": "L'importazione sovrascriverà tutti i dati attuali. Questa azione non può essere annullata."
+        },
+        "users": {
+            "title": "Database Utenti",
+            "subtitle": "Gestisci accessi e ruoli",
+            "merge_btn": "Unisci Utenti",
+            "add_btn": "Aggiungi Utente",
+            "table": {
+                "user": "Utente",
+                "role": "Ruolo",
+                "progress": "Progresso",
+                "actions": "Azioni",
+                "empty": "Nessun utente trovato."
+            },
+            "delete_confirm": "Elimina Utente"
+        },
+        "system": {
+            "title": "Configurazione Sistema",
+            "api_keys": "Chiavi API Backend",
+            "gemini_label": "Chiave API Google Gemini",
+            "gemini_placeholder": "Inserisci Chiave API",
+            "gemini_hint": "Questa chiave è richiesta per le funzionalità AI. È memorizzata in modo sicuro localmente."
+        }
+    },
+    "tutor": {
+        "dashboard_title": "Pannello Tutor",
+        "tabs": {
+            "overview": "Panoramica",
+            "students": "Studenti",
+            "flashcards": "Carte"
+        },
+        "stats": {
+            "total_students": "Totale Studenti",
+            "active_students": "Studenti Attivi",
+            "archived_students": "Studenti Archiviati"
+        },
+        "actions": {
+            "add_student": "Aggiungi Nuovo Studente",
+            "manage_content": "Gestisci Contenuti"
+        },
+        "toggle": {
+            "active": "Attivo",
+            "archived": "Archiviato"
+        }
+    },
+    "studyMode": {
+        "readyToStudy": "Ready to Study?",
+        "cardsInDeck": "{{count}} cards in this deck. Choose your interaction mode.",
+        "manualMode": "Manual Mode",
+        "manualModeDesc": "Self-check, Type, or Multiple Choice.",
+        "voiceMode": "Voice Mode",
+        "voiceModeDesc": "Speak your answers using the microphone.",
+        "answerStyle": "Answer Style",
+        "selfCheck": "Self Check",
+        "selfCheckDesc": "Classic flashcard flip.",
+        "typeAnswer": "Type Answer",
+        "typeAnswerDesc": "Type the word exactly.",
+        "multipleChoice": "Multiple Choice",
+        "multipleChoiceDesc": "Select from 4 options.",
+        "matchWord": "Match Word",
+        "matchWordDesc": "See Definition to Choose Word",
+        "matchDef": "Match Definition",
+        "matchDefDesc": "See Word to Choose Definition",
+        "mixedMode": "Mixed Mode",
+        "mixedModeDesc": "Randomly switch between style.",
+        "sessionComplete": "Session Complete!",
+        "reviewPassed": "Review passed.",
+        "greatJob": "Great study session!",
+        "accuracy": "Accuracy",
+        "time": "Time",
+        "best": "Best",
+        "newBest": "New Best!",
+        "needsImprovement": "Needs Improvement",
+        "missedCount": "You missed {{count}} cards on the first attempt.",
+        "reviewMissed": "Review Missed Items",
+        "returnToDeck": "Return to Deck",
+        "tryAgain": "Try again ({{count}}/3)",
+        "listen": "Listen to the word...",
+        "notQuite": "Not quite. Here is the card.",
+        "correct": "Correct!",
+        "nextCard": "Next Card",
+        "gotIt": "Got it",
+        "skip": "Skip / Keep in Queue",
+        "listening": "Listening...",
+        "nowYouTry": "Now you try..."
+    },
+    "pageTitles": {
+        "adminDashboard": "Admin Dashboard",
+        "tutorDashboard": "Tutor Dashboard",
+        "studyMode": "Study Mode",
+        "quizMode": "Quiz Mode",
+        "timedMode": "Timed Mode",
+        "profile": "User Profile",
+        "deckView": "Deck View",
+        "modeSelection": "Mode Selection",
+        "topicSelection": "Library",
+        "welcome": "Welcome",
+        "login": "Login",
+        "typing": "Typing Mode",
+        "quizResult": "Quiz Results"
+    }
+}

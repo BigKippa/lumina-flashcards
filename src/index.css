@@ -1,0 +1,95 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Palette from user (Desaturated/Flattened ~20%): 
+       Blue: 205 36% -> 29%
+       Green: 136 11% -> 9%
+       Teal: 180 32% -> 26%
+       Gold: 36 48% -> 38%
+       Sand: 37 28% -> 22%
+    */
+
+    --background: 37 22% 95%;
+    /* Sand tint */
+    --foreground: 0 0% 0%;
+    /* Pure Black */
+
+    --card: 180 26% 70%;
+    /* Teal */
+    --card-foreground: 0 0% 0%;
+
+    --popover: 36 38% 67%;
+    --popover-foreground: 0 0% 0%;
+
+    --primary: 205 29% 45%;
+    /* Blue */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 36 38% 67%;
+    /* Gold */
+    --secondary-foreground: 0 0% 0%;
+
+    --muted: 136 9% 49%;
+    /* Green */
+    --muted-foreground: 0 0% 40%;
+
+    --accent: 37 22% 67%;
+    /* Sand */
+    --accent-foreground: 0 0% 0%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 37 22% 85%;
+    --input: 37 22% 85%;
+    --ring: 205 29% 45%;
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    @apply antialiased text-black min-h-screen bg-background;
+  }
+}
+
+/* Animations */
+@keyframes shake {
+
+  10%,
+  90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+
+  20%,
+  80% {
+    transform: translate3d(2px, 0, 0);
+  }
+
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+
+  40%,
+  60% {
+    transform: translate3d(4px, 0, 0);
+  }
+}
+
+@keyframes countdown {
+  from {
+    stroke-dashoffset: 0;
+  }
+
+  to {
+    stroke-dashoffset: 283;
+  }
+}

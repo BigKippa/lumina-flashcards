@@ -1,0 +1,314 @@
+{
+    "welcome": {
+        "greeting": {
+            "morning": "早上好",
+            "afternoon": "下午好",
+            "evening": "晚上好"
+        },
+        "subtitle": "今天你想掌握什么？",
+        "categories": {
+            "random": "随机混合",
+            "vocabulary": "词汇",
+            "idioms": "成语和谚语",
+            "phrasal_verbs": "短语动词",
+            "collocations": "词组搭配",
+            "prepositions": "介词"
+        },
+        "start_session": "开始会话",
+        "quick_start": "快速开始",
+        "resume": "继续 {{deck}}",
+        "favorites": "收藏夹",
+        "favorites_subtitle": "您保存的项目",
+        "no_favorites": "暂无收藏"
+    },
+    "common": {
+        "language": "语言",
+        "settings": "设置",
+        "profile": "个人资料",
+        "logout": "Log Out",
+        "home": "Home",
+        "back": "Back",
+        "next": "Next",
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "save": "Save",
+        "loading": "Loading...",
+        "error": "Error",
+        "success": "Success",
+        "or": "或"
+    },
+    "auth": {
+        "login": "登录",
+        "register": "新用户",
+        "guest": "作为访客继续",
+        "choose_language": "选择语言",
+        "welcome_title": "欢迎来到 Lumina",
+        "welcome_subtitle": "开启您的绝美词汇之旅。",
+        "username": "用户名",
+        "password": "密码",
+        "email": "邮箱（用于验证）",
+        "email_placeholder": "name@example.com",
+        "username_placeholder": "输入用户名",
+        "password_placeholder": "输入密码",
+        "remember_me": "记住我",
+        "forgot_password": "忘记密码？",
+        "create_account": "创建账户",
+        "choose_username": "选择用户名",
+        "choose_password": "设置密码",
+        "verify_email": "验证邮箱",
+        "verification_code": "验证码",
+        "verify_create": "验证并创建账户",
+        "resend_code": "重发验证码",
+        "back_to_login": "返回登录",
+        "role_learner": "学习者",
+        "role_tutor": "导师",
+        "i_am_a": "我是...",
+        "or": "或"
+    },
+    "topics": {
+        "selection": {
+            "title": "词汇组",
+            "subtitle": "选择一个类别以探索特定主题",
+            "back_to_home": "返回首页",
+            "back_to_groups": "返回组",
+            "student_library": "学生图书馆",
+            "cards_count": "{{count}} 张卡片",
+            "surprise_me_title": "给我惊喜（所有词汇）",
+            "surprise_me_subtitle": "从每个词汇主题中随机抽取单词",
+            "random_mix_title": "{{group}} 的随机混合",
+            "random_mix_subtitle": "混合该组中所有主题的单词"
+        },
+        "daily_life": {
+            "title": "日常生活与生存",
+            "description": "任何初级到中级学习者的基石。",
+            "home": {
+                "label": "家",
+                "desc": "家具、电器和家务。"
+            },
+            "food": {
+                "label": "食物与饮料",
+                "desc": "杂货、烹饪方法和点餐。"
+            },
+            "transport": {
+                "label": "交通",
+                "desc": "乘坐公共交通、驾驶和机场。"
+            },
+            "health": {
+                "label": "健康与保健",
+                "desc": "常见疾病、身体部位和锻炼。"
+            },
+            "shopping": {
+                "label": "购物",
+                "desc": "服装、尺寸、价格和退货。"
+            }
+        },
+        "business": {
+            "title": "专业与商务英语",
+            "description": "对于使用英语进行职业发展的学习者至关重要。",
+            "office": {
+                "label": "办公室",
+                "desc": "文具、技术和等级制度。"
+            },
+            "meetings": {
+                "label": "会议与演示",
+                "desc": "习语、过渡短语和公司语言。"
+            },
+            "finance": {
+                "label": "谈判与金融",
+                "desc": "合同、银行和市场趋势。"
+            },
+            "job": {
+                "label": "求职",
+                "desc": "简历关键词、面试动词和软技能。"
+            }
+        },
+        "communication": {
+            "title": "沟通与社交",
+            "description": "专注于维系对话的“粘合剂”。",
+            "phrasal": {
+                "label": "短语动词",
+                "desc": "按小品词或动作分组。"
+            },
+            "idioms": {
+                "label": "常见习语",
+                "desc": "日常英语中的比喻语言。"
+            },
+            "social": {
+                "label": "社交",
+                "desc": "问候、闲聊和礼貌用语。"
+            },
+            "emotions": {
+                "label": "情绪与观点",
+                "desc": "描述感受和表达同意。"
+            }
+        },
+        "academic": {
+            "title": "学术与技术",
+            "description": "适合准备托福或雅思等考试的学生。",
+            "science": {
+                "label": "科学与技术",
+                "desc": "生物学、化学和IT术语。"
+            },
+            "env": {
+                "label": "环境与自然",
+                "desc": "气候变化、地理和动物。"
+            },
+            "arts": {
+                "label": "艺术",
+                "desc": "文学、音乐、电影和创造性表达。"
+            },
+            "edu": {
+                "label": "教育",
+                "desc": "大学生活、科目和学习习惯。"
+            }
+        },
+        "grammar": {
+            "title": "基于语法的词汇",
+            "description": "通过语法角色学习单词。",
+            "temporal": {
+                "label": "时间词",
+                "desc": "频率副词和时间标记。"
+            },
+            "connectors": {
+                "label": "连接词与连词",
+                "desc": "构建复杂句子。"
+            },
+            "collocations": {
+                "label": "搭配",
+                "desc": "自然组合在一起的单词。"
+            }
+        }
+    },
+    "roles": {
+        "admin": "管理员",
+        "adminTutor": "管理员（导师模式）",
+        "adminLearner": "管理员（学习者模式）"
+    },
+    "mode": {
+        "title": "用户模式",
+        "subtitle": "选择您本次会话的角色。",
+        "learner": "学习者",
+        "learner_desc": "通过互动抽认卡和测验掌握词汇。",
+        "tutor": "导师",
+        "tutor_desc": "管理学生，分配卡组并跟踪进度。",
+        "admin": "管理员",
+        "admin_desc": "配置系统设置和管理内容。"
+    },
+    "admin": {
+        "dashboard_title": "Admin Dashboard",
+        "tabs": {
+            "menu": "Menu",
+            "decks": "Decks",
+            "users": "Users",
+            "tickets": "Tickets"
+        },
+        "data_management": {
+            "title": "Data Management",
+            "subtitle": "Backup and restore your application data.",
+            "export": "Export Backup",
+            "export_desc": "Download all data as JSON",
+            "import": "Import Backup",
+            "import_desc": "Restore from JSON file",
+            "warning_title": "Important Note:",
+            "warning_desc": "Importing data will <strong>overwrite</strong> all current decks, cards, users, and settings. This action cannot be undone."
+        },
+        "users": {
+            "title": "User Database",
+            "subtitle": "Manage access and roles",
+            "merge_btn": "Merge Users",
+            "add_btn": "Add User",
+            "table": {
+                "user": "User",
+                "role": "Role",
+                "progress": "Progress",
+                "actions": "Actions",
+                "empty": "No users found."
+            },
+            "delete_confirm": "Delete User"
+        },
+        "system": {
+            "title": "System Configuration",
+            "api_keys": "Backend API Keys",
+            "gemini_label": "Google Gemini API Key",
+            "gemini_placeholder": "Enter backend API Key",
+            "gemini_hint": "This key is required for all AI generation features. It is stored securely in local storage but only accessible here."
+        }
+    },
+    "tutor": {
+        "dashboard_title": "Tutor Dashboard",
+        "tabs": {
+            "overview": "Overview",
+            "students": "Students",
+            "flashcards": "Flashcards"
+        },
+        "stats": {
+            "total_students": "Total Students",
+            "active_students": "Active Students",
+            "archived_students": "Archived Students"
+        },
+        "actions": {
+            "add_student": "Add New Student",
+            "manage_content": "Manage Learning Content"
+        },
+        "toggle": {
+            "active": "Active",
+            "archived": "Archived"
+        }
+    },
+    "studyMode": {
+        "readyToStudy": "Ready to Study?",
+        "cardsInDeck": "{{count}} cards in this deck. Choose your interaction mode.",
+        "manualMode": "Manual Mode",
+        "manualModeDesc": "Self-check, Type, or Multiple Choice.",
+        "voiceMode": "Voice Mode",
+        "voiceModeDesc": "Speak your answers using the microphone.",
+        "answerStyle": "Answer Style",
+        "selfCheck": "Self Check",
+        "selfCheckDesc": "Classic flashcard flip.",
+        "typeAnswer": "Type Answer",
+        "typeAnswerDesc": "Type the word exactly.",
+        "multipleChoice": "Multiple Choice",
+        "multipleChoiceDesc": "Select from 4 options.",
+        "matchWord": "Match Word",
+        "matchWordDesc": "See Definition to Choose Word",
+        "matchDef": "Match Definition",
+        "matchDefDesc": "See Word to Choose Definition",
+        "mixedMode": "Mixed Mode",
+        "mixedModeDesc": "Randomly switch between style.",
+        "sessionComplete": "Session Complete!",
+        "reviewPassed": "Review passed.",
+        "greatJob": "Great study session!",
+        "accuracy": "Accuracy",
+        "time": "Time",
+        "best": "Best",
+        "newBest": "New Best!",
+        "needsImprovement": "Needs Improvement",
+        "missedCount": "You missed {{count}} cards on the first attempt.",
+        "reviewMissed": "Review Missed Items",
+        "returnToDeck": "Return to Deck",
+        "tryAgain": "Try again ({{count}}/3)",
+        "listen": "Listen to the word...",
+        "notQuite": "Not quite. Here is the card.",
+        "correct": "Correct!",
+        "nextCard": "Next Card",
+        "gotIt": "Got it",
+        "skip": "Skip / Keep in Queue",
+        "listening": "Listening...",
+        "nowYouTry": "Now you try..."
+    },
+    "pageTitles": {
+        "adminDashboard": "Admin Dashboard",
+        "tutorDashboard": "Tutor Dashboard",
+        "studyMode": "Study Mode",
+        "quizMode": "Quiz Mode",
+        "timedMode": "Timed Mode",
+        "profile": "User Profile",
+        "deckView": "Deck View",
+        "modeSelection": "Mode Selection",
+        "topicSelection": "Library",
+        "welcome": "Welcome",
+        "login": "Login",
+        "typing": "Typing Mode",
+        "quizResult": "Quiz Results"
+    }
+}

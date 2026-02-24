@@ -1,0 +1,316 @@
+{
+    "welcome": {
+        "greeting": {
+            "morning": "Good Morning",
+            "afternoon": "Good Afternoon",
+            "evening": "Good Evening"
+        },
+        "subtitle": "What would you like to master today?",
+        "categories": {
+            "random": "Random Mix",
+            "vocabulary": "Vocabulary",
+            "idioms": "Idioms & Sayings",
+            "phrasal_verbs": "Phrasal Verbs",
+            "collocations": "Phrases & Collocations",
+            "prepositions": "Prepositions"
+        },
+        "start_session": "Start Session",
+        "quick_start": "Quick Start",
+        "resume": "Resume {{deck}}",
+        "quick_start_title": "Quick Start",
+        "no_recent_session": "No Recent Session",
+        "favorites": "Favorites",
+        "favorites_subtitle": "Your saved items",
+        "no_favorites": "No favorites yet"
+    },
+    "common": {
+        "language": "Language",
+        "settings": "Settings",
+        "profile": "Profile",
+        "logout": "Log Out",
+        "home": "Home",
+        "back": "Back",
+        "next": "Next",
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "save": "Save",
+        "loading": "Loading...",
+        "error": "Error",
+        "success": "Success",
+        "or": "Or"
+    },
+    "auth": {
+        "login": "Log In",
+        "register": "New User",
+        "guest": "Continue as Guest",
+        "choose_language": "Choose your language",
+        "welcome_title": "Welcome to Lumina",
+        "welcome_subtitle": "Your journey to beautiful vocabulary starts here.",
+        "username": "Username",
+        "password": "Password",
+        "email": "Email (for verification)",
+        "email_placeholder": "name@example.com",
+        "username_placeholder": "Enter username",
+        "password_placeholder": "Enter password",
+        "remember_me": "Remember me",
+        "forgot_password": "Forgot password?",
+        "create_account": "Create Account",
+        "choose_username": "Choose Username",
+        "choose_password": "Choose Password",
+        "verify_email": "Verify Email",
+        "verification_code": "Verification Code",
+        "verify_create": "Verify & Create Account",
+        "resend_code": "Resend Code",
+        "back_to_login": "Back to Login",
+        "role_learner": "Learner",
+        "role_tutor": "Tutor",
+        "i_am_a": "I am a...",
+        "or": "Or"
+    },
+    "topics": {
+        "selection": {
+            "title": "Vocabulary Groups",
+            "subtitle": "Select a category to explore specific topics",
+            "back_to_home": "Back to Home",
+            "back_to_groups": "Back to Groups",
+            "student_library": "Student Library",
+            "cards_count": "{{count}} Cards",
+            "surprise_me_title": "Surprise Me (All Vocabulary)",
+            "surprise_me_subtitle": "Shuffle words from every single vocabulary topic",
+            "random_mix_title": "Random Mix of {{group}}",
+            "random_mix_subtitle": "Shuffle words from all topics in this group"
+        },
+        "daily_life": {
+            "title": "Daily Life & Survival",
+            "description": "The building blocks for any beginner to intermediate learner.",
+            "home": {
+                "label": "The Home",
+                "desc": "Furniture, appliances, and household chores."
+            },
+            "food": {
+                "label": "Food & Drink",
+                "desc": "Groceries, cooking methods, and ordering."
+            },
+            "transport": {
+                "label": "Transportation",
+                "desc": "Navigating public transit, driving, and airports."
+            },
+            "health": {
+                "label": "Health & Wellness",
+                "desc": "Common illnesses, body parts, and exercise."
+            },
+            "shopping": {
+                "label": "Shopping",
+                "desc": "Clothing, sizes, prices, and returns."
+            }
+        },
+        "business": {
+            "title": "Professional & Business English",
+            "description": "Essential for learners using English for career advancement.",
+            "office": {
+                "label": "The Office",
+                "desc": "Stationery, technology, and hierarchy."
+            },
+            "meetings": {
+                "label": "Meetings & Presentations",
+                "desc": "Idioms, transition phrases, and corporate speak."
+            },
+            "finance": {
+                "label": "Negotiation & Finance",
+                "desc": "Contracts, banking, and market trends."
+            },
+            "job": {
+                "label": "Job Hunting",
+                "desc": "Resume keywords, interview verbs, and soft skills."
+            }
+        },
+        "communication": {
+            "title": "Communication & Socializing",
+            "description": "Focuses on the \"glue\" that holds conversations together.",
+            "phrasal": {
+                "label": "Phrasal Verbs",
+                "desc": "Grouped by particle or action."
+            },
+            "idioms": {
+                "label": "Common Idioms",
+                "desc": "Figurative language in everyday English."
+            },
+            "social": {
+                "label": "Socializing",
+                "desc": "Greetings, small talk, and polite expressions."
+            },
+            "emotions": {
+                "label": "Emotions & Opinions",
+                "desc": "Describing feelings and expressing agreement."
+            }
+        },
+        "academic": {
+            "title": "Academic & Technical",
+            "description": "For students preparing for exams like TOEFL or IELTS.",
+            "science": {
+                "label": "Science & Technology",
+                "desc": "Biology, chemistry, and IT terminology."
+            },
+            "env": {
+                "label": "Environment & Nature",
+                "desc": "Climate change, geography, and animals."
+            },
+            "arts": {
+                "label": "The Arts",
+                "desc": "Literature, music, film, and creative expression."
+            },
+            "edu": {
+                "label": "Education",
+                "desc": "University life, subjects, and study habits."
+            }
+        },
+        "grammar": {
+            "title": "Grammar-Based Vocabulary",
+            "description": "Learning words by their functional role.",
+            "temporal": {
+                "label": "Temporal Words",
+                "desc": "Adverbs of frequency and time markers."
+            },
+            "connectors": {
+                "label": "Connectors & Conjunctions",
+                "desc": "Building complex sentences."
+            },
+            "collocations": {
+                "label": "Collocations",
+                "desc": "Words that naturally go together."
+            }
+        }
+    },
+    "roles": {
+        "admin": "Administrator",
+        "adminTutor": "Admin (Tutor Mode)",
+        "adminLearner": "Admin (Learner Mode)"
+    },
+    "mode": {
+        "title": "User Mode",
+        "subtitle": "Select your active role for this session.",
+        "learner": "Learner",
+        "learner_desc": "Master vocabulary with interactive flashcards and quizzes.",
+        "tutor": "Tutor",
+        "tutor_desc": "Manage students, assign decks, and track progress.",
+        "admin": "Admin",
+        "admin_desc": "Configure system settings and manage content."
+    },
+    "admin": {
+        "dashboard_title": "Admin Dashboard",
+        "tabs": {
+            "menu": "Menu",
+            "decks": "Decks",
+            "users": "Users",
+            "tickets": "Tickets"
+        },
+        "data_management": {
+            "title": "Data Management",
+            "subtitle": "Backup and restore your application data.",
+            "export": "Export Backup",
+            "export_desc": "Download all data as JSON",
+            "import": "Import Backup",
+            "import_desc": "Restore from JSON file",
+            "warning_title": "Important Note:",
+            "warning_desc": "Importing data will <strong>overwrite</strong> all current decks, cards, users, and settings. This action cannot be undone."
+        },
+        "users": {
+            "title": "User Database",
+            "subtitle": "Manage access and roles",
+            "merge_btn": "Merge Users",
+            "add_btn": "Add User",
+            "table": {
+                "user": "User",
+                "role": "Role",
+                "progress": "Progress",
+                "actions": "Actions",
+                "empty": "No users found."
+            },
+            "delete_confirm": "Delete User"
+        },
+        "system": {
+            "title": "System Configuration",
+            "api_keys": "Backend API Keys",
+            "gemini_label": "Google Gemini API Key",
+            "gemini_placeholder": "Enter backend API Key",
+            "gemini_hint": "This key is required for all AI generation features. It is stored securely in local storage but only accessible here."
+        }
+    },
+    "tutor": {
+        "dashboard_title": "Tutor Dashboard",
+        "tabs": {
+            "overview": "Overview",
+            "students": "Students",
+            "flashcards": "Flashcards"
+        },
+        "stats": {
+            "total_students": "Total Students",
+            "active_students": "Active Students",
+            "archived_students": "Archived Students"
+        },
+        "actions": {
+            "add_student": "Add New Student",
+            "manage_content": "Manage Learning Content"
+        },
+        "toggle": {
+            "active": "Active",
+            "archived": "Archived"
+        }
+    },
+    "studyMode": {
+        "readyToStudy": "Ready to Study?",
+        "cardsInDeck": "{{count}} cards in this deck. Choose your interaction mode.",
+        "manualMode": "Manual Mode",
+        "manualModeDesc": "Self-check, Type, or Multiple Choice.",
+        "voiceMode": "Voice Mode",
+        "voiceModeDesc": "Speak your answers using the microphone.",
+        "answerStyle": "Answer Style",
+        "selfCheck": "Self Check",
+        "selfCheckDesc": "Classic flashcard flip.",
+        "typeAnswer": "Type Answer",
+        "typeAnswerDesc": "Type the word exactly.",
+        "multipleChoice": "Multiple Choice",
+        "multipleChoiceDesc": "Select from 4 options.",
+        "matchWord": "Match Word",
+        "matchWordDesc": "See Definition to Choose Word",
+        "matchDef": "Match Definition",
+        "matchDefDesc": "See Word to Choose Definition",
+        "mixedMode": "Mixed Mode",
+        "mixedModeDesc": "Randomly switch between style.",
+        "sessionComplete": "Session Complete!",
+        "reviewPassed": "Review passed.",
+        "greatJob": "Great study session!",
+        "accuracy": "Accuracy",
+        "time": "Time",
+        "best": "Best",
+        "newBest": "New Best!",
+        "needsImprovement": "Needs Improvement",
+        "missedCount": "You missed {{count}} cards on the first attempt.",
+        "reviewMissed": "Review Missed Items",
+        "returnToDeck": "Return to Deck",
+        "tryAgain": "Try again ({{count}}/3)",
+        "listen": "Listen to the word...",
+        "notQuite": "Not quite. Here is the card.",
+        "correct": "Correct!",
+        "nextCard": "Next Card",
+        "gotIt": "Got it",
+        "skip": "Skip / Keep in Queue",
+        "listening": "Listening...",
+        "nowYouTry": "Now you try..."
+    },
+    "pageTitles": {
+        "adminDashboard": "Admin Dashboard",
+        "tutorDashboard": "Tutor Dashboard",
+        "studyMode": "Study Mode",
+        "quizMode": "Quiz Mode",
+        "timedMode": "Timed Mode",
+        "profile": "User Profile",
+        "deckView": "Deck View",
+        "modeSelection": "Mode Selection",
+        "topicSelection": "Library",
+        "welcome": "Welcome",
+        "login": "Login",
+        "typing": "Typing Mode",
+        "quizResult": "Quiz Results"
+    }
+}
