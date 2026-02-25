@@ -1,12 +1,12 @@
 import React, { useState, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Student, Deck, AppSettings } from '../types';
+import { Student, Deck, AppSettings, UserProfile } from '../types';
 import { Word } from '../data/vocabulary';
-import { Search, Plus, UserCircle, ChevronDown, SortAsc, Clock, Archive, GraduationCap, Users, Layout } from 'lucide-react';
+import { Search, Plus, UserCircle, ChevronDown, SortAsc, Clock, GraduationCap, Users, Layout, Zap, MessageSquare, CheckSquare, ArrowLeft, MapPin, Bell, Library } from 'lucide-react';
 import { StudentProfile } from './StudentProfile';
 import { AddContentModal } from './AddContentModal';
 
 interface TutorDashboardProps {
+    user: UserProfile;
     students: Student[];
     decks: Deck[];
     onUpdateStudent: (student: Student) => void;
@@ -18,10 +18,11 @@ interface TutorDashboardProps {
     onEditCard: (card: Word) => void;
     apiKey?: string;
     settings: AppSettings;
+    onNavigateToProfile?: (target?: string) => void;
 }
 
-export const TutorDashboard: React.FC<TutorDashboardProps> = ({ students, decks, onUpdateStudent, onAddStudent, view, onViewChange, onAddDeck, onAddCard, onEditCard, apiKey, settings }) => {
-    const { t } = useTranslation();
+export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, decks, onUpdateStudent, onAddStudent, view, onViewChange, onAddDeck, onAddCard, onEditCard, apiKey, settings, onNavigateToProfile }) => {
+    const [currentTime, setCurrentTime] = useState(new Date());
     const [activeTab, setActiveTab] = useState<'active' | 'archived'>('active');
     const [searchQuery, setSearchQuery] = useState('');
     const [sortOption, setSortOption] = useState<'a-z' | 'z-a' | 'newest' | 'oldest'>('a-z');
@@ -47,6 +48,12 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ students, decks,
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [isSortDropdownOpen]);
+
+    // Live Clock Timer
+    React.useEffect(() => {
+        const timer = setInterval(() => setCurrentTime(new Date()), 60000);
+        return () => clearInterval(timer);
+    }, []);
 
     // Initial Empty Student for creating new
     const handleAddNew = () => {
@@ -104,118 +111,194 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ students, decks,
                     <div>
                         <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
                             <GraduationCap className="w-8 h-8 text-primary" />
-                            {t('tutor.dashboard_title')}
+                            Tutor Dashboard
                         </h1>
                         <p className="text-muted-foreground mt-1">
                             {activeTab === 'active'
-                                ? `${stats.active} ${t('tutor.stats.active_students')}`
-                                : `${stats.archived} ${t('tutor.stats.archived_students')}`
+                                ? `${stats.active} Active Students`
+                                : `${stats.archived} Archived Students`
                             }
                         </p>
                     </div>
 
                     <div className="flex gap-3">
-                        <button
-                            onClick={() => setIsManageContentOpen(true)}
-                            className="flex items-center gap-2 px-5 py-2.5 bg-secondary text-secondary-foreground font-bold rounded-xl hover:bg-secondary/80 transition-all border border-border"
-                        >
-                            <Layout className="w-5 h-5" />
-                            {t('tutor.actions.manage_content')}
-                        </button>
+
                         <button
                             onClick={handleAddNew}
                             className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground font-bold rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
                         >
                             <Plus className="w-5 h-5" />
-                            {t('tutor.actions.add_student')}
+                            Add Student
                         </button>
                     </div>
                 </div>
 
-                {/* Filters and Search Bar */}
-                <div className="flex flex-col sm:flex-row gap-4 mb-8">
-                    {/* Active/Archived Toggle */}
-                    <div className="flex bg-secondary/50 p-1 rounded-xl border border-border gap-1">
-                        <button
-                            onClick={() => setActiveTab('active')}
-                            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'active' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
-                        >
-                            <Users className="w-4 h-4" />
-                            {t('tutor.toggle.active')}
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('archived')}
-                            className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'archived' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
-                        >
-                            <Archive className="w-4 h-4" />
-                            {t('tutor.toggle.archived')}
-                        </button>
-                    </div>
 
-                    {/* Search */}
-                    <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <input
-                            type="text"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder={t('tutor.search_placeholder')}
-                            className="w-full pl-9 pr-4 py-2 rounded-xl border border-input bg-background focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                        />
-                    </div>
-
-                    {/* Sort Dropdown */}
-                    <div className="relative" ref={sortDropdownRef}>
-                        <button
-                            onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
-                            className="flex items-center gap-2 px-4 py-2 bg-secondary/50 hover:bg-secondary rounded-xl text-sm font-bold transition-colors border border-border"
-                        >
-                            {sortOption === 'a-z' || sortOption === 'z-a' ? <SortAsc className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
-                            <span className="capitalize">{t(`tutor.sort_options.${sortOption.replace('-', '_')}`)}</span>
-                            <ChevronDown className={`w-3 h-3 opacity-50 transition-transform ${isSortDropdownOpen ? 'rotate-180' : ''}`} />
-                        </button>
-                        {/* Dropdown Menu */}
-                        {isSortDropdownOpen && (
-                            <div className="absolute right-0 top-full mt-2 w-40 bg-popover border border-border rounded-xl shadow-xl p-1 z-20 animate-in fade-in zoom-in-95">
-                                <button onClick={() => { setSortOption('a-z'); setIsSortDropdownOpen(false); }} className="w-full text-left px-3 py-2 text-sm hover:bg-secondary rounded-lg">{t('tutor.sort_options.a_z')}</button>
-                                <button onClick={() => { setSortOption('z-a'); setIsSortDropdownOpen(false); }} className="w-full text-left px-3 py-2 text-sm hover:bg-secondary rounded-lg">{t('tutor.sort_options.z_a')}</button>
-                                <button onClick={() => { setSortOption('newest'); setIsSortDropdownOpen(false); }} className="w-full text-left px-3 py-2 text-sm hover:bg-secondary rounded-lg">{t('tutor.sort_options.newest')}</button>
-                                <button onClick={() => { setSortOption('oldest'); setIsSortDropdownOpen(false); }} className="w-full text-left px-3 py-2 text-sm hover:bg-secondary rounded-lg">{t('tutor.sort_options.oldest')}</button>
-                            </div>
-                        )}
-                    </div>
-                </div>
 
                 {/* Page Header */}
                 {/* The original page header content was replaced by the new header and filter/search bar above. */}
 
                 {view === 'dashboard' && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto mt-10">
-                        {/* Manage Students Tile */}
-                        <div
-                            onClick={() => onViewChange('students')}
-                            className="bg-card hover:bg-secondary/20 border border-border rounded-2xl p-8 cursor-pointer transition-all hover:shadow-lg group flex flex-col items-center text-center gap-4"
-                        >
-                            <div className="p-4 rounded-full bg-blue-100 text-blue-600 group-hover:scale-110 transition-transform">
-                                <Users className="w-10 h-10" />
+                    <div className="flex flex-col gap-6 max-w-6xl mx-auto mt-6">
+                        {/* Tutor Hero Tile */}
+                        <div className="bg-zinc-700 border border-zinc-600 rounded-3xl p-8 flex flex-col md:flex-row gap-8 items-center shadow-md relative overflow-hidden text-zinc-100">
+                            <div className="absolute right-0 top-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+
+                            {/* Profile Info (Left) */}
+                            <div className="flex items-center gap-6 relative z-10 w-full md:w-auto md:min-w-[320px] shrink-0">
+                                <div className="w-24 h-24 rounded-2xl bg-primary/20 flex items-center justify-center text-primary shadow-inner border border-primary/20 flex-shrink-0 overflow-hidden">
+                                    {user.avatarUrl ? (
+                                        <img src={user.avatarUrl} alt="Tutor avatar" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <UserCircle className="w-12 h-12" />
+                                    )}
+                                </div>
+                                <div className="flex-1 z-10">
+                                    <h2 className="text-3xl font-bold mb-2 text-white">
+                                        {user.preferredName || user.firstName || 'Tutor'} {user.lastName || ''}
+                                    </h2>
+                                    <div className="flex flex-col gap-y-1.5 mt-3 text-sm text-zinc-400 font-medium">
+                                        <span className="flex items-center gap-2"><GraduationCap className="w-4 h-4 text-zinc-300" /> <span className="text-zinc-300 pointer-events-none">Professional Tutor</span></span>
+                                        <span
+                                            className="flex items-center gap-2 cursor-pointer hover:text-white transition-colors"
+                                            onClick={() => onNavigateToProfile?.('section-location')}
+                                            title="Edit Location"
+                                        >
+                                            <MapPin className="w-4 h-4" />
+                                            {user.currentCity ? `${user.currentCity}, ${user.currentCountry}` : (user.currentCountry || 'Location Not Set')}
+                                        </span>
+                                        <span
+                                            className="flex items-center gap-2 cursor-pointer hover:text-white transition-colors"
+                                            onClick={() => onNavigateToProfile?.('section-timezone')}
+                                            title="Edit Timezone"
+                                        >
+                                            <Clock className="w-4 h-4" />
+                                            {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: user.timeZone || undefined })} ({user.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'Local Time'})
+                                        </span>
+                                        <span className="flex items-center gap-2">
+                                            <span className="w-4 h-4 flex items-center justify-center text-[10px] bg-zinc-600 rounded-sm border border-zinc-500/50">📅</span>
+                                            {currentTime.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric', timeZone: user.timeZone || undefined })}
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <h2 className="text-2xl font-bold mb-2">Manage Students</h2>
-                                <p className="text-muted-foreground">View progress, assign homework, and manage student profiles.</p>
+
+                            {/* Stats & Time (Right) */}
+                            <div className="flex flex-wrap md:flex-nowrap justify-center gap-4 relative z-10 w-full md:flex-1">
+
+                                {/* Active Students Widget */}
+                                <div
+                                    onClick={() => onViewChange('students')}
+                                    className="bg-zinc-500/20 hover:bg-zinc-500/30 cursor-pointer transition-colors backdrop-blur-sm border border-zinc-500/30 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm"
+                                >
+                                    <Users className="w-5 h-5 text-zinc-400 mb-2" />
+                                    <span className="text-2xl font-bold text-white">{stats.active}</span>
+                                    <span className="text-xs text-zinc-300 text-center line-clamp-2">Active<br />Students</span>
+                                </div>
+
+                                {/* Inbox/Pending Widget */}
+                                <div
+                                    onClick={() => alert('Messages Navigation - Coming Soon')}
+                                    className="bg-green-500/20 hover:bg-green-500/30 cursor-pointer transition-colors backdrop-blur-sm border border-green-500/30 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm relative"
+                                >
+                                    <div className="absolute top-3 right-3 w-2.5 h-2.5 bg-red-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.6)]"></div>
+                                    <Bell className="w-5 h-5 text-green-400 mb-2" />
+                                    <span className="text-2xl font-bold text-white">3</span>
+                                    <span className="text-xs text-zinc-300 text-center line-clamp-2">New<br />Messages</span>
+                                </div>
                             </div>
                         </div>
 
-                        {/* Manage Flashcards Tile */}
-                        <div
-                            onClick={() => onViewChange('flashcards')} // Placeholder for now
-                            className="bg-card hover:bg-secondary/20 border border-border rounded-2xl p-8 cursor-pointer transition-all hover:shadow-lg group flex flex-col items-center text-center gap-4"
-                        >
-                            <div className="p-4 rounded-full bg-green-100 text-green-600 group-hover:scale-110 transition-transform">
-                                <Archive className="w-10 h-10" />
+                        {/* Control Dashboard Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {/* All Content Tile */}
+                            <div
+                                onClick={() => onViewChange('flashcards')}
+                                className="bg-cyan-500/25 hover:bg-cyan-500/30 border border-cyan-500/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden"
+                            >
+                                <div className="absolute -right-6 -top-6 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl group-hover:bg-cyan-500/20 transition-colors"></div>
+                                <div className="w-12 h-12 rounded-xl bg-cyan-100 text-cyan-600 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-cyan-200">
+                                    <Library className="w-6 h-6" />
+                                </div>
+                                <div className="relative z-10 font-medium">
+                                    <h2 className="text-xl font-bold mb-1">All Content</h2>
+                                    <p className="text-sm text-muted-foreground line-clamp-2">Browse the complete library of global flashcards and decks.</p>
+                                </div>
                             </div>
-                            <div>
-                                <h2 className="text-2xl font-bold mb-2">Manage Flashcards</h2>
-                                <p className="text-muted-foreground">Create, edit, and organize flashcard decks for your students.</p>
+
+                            {/* Quickstart Tile */}
+                            <div
+                                onClick={() => alert('Quickstart Navigation - Coming Soon')}
+                                className="bg-yellow-500/25 hover:bg-yellow-500/30 border border-yellow-500/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden"
+                            >
+                                <div className="absolute -right-6 -top-6 w-24 h-24 bg-yellow-500/10 rounded-full blur-2xl group-hover:bg-yellow-500/20 transition-colors"></div>
+                                <div className="w-12 h-12 rounded-xl bg-yellow-100 text-yellow-600 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-yellow-200">
+                                    <Zap className="w-6 h-6" />
+                                </div>
+                                <div className="relative z-10 font-medium">
+                                    <h2 className="text-xl font-bold mb-1">Quickstart</h2>
+                                    <p className="text-sm text-muted-foreground line-clamp-2">Jump straight into your next scheduled session or lesson plan.</p>
+                                </div>
+                            </div>
+
+                            {/* Manage Students Tile */}
+                            <div
+                                onClick={() => onViewChange('students')}
+                                className="bg-blue-500/25 hover:bg-blue-500/30 border border-blue-500/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden"
+                            >
+                                <div className="absolute -right-6 -top-6 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-colors"></div>
+                                <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-blue-200">
+                                    <Users className="w-6 h-6" />
+                                </div>
+                                <div className="relative z-10 font-medium">
+                                    <h2 className="text-xl font-bold mb-1 flex items-center gap-2">Students <span className="bg-blue-100 text-blue-800 text-xs py-0.5 px-2 rounded-full font-bold">{students.length}</span></h2>
+                                    <p className="text-sm text-muted-foreground line-clamp-2">View progress, assign homework, and manage student profiles.</p>
+                                </div>
+                            </div>
+
+                            {/* Manage Learning Content Tile */}
+                            <div
+                                onClick={() => setIsManageContentOpen(true)}
+                                className="bg-green-500/25 hover:bg-green-500/30 border border-green-500/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden"
+                            >
+                                <div className="absolute -right-6 -top-6 w-24 h-24 bg-green-500/10 rounded-full blur-2xl group-hover:bg-green-500/20 transition-colors"></div>
+                                <div className="w-12 h-12 rounded-xl bg-green-100 text-green-600 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-green-200">
+                                    <Layout className="w-6 h-6" />
+                                </div>
+                                <div className="relative z-10 font-medium">
+                                    <h2 className="text-xl font-bold mb-1 flex items-center gap-2">Manage Learning Content</h2>
+                                    <p className="text-sm text-muted-foreground line-clamp-2">Create, edit, and organize flashcard decks for your students.</p>
+                                </div>
+                            </div>
+
+                            {/* Messages Tile */}
+                            <div
+                                onClick={() => alert('Messages Navigation - Coming Soon')}
+                                className="bg-purple-500/25 hover:bg-purple-500/30 border border-purple-500/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden"
+                            >
+                                <div className="absolute -right-6 -top-6 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl group-hover:bg-purple-500/20 transition-colors"></div>
+                                <div className="w-12 h-12 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-purple-200">
+                                    <MessageSquare className="w-6 h-6" />
+                                </div>
+                                <div className="relative z-10 font-medium">
+                                    <h2 className="text-xl font-bold mb-1">Messages</h2>
+                                    <p className="text-sm text-muted-foreground line-clamp-2">Communicate directly with your students and review feedback.</p>
+                                </div>
+                            </div>
+
+                            {/* To-Do List Tile */}
+                            <div
+                                onClick={() => alert('To-Do List Navigation - Coming Soon')}
+                                className="bg-orange-500/25 hover:bg-orange-500/30 border border-orange-500/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden"
+                            >
+                                <div className="absolute -right-6 -top-6 w-24 h-24 bg-orange-500/10 rounded-full blur-2xl group-hover:bg-orange-500/20 transition-colors"></div>
+                                <div className="w-12 h-12 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-orange-200">
+                                    <CheckSquare className="w-6 h-6" />
+                                </div>
+                                <div className="relative z-10 font-medium">
+                                    <h2 className="text-xl font-bold mb-1">To Do List</h2>
+                                    <p className="text-sm text-muted-foreground line-clamp-2">Track your administrative tasks, grading, and upcoming goals.</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -223,7 +306,20 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ students, decks,
 
                 {/* Manage Students View */}
                 {view === 'students' && (
-                    <div className="flex flex-col gap-6">
+                    <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-2">
+                        {/* Go Back Header */}
+                        <div className="flex items-center gap-4 border-b border-border pb-4">
+                            <button
+                                onClick={() => onViewChange('dashboard')}
+                                className="p-2 rounded-full hover:bg-secondary text-muted-foreground transition-all"
+                                title="Back to Dashboard"
+                            >
+                                <ArrowLeft className="w-5 h-5" />
+                            </button>
+                            <div>
+                                <h2 className="text-2xl font-bold">Manage Students</h2>
+                            </div>
+                        </div>
 
                         {/* Controls Bar */}
                         <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-card p-4 rounded-xl border border-border shadow-sm">
@@ -343,10 +439,19 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ students, decks,
                 {/* Manage Flashcards View */}
                 {view === 'flashcards' && (
                     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <h2 className="text-2xl font-bold">Flashcard Library</h2>
-                                <p className="text-muted-foreground">Manage global decks and cards.</p>
+                        <div className="flex justify-between items-center border-b border-border pb-4">
+                            <div className="flex items-center gap-4">
+                                <button
+                                    onClick={() => onViewChange('dashboard')}
+                                    className="p-2 rounded-full hover:bg-secondary text-muted-foreground transition-all"
+                                    title="Back to Dashboard"
+                                >
+                                    <ArrowLeft className="w-5 h-5" />
+                                </button>
+                                <div>
+                                    <h2 className="text-2xl font-bold">Flashcard Library</h2>
+                                    <p className="text-muted-foreground">Manage global decks and cards.</p>
+                                </div>
                             </div>
                             <button
                                 onClick={() => setIsManageContentOpen(true)}

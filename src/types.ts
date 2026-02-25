@@ -115,10 +115,48 @@ export interface ContactDetail {
     isRecovery: boolean;
 }
 
+export interface TutorEducation {
+    degree: string;
+    institution: string;
+}
+
+export interface TutorLanguage {
+    language: string;
+    level: string;
+}
+
+export interface TutorProfileData {
+    displayName?: string;
+    languagesTaught?: string[];
+    proficiencyLevel?: string;
+    originType?: 'Mother Tongue' | 'Second Language' | '';
+    otherLanguagesSpoken?: TutorLanguage[];
+    placesLived?: string[];
+    bio?: string;
+    education?: TutorEducation[];
+    teachingCertificates?: string[];
+    teachingSkills?: string[];
+    yearsExperience?: number;
+    availabilityGrid?: Record<string, string>;
+    hourlyRate?: number;
+    currency?: string;
+    trialLessonAvailable?: boolean;
+}
+
+
 export interface UserProfile {
     id: string;
-    username: string;
+    username: string; // Used as display name unless firstName is present
     email?: string; // New anchor for identity
+    title?: string; // e.g. Mr., Ms., Dr.
+    firstName?: string; // Mandatory in UI
+    preferredName?: string;
+    middleName?: string;
+    lastName?: string; // Mandatory in UI
+    gender?: string; // 'Male' | 'Female' | 'Prefer not to answer' | etc. Mandatory in UI
+    dateOfBirth?: string; // ISO format string. Mandatory in UI
+    nativeLanguage?: string; // Mandatory in UI
+    createdAt?: string; // ISO format string for "Member Since"
     activeDeckIds?: string[]; // IDs of assigned decks
     avatarUrl?: string; // For future use
     progress: Record<string, DeckProgress>; // Keyed by DeckID
@@ -146,9 +184,9 @@ export interface UserProfile {
     // Professional & Identity
     profession?: string;
     interests?: string; // Comma-separated
+    tutorData?: TutorProfileData;
 
     // Learning Profile
-    nativeLanguage?: string;
     targetLanguage?: string;
     englishLevel?: string;
     goals?: string;

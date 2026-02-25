@@ -499,7 +499,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <button
                             onClick={() => onTabChange('users')}
-                            className="flex flex-col items-center p-8 rounded-2xl bg-card border border-border hover:border-primary/50 hover:bg-secondary/40 transition-all group hover:scale-105 shadow-md"
+                            className="flex flex-col items-center p-8 rounded-2xl bg-blue-500/25 hover:bg-blue-500/30 border border-blue-500/20 transition-all group hover:scale-105 shadow-md"
                         >
                             <div className="w-16 h-16 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mb-6 group-hover:bg-blue-600 group-hover:text-white transition-colors">
                                 <Users className="w-8 h-8" />
@@ -512,7 +512,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
 
                         <button
                             onClick={() => onTabChange('decks')}
-                            className="flex flex-col items-center p-8 rounded-2xl bg-card border border-border hover:border-primary/50 hover:bg-secondary/40 transition-all group hover:scale-105 shadow-md"
+                            className="flex flex-col items-center p-8 rounded-2xl bg-purple-500/25 hover:bg-purple-500/30 border border-purple-500/20 transition-all group hover:scale-105 shadow-md"
                         >
                             <div className="w-16 h-16 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mb-6 group-hover:bg-purple-600 group-hover:text-white transition-colors">
                                 <Library className="w-8 h-8" />
@@ -525,7 +525,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
 
                         <button
                             onClick={() => onTabChange('cards')}
-                            className="flex flex-col items-center p-8 rounded-2xl bg-card border border-border hover:border-primary/50 hover:bg-secondary/40 transition-all group hover:scale-105 shadow-md"
+                            className="flex flex-col items-center p-8 rounded-2xl bg-green-500/25 hover:bg-green-500/30 border border-green-500/20 transition-all group hover:scale-105 shadow-md"
                         >
                             <div className="w-16 h-16 rounded-full bg-green-100 text-green-600 flex items-center justify-center mb-6 group-hover:bg-green-600 group-hover:text-white transition-colors">
                                 <Edit2 className="w-8 h-8" />
@@ -538,7 +538,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
 
                         <button
                             onClick={() => onTabChange('tickets')}
-                            className="flex flex-col items-center p-8 rounded-2xl bg-card border border-border hover:border-primary/50 hover:bg-secondary/40 transition-all group hover:scale-105 shadow-md"
+                            className="flex flex-col items-center p-8 rounded-2xl bg-orange-500/25 hover:bg-orange-500/30 border border-orange-500/20 transition-all group hover:scale-105 shadow-md"
                         >
                             <div className="w-16 h-16 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center mb-6 group-hover:bg-orange-600 group-hover:text-white transition-colors">
                                 <Sparkles className="w-8 h-8" />
@@ -551,7 +551,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
 
                         <button
                             onClick={() => onTabChange('archived')}
-                            className="flex flex-col items-center p-8 rounded-2xl bg-card border border-border hover:border-primary/50 hover:bg-secondary/40 transition-all group hover:scale-105 shadow-md"
+                            className="flex flex-col items-center p-8 rounded-2xl bg-gray-500/25 hover:bg-gray-500/30 border border-gray-500/20 transition-all group hover:scale-105 shadow-md"
                         >
                             <div className="w-16 h-16 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center mb-6 group-hover:bg-gray-600 group-hover:text-white transition-colors">
                                 <Archive className="w-8 h-8" />
@@ -564,7 +564,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
 
                         <button
                             onClick={() => onTabChange('settings')}
-                            className="flex flex-col items-center p-8 rounded-2xl bg-card border border-border hover:border-primary/50 hover:bg-secondary/40 transition-all group hover:scale-105 shadow-md"
+                            className="flex flex-col items-center p-8 rounded-2xl bg-slate-500/25 hover:bg-slate-500/30 border border-slate-500/20 transition-all group hover:scale-105 shadow-md"
                         >
                             <div className="w-16 h-16 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center mb-6 group-hover:bg-slate-600 group-hover:text-white transition-colors">
                                 <Settings className="w-8 h-8" />

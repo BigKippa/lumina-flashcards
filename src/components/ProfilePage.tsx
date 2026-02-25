@@ -1,10 +1,11 @@
-import { useState } from 'react';
-import { UserProfile, ContactDetail } from '../types';
+import { useState, useRef, useEffect } from 'react';
+import { UserProfile, ContactDetail, TutorProfileData } from '../types';
 import {
     Book, Pencil, Check, X, AlertCircle, Eye, EyeOff, Mail, RefreshCcw, Lock, KeyRound,
-    User, MapPin, Briefcase, Heart, Globe, Clock, Activity, Settings, Shield, UserSquare2, Upload, Trash2, Phone
+    User, MapPin, Briefcase, Heart, Globe, Clock, Activity, Settings, Shield, UserSquare2, Upload, Trash2, Phone, Locate, Loader2, Camera
 } from 'lucide-react';
 import { generateVerificationCode, simulateSendEmail, simulateSendSMS } from '../utils/mockEmailService';
+import { countryCodes, findCountryByCode, getDefaultCountryCode } from '../utils/countryCodes';
 
 interface ProfilePageProps {
     user: UserProfile;
@@ -15,13 +16,14 @@ interface ProfilePageProps {
     initialEditMode?: boolean;
     onLogout?: () => void;
     onOpenSettings?: () => void;
+    initialScrollTarget?: string | null;
 }
 
 // --- Helper Types ---
 interface TabButtonProps {
-    id: 'basic' | 'learning' | 'account';
-    activeTab: 'basic' | 'learning' | 'account';
-    setActiveTab: (tab: 'basic' | 'learning' | 'account') => void;
+    id: 'basic' | 'learning' | 'account' | 'tutor';
+    activeTab: 'basic' | 'learning' | 'account' | 'tutor';
+    setActiveTab: (tab: 'basic' | 'learning' | 'account' | 'tutor') => void;
     label: string;
     icon: any;
 }
@@ -39,6 +41,7 @@ interface FieldProps {
     fieldKey: string;
     icon?: any;
     placeholder?: string;
+    helperText?: string;
     isEditing: boolean;
     setEditForm: React.Dispatch<React.SetStateAction<any>>;
 }
@@ -93,29 +96,29 @@ const TabButton = ({ id, activeTab, setActiveTab, label, icon: Icon }: TabButton
 
 const Section = ({ title, icon: Icon, children, colorTheme = 'default' }: SectionProps) => {
     let bgClass = "bg-card";
-    let borderClass = "border-border";
+    let borderClass = "border-border shadow-sm";
     let iconClass = "text-primary";
 
     if (colorTheme === 'primary') {
-        bgClass = "bg-primary/5";
-        borderClass = "border-primary/20";
+        bgClass = "bg-primary/10";
+        borderClass = "border-primary/30 shadow-md";
         iconClass = "text-primary";
     } else if (colorTheme === 'secondary') {
-        bgClass = "bg-secondary/30";
-        borderClass = "border-secondary/50";
+        bgClass = "bg-secondary/50";
+        borderClass = "border-secondary/60 shadow-md";
         iconClass = "text-secondary-foreground";
     } else if (colorTheme === 'accent') {
-        bgClass = "bg-accent/10";
-        borderClass = "border-accent/20";
+        bgClass = "bg-accent/15";
+        borderClass = "border-accent/30 shadow-md";
         iconClass = "text-accent-foreground";
     } else if (colorTheme === 'muted') {
-        bgClass = "bg-muted/30";
-        borderClass = "border-muted/50";
+        bgClass = "bg-muted/40";
+        borderClass = "border-muted/60 shadow-sm";
         iconClass = "text-muted-foreground";
     }
 
     return (
-        <div className={`${bgClass} p-6 rounded-xl border ${borderClass} shadow-sm mb-6 transition-colors`}>
+        <div className={`${bgClass} p-6 rounded-xl border ${borderClass} mb-6 transition-colors`}>
             <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-foreground">
                 <Icon className={`w-5 h-5 ${iconClass}`} /> {title}
             </h3>
@@ -154,7 +157,7 @@ const SelectField = ({ label, value, fieldKey, options, icon: Icon, placeholder,
     </div>
 );
 
-const Field = ({ label, value, fieldKey, icon: Icon, placeholder, isEditing, setEditForm }: FieldProps) => (
+const Field = ({ label, value, fieldKey, icon: Icon, placeholder, helperText, isEditing, setEditForm }: FieldProps) => (
     <div className="w-full">
         <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">{label}</label>
         {isEditing ? (
@@ -167,11 +170,15 @@ const Field = ({ label, value, fieldKey, icon: Icon, placeholder, isEditing, set
                     placeholder={placeholder || `Enter ${label.toLowerCase()}`}
                     className={`w-full p-2 rounded-md border border-input bg-background ${Icon ? 'pl-9' : ''} text-sm`}
                 />
+                {helperText && <p className="text-[10px] text-muted-foreground mt-1.5 leading-tight">{helperText}</p>}
             </div>
         ) : (
-            <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-md min-h-[38px] text-sm">
-                {Icon && <Icon className="w-4 h-4 text-muted-foreground" />}
-                <span className={!value ? 'text-muted-foreground italic' : ''}>{value || 'Not set'}</span>
+            <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-md min-h-[38px] text-sm">
+                    {Icon && <Icon className="w-4 h-4 text-muted-foreground" />}
+                    <span className={!value ? 'text-muted-foreground italic' : ''}>{value || 'Not set'}</span>
+                </div>
+                {helperText && <p className="text-[10px] text-muted-foreground/70 leading-tight">{helperText}</p>}
             </div>
         )}
     </div>
@@ -259,78 +266,114 @@ const ContactListEditor = ({ type, contacts, setContacts, isEditing, icon: Icon 
 
     return (
         <div className="space-y-3">
-            {contacts.map((c) => (
-                <div key={c.id} className="p-3 bg-secondary/20 border border-border rounded-lg space-y-3 relative group">
-                    <div className="flex gap-2">
-                        <div className="flex-1 relative">
-                            <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            <input
-                                type={type === 'email' ? 'email' : 'text'}
-                                value={c.value}
-                                onChange={e => {
-                                    let val = e.target.value;
-                                    if (type === 'phone') {
-                                        val = val.replace(/[^0-9\s()+-]/g, '');
-                                    }
-                                    handleUpdate(c.id, { value: val });
-                                }}
-                                placeholder={`Enter ${type}`}
-                                className="w-full py-2 pl-9 pr-2 rounded-md border border-input bg-background text-sm focus:border-primary placeholder:text-muted-foreground/50"
-                            />
+            {contacts.map((c) => {
+                const isPhone = type === 'phone';
+                const currentCountry = isPhone ? (findCountryByCode(c.value) || getDefaultCountryCode()) : null;
+
+                return (
+                    <div key={c.id} className="p-3 bg-secondary/20 border border-border rounded-lg space-y-3 relative group">
+                        <div className="flex gap-2">
+                            {isPhone && (
+                                <div className="relative flex items-center">
+                                    <span className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none z-10">
+                                        {currentCountry?.flag || '🌐'}
+                                    </span>
+                                    <select
+                                        value={currentCountry?.code || ''}
+                                        onChange={(e) => {
+                                            const newCode = e.target.value;
+                                            const oldCodeMatch = findCountryByCode(c.value);
+                                            let newVal = c.value;
+                                            if (oldCodeMatch && c.value.startsWith(oldCodeMatch.code)) {
+                                                newVal = c.value.replace(oldCodeMatch.code, newCode);
+                                            } else if (!c.value.startsWith('+')) {
+                                                newVal = newCode + ' ' + c.value;
+                                            } else {
+                                                newVal = newCode + ' ' + newVal.replace(/^\+\d+\s*/, '');
+                                            }
+                                            handleUpdate(c.id, { value: newVal });
+                                        }}
+                                        className="w-[100px] py-2 pl-9 pr-2 rounded-md border border-input bg-background/50 focus:bg-background text-sm text-foreground focus:border-primary transition-colors cursor-pointer"
+                                        title="Change country code"
+                                    >
+                                        {countryCodes.map(country => (
+                                            <option key={country.iso} value={country.code}>
+                                                {country.flag} {country.code}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+                            <div className="flex-1 relative">
+                                <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                <input
+                                    type={type === 'email' ? 'email' : 'tel'}
+                                    value={c.value}
+                                    onChange={e => {
+                                        let val = e.target.value;
+                                        if (type === 'phone') {
+                                            val = val.replace(/[^0-9\s()+-]/g, '');
+                                        }
+                                        handleUpdate(c.id, { value: val });
+                                    }}
+                                    placeholder={`Enter ${type}`}
+                                    className="w-full py-2 pl-9 pr-2 rounded-md border border-input bg-background text-sm focus:border-primary placeholder:text-muted-foreground/50"
+                                />
+                            </div>
+                            <button
+                                onClick={() => handleRemove(c.id)}
+                                className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors shrink-0"
+                                title="Remove"
+                            >
+                                <Trash2 className="w-4 h-4" />
+                            </button>
                         </div>
-                        <button
-                            onClick={() => handleRemove(c.id)}
-                            className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors shrink-0"
-                            title="Remove"
-                        >
-                            <Trash2 className="w-4 h-4" />
-                        </button>
-                    </div>
 
-                    <div className="flex gap-2">
-                        <select
-                            value={c.isCustomLabel ? 'Custom' : c.label}
-                            onChange={(e) => {
-                                const val = e.target.value;
-                                if (val === 'Custom') {
-                                    handleUpdate(c.id, { isCustomLabel: true, label: '' });
-                                } else {
-                                    handleUpdate(c.id, { isCustomLabel: false, label: val });
-                                }
-                            }}
-                            className="w-1/3 p-2 rounded-md border border-input bg-background text-sm text-foreground overflow-hidden text-ellipsis"
-                        >
-                            {labelOptions.map((opt: string, _index) => (
-                                <option key={opt} value={opt}>{opt}</option>
-                            ))}
-                        </select>
+                        <div className="flex gap-2">
+                            <select
+                                value={c.isCustomLabel ? 'Custom' : c.label}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    if (val === 'Custom') {
+                                        handleUpdate(c.id, { isCustomLabel: true, label: '' });
+                                    } else {
+                                        handleUpdate(c.id, { isCustomLabel: false, label: val });
+                                    }
+                                }}
+                                className="w-1/3 p-2 rounded-md border border-input bg-background text-sm text-foreground overflow-hidden text-ellipsis"
+                            >
+                                {labelOptions.map((opt: string, _index) => (
+                                    <option key={opt} value={opt}>{opt}</option>
+                                ))}
+                            </select>
 
-                        {c.isCustomLabel && (
-                            <input
-                                type="text"
-                                value={c.label}
-                                onChange={e => handleUpdate(c.id, { label: e.target.value })}
-                                placeholder="Custom label"
-                                className="flex-1 p-2 rounded-md border border-input bg-background text-sm focus:border-primary"
-                                autoFocus
-                            />
+                            {c.isCustomLabel && (
+                                <input
+                                    type="text"
+                                    value={c.label}
+                                    onChange={e => handleUpdate(c.id, { label: e.target.value })}
+                                    placeholder="Custom label"
+                                    className="flex-1 p-2 rounded-md border border-input bg-background text-sm focus:border-primary"
+                                    autoFocus
+                                />
+                            )}
+                        </div>
+
+                        {contacts.length > 1 && (
+                            <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer group/label w-fit">
+                                <input
+                                    type="radio"
+                                    name={`recovery-${type}`}
+                                    checked={c.isRecovery}
+                                    onChange={() => handleSetRecovery(c.id)}
+                                    className="accent-primary"
+                                />
+                                <span className="group-hover/label:text-foreground transition-colors">Set as Recovery {type === 'email' ? 'Email' : 'Phone'}</span>
+                            </label>
                         )}
                     </div>
-
-                    {contacts.length > 1 && (
-                        <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer group/label w-fit">
-                            <input
-                                type="radio"
-                                name={`recovery-${type}`}
-                                checked={c.isRecovery}
-                                onChange={() => handleSetRecovery(c.id)}
-                                className="accent-primary"
-                            />
-                            <span className="group-hover/label:text-foreground transition-colors">Set as Recovery {type === 'email' ? 'Email' : 'Phone'}</span>
-                        </label>
-                    )}
-                </div>
-            ))}
+                );
+            })}
 
             <button
                 onClick={handleAdd}
@@ -343,11 +386,241 @@ const ContactListEditor = ({ type, contacts, setContacts, isEditing, icon: Icon 
     );
 };
 
-export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showToast, initialEditMode = false, onLogout, onOpenSettings }: ProfilePageProps) {
+function TagsInput({
+    label,
+    tags,
+    setTags,
+    isEditing,
+    placeholder = "Add tag..."
+}: {
+    label: string;
+    tags: string[];
+    setTags: (tags: string[]) => void;
+    isEditing: boolean;
+    placeholder?: string;
+}) {
+    const [inputValue, setInputValue] = useState("");
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter' && inputValue.trim()) {
+            e.preventDefault();
+            if (!tags.includes(inputValue.trim())) {
+                setTags([...tags, inputValue.trim()]);
+            }
+            setInputValue("");
+        }
+    };
+
+    const removeTag = (tagToRemove: string) => {
+        setTags(tags.filter(tag => tag !== tagToRemove));
+    };
+
+    return (
+        <div className="space-y-2 w-full">
+            <label className="text-xs font-bold text-muted-foreground uppercase">{label}</label>
+            <div className="flex flex-wrap gap-2">
+                {tags.map(tag => (
+                    <span key={tag} className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary text-sm font-medium rounded-full border border-primary/20">
+                        {tag}
+                        {isEditing && (
+                            <button type="button" onClick={() => removeTag(tag)} className="hover:text-destructive transition-colors rounded-full p-0.5" title="Remove">
+                                <X className="w-3 h-3" />
+                            </button>
+                        )}
+                    </span>
+                ))}
+                {!isEditing && tags.length === 0 && (
+                    <span className="text-sm text-muted-foreground italic">None specified</span>
+                )}
+            </div>
+            {isEditing && (
+                <input
+                    type="text"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder={placeholder}
+                    className="w-full mt-2 p-2 rounded bg-secondary/50 border border-border focus:border-primary outline-none text-sm"
+                />
+            )}
+        </div>
+    );
+}
+
+function EducationEditor({ education, setEducation, isEditing }: {
+    education: { degree: string, institution: string }[];
+    setEducation: (edu: { degree: string, institution: string }[]) => void;
+    isEditing: boolean;
+}) {
+    const [degree, setDegree] = useState("");
+    const [institution, setInstitution] = useState("");
+
+    const handleAdd = () => {
+        if (degree.trim() && institution.trim()) {
+            setEducation([...education, { degree: degree.trim(), institution: institution.trim() }]);
+            setDegree("");
+            setInstitution("");
+        }
+    };
+
+    const removeEdu = (index: number) => {
+        setEducation(education.filter((_, i) => i !== index));
+    };
+
+    return (
+        <div className="space-y-4 w-full">
+            <label className="text-xs font-bold text-muted-foreground uppercase">Education</label>
+            {education.length === 0 && !isEditing && (
+                <div className="text-sm text-muted-foreground italic">No education provided.</div>
+            )}
+            {education.map((edu, index) => (
+                <div key={index} className="flex justify-between items-center bg-secondary/30 p-3 rounded-lg border border-border">
+                    <div>
+                        <div className="font-semibold text-foreground text-sm">{edu.degree}</div>
+                        <div className="text-xs text-muted-foreground">{edu.institution}</div>
+                    </div>
+                    {isEditing && (
+                        <button type="button" onClick={() => removeEdu(index)} className="text-muted-foreground hover:text-destructive p-2" title="Remove">
+                            <Trash2 className="w-4 h-4" />
+                        </button>
+                    )}
+                </div>
+            ))}
+            {isEditing && (
+                <div className="flex gap-2 items-end">
+                    <div className="flex-1 space-y-2">
+                        <input
+                            type="text"
+                            value={degree}
+                            onChange={(e) => setDegree(e.target.value)}
+                            placeholder="Degree/Certificate"
+                            className="w-full p-2 rounded bg-secondary/50 border border-border focus:border-primary outline-none text-sm"
+                        />
+                        <input
+                            type="text"
+                            value={institution}
+                            onChange={(e) => setInstitution(e.target.value)}
+                            placeholder="Institution"
+                            className="w-full p-2 rounded bg-secondary/50 border border-border focus:border-primary outline-none text-sm"
+                        />
+                    </div>
+                    <button type="button" onClick={handleAdd} className="p-2 mb-1 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 text-sm font-bold h-10 w-16">
+                        Add
+                    </button>
+                </div>
+            )}
+        </div>
+    );
+}
+
+function LanguageLevelEditor({ languages, setLanguages, isEditing, label = "Other Languages Spoken" }: {
+    languages: { language: string, level: string }[];
+    setLanguages: (langs: { language: string, level: string }[]) => void;
+    isEditing: boolean;
+    label?: string;
+}) {
+    const [language, setLanguage] = useState("");
+    const [level, setLevel] = useState("");
+
+    const handleAdd = () => {
+        if (language.trim() && level) {
+            setLanguages([...languages, { language: language.trim(), level }]);
+            setLanguage("");
+            setLevel("");
+        }
+    };
+
+    const removeLang = (index: number) => {
+        setLanguages(languages.filter((_, i) => i !== index));
+    };
+
+    return (
+        <div className="space-y-4 w-full">
+            <label className="text-xs font-bold text-muted-foreground uppercase">{label}</label>
+            {languages.length === 0 && !isEditing && (
+                <div className="text-sm text-muted-foreground italic">None specified.</div>
+            )}
+            {languages.map((lang, index) => (
+                <div key={index} className="flex justify-between items-center bg-secondary/30 p-3 rounded-lg border border-border">
+                    <div className="flex items-center gap-3">
+                        <div className="font-semibold text-foreground text-sm">{lang.language}</div>
+                        <div className="bg-primary/10 text-primary px-2 py-0.5 rounded text-xs font-bold">{lang.level}</div>
+                    </div>
+                    {isEditing && (
+                        <button type="button" onClick={() => removeLang(index)} className="text-muted-foreground hover:text-destructive p-2" title="Remove">
+                            <Trash2 className="w-4 h-4" />
+                        </button>
+                    )}
+                </div>
+            ))}
+            {isEditing && (
+                <div className="flex gap-2 items-end">
+                    <div className="flex-1 space-y-2">
+                        <input
+                            type="text"
+                            value={language}
+                            onChange={(e) => setLanguage(e.target.value)}
+                            placeholder="Language"
+                            className="w-full p-2 rounded bg-secondary/50 border border-border focus:border-primary outline-none text-sm"
+                        />
+                        <select
+                            value={level}
+                            onChange={(e) => setLevel(e.target.value)}
+                            className="w-full p-2 rounded bg-secondary/50 border border-border focus:border-primary outline-none text-sm"
+                        >
+                            <option value="" disabled>Select Level</option>
+                            <option value="A1">A1 - Beginner</option>
+                            <option value="A2">A2 - Elementary</option>
+                            <option value="B1">B1 - Intermediate</option>
+                            <option value="B2">B2 - Upper Intermediate</option>
+                            <option value="C1">C1 - Advanced</option>
+                            <option value="C2">C2 - Mastery / Native</option>
+                        </select>
+                    </div>
+                    <button type="button" onClick={handleAdd} className="p-2 mb-1 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 text-sm font-bold h-10 w-16">
+                        Add
+                    </button>
+                </div>
+            )}
+        </div>
+    );
+}
+
+export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showToast, initialEditMode = false, onLogout, onOpenSettings, initialScrollTarget }: ProfilePageProps) {
     const [isEditing, setIsEditing] = useState(initialEditMode);
-    const [activeTab, setActiveTab] = useState<'basic' | 'learning' | 'account'>('basic');
+    const [activeTab, setActiveTab] = useState<'basic' | 'learning' | 'account' | 'tutor'>('basic');
+
+    useEffect(() => {
+        if (initialScrollTarget) {
+            setActiveTab('basic');
+            setIsEditing(true); // Open edit mode to make them editable immediately
+            // Allow time for render
+            setTimeout(() => {
+                const el = document.getElementById(initialScrollTarget);
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 100);
+        }
+    }, [initialScrollTarget]);
 
     // Expanded Edit Form State
+
+    const calculateAge = (dobString: string | undefined): string => {
+        if (!dobString) return '';
+        const dob = new Date(dobString);
+        if (isNaN(dob.getTime())) return '';
+        const diffMs = Date.now() - dob.getTime();
+        const ageDt = new Date(diffMs);
+        return Math.abs(ageDt.getUTCFullYear() - 1970).toString();
+    };
+
+    const calculateMemberSince = (createdString: string | undefined): string => {
+        if (!createdString) return 'Unknown';
+        const date = new Date(createdString);
+        if (isNaN(date.getTime())) return 'Unknown';
+        return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+    };
 
     // Helper to migrate legacy single strings to arrays silently during initial edit form load
     const initializeEmails = (): ContactDetail[] => {
@@ -369,7 +642,17 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
         emails: initializeEmails(),
         phones: initializePhones(),
 
-        // Basic Info
+        // Unified Basic Info
+        title: user.title || '',
+        firstName: user.firstName || '',
+        preferredName: user.preferredName || '',
+        middleName: user.middleName || '',
+        lastName: user.lastName || '',
+        gender: user.gender || '',
+        dateOfBirth: user.dateOfBirth || '',
+        nativeLanguage: user.nativeLanguage || '',
+
+        // Contact & Location Info
         timeZone: user.timeZone || '',
         originCity: user.originCity || '',
         originCountry: user.originCountry || '',
@@ -379,13 +662,31 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
         interests: user.interests || '',
 
         // Learning Profile
-        nativeLanguage: user.nativeLanguage || '',
         targetLanguage: user.targetLanguage || 'English',
         englishLevel: user.englishLevel || '',
         goals: user.goals || '',
         englishEnvironment: user.englishEnvironment || '',
         schedule: user.schedule || '',
         preferences: user.preferences || '',
+
+        // Tutor Data
+        tutorData: user.tutorData || {
+            displayName: '',
+            languagesTaught: [],
+            proficiencyLevel: '',
+            originType: '',
+            otherLanguagesSpoken: [],
+            placesLived: [],
+            bio: '',
+            education: [],
+            teachingCertificates: [],
+            teachingSkills: [],
+            yearsExperience: 0,
+            availabilityGrid: {},
+            hourlyRate: 0,
+            currency: 'USD',
+            trialLessonAvailable: false
+        } as TutorProfileData
     });
 
     const [showPassword, setShowPassword] = useState(false);
@@ -401,6 +702,14 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
     // Password Change State
     const [passwordStep, setPasswordStep] = useState<'idle' | 'method-selection' | 'verify-old' | 'verify-email' | 'verify-phone' | 'set-new'>('idle');
     const [passwordForm, setPasswordForm] = useState({ oldPassword: '', newPassword: '', confirmNewPassword: '' });
+
+    // Geolocation State
+    const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+
+    // Camera State
+    const [isCameraActive, setIsCameraActive] = useState(false);
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const streamRef = useRef<MediaStream | null>(null);
 
     // --- Actions ---
 
@@ -424,7 +733,16 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
             username: editForm.username,
             role: editForm.role as 'admin' | 'tutor' | 'user',
             avatarUrl: editForm.avatarUrl,
-            // Basic
+            // Basic Info
+            title: editForm.title,
+            firstName: editForm.firstName,
+            preferredName: editForm.preferredName,
+            middleName: editForm.middleName,
+            lastName: editForm.lastName,
+            gender: editForm.gender,
+            dateOfBirth: editForm.dateOfBirth,
+            nativeLanguage: editForm.nativeLanguage,
+
             emails: editForm.emails,
             phones: editForm.phones,
             email: recoveryEmail, // Sync the fundamental ID fields
@@ -437,13 +755,14 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
             profession: editForm.profession,
             interests: editForm.interests,
             // Learning
-            nativeLanguage: editForm.nativeLanguage,
             targetLanguage: editForm.targetLanguage,
             englishLevel: editForm.englishLevel,
             goals: editForm.goals,
             englishEnvironment: editForm.englishEnvironment,
             schedule: editForm.schedule,
             preferences: editForm.preferences,
+            // Tutor
+            tutorData: editForm.role === 'tutor' ? editForm.tutorData : undefined,
         });
         setIsEditing(false);
         showToast("Profile updated successfully!", 'success');
@@ -456,6 +775,17 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
             avatarUrl: user.avatarUrl || '',
             emails: initializeEmails(),
             phones: initializePhones(),
+
+            // Unified Basic Info
+            title: user.title || '',
+            firstName: user.firstName || '',
+            preferredName: user.preferredName || '',
+            middleName: user.middleName || '',
+            lastName: user.lastName || '',
+            gender: user.gender || '',
+            dateOfBirth: user.dateOfBirth || '',
+            nativeLanguage: user.nativeLanguage || '',
+
             timeZone: user.timeZone || '',
             originCity: user.originCity || '',
             originCountry: user.originCountry || '',
@@ -463,13 +793,31 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
             currentCountry: user.currentCountry || '',
             profession: user.profession || '',
             interests: user.interests || '',
-            nativeLanguage: user.nativeLanguage || '',
             targetLanguage: user.targetLanguage || 'English',
             englishLevel: user.englishLevel || '',
             goals: user.goals || '',
             englishEnvironment: user.englishEnvironment || '',
             schedule: user.schedule || '',
             preferences: user.preferences || '',
+
+            // Tutor Data
+            tutorData: user.tutorData || {
+                displayName: '',
+                languagesTaught: [],
+                proficiencyLevel: '',
+                originType: '',
+                otherLanguagesSpoken: [],
+                placesLived: [],
+                bio: '',
+                education: [],
+                teachingCertificates: [],
+                teachingSkills: [],
+                yearsExperience: 0,
+                availabilityGrid: {},
+                hourlyRate: 0,
+                currency: 'USD',
+                trialLessonAvailable: false
+            } as any
         });
         setIsEditing(false);
         setError(null);
@@ -607,6 +955,92 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
             }, 1500);
         }
     };
+    const handleDetectLocation = async () => {
+        if (!navigator.geolocation) {
+            showToast("Geolocation is not supported by your browser.", "error");
+            return;
+        }
+
+        setIsDetectingLocation(true);
+        try {
+            // 1. Get Time Zone instantly
+            const detectedTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+            // 2. Get Geolocation
+            const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(resolve, reject, {
+                    timeout: 10000,
+                    maximumAge: 0,
+                    enableHighAccuracy: true
+                });
+            });
+
+            const { latitude, longitude } = position.coords;
+
+            // 3. Reverse Geocode (using free BigDataCloud API)
+            const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`);
+
+            if (!response.ok) throw new Error("Failed to fetch location data");
+
+            const data = await response.json();
+
+            // 4. Update Form State
+            setEditForm(prev => ({
+                ...prev,
+                timeZone: detectedTimeZone || prev.timeZone,
+                currentCity: data.city || data.locality || prev.currentCity,
+                currentCountry: data.countryName || prev.currentCountry,
+            }));
+
+            showToast("Location and Time Zone detected successfully!", "success");
+
+        } catch (err: any) {
+            console.error("Location detection error:", err);
+            showToast(err.message === "User denied Geolocation" ? "Location permission denied." : "Failed to detect location.", "error");
+        } finally {
+            setIsDetectingLocation(false);
+        }
+    };
+
+    const startCamera = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            streamRef.current = stream;
+            setIsCameraActive(true);
+        } catch (err) {
+            console.error("Error accessing camera:", err);
+            showToast("Could not access camera. Please check permissions.", "error");
+        }
+    };
+
+    useEffect(() => {
+        if (isCameraActive && videoRef.current && streamRef.current) {
+            videoRef.current.srcObject = streamRef.current;
+        }
+    }, [isCameraActive]);
+
+    const stopCamera = () => {
+        if (streamRef.current) {
+            streamRef.current.getTracks().forEach(track => track.stop());
+            streamRef.current = null;
+        }
+        setIsCameraActive(false);
+    };
+
+    const capturePhoto = () => {
+        if (videoRef.current) {
+            const canvas = document.createElement('canvas');
+            canvas.width = videoRef.current.videoWidth;
+            canvas.height = videoRef.current.videoHeight;
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+                ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                setEditForm(prev => ({ ...prev, avatarUrl: dataUrl }));
+            }
+        }
+        stopCamera();
+    };
 
     const maskEmail = (email: string) => {
         const [local, domain] = email.split('@');
@@ -617,6 +1051,7 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
         return `${start}****${end}@${domain}`;
     };
 
+    if (!user) return <div className="p-8 text-center text-muted-foreground">Loading profile...</div>;
 
     return (
         <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -663,15 +1098,25 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
                                         }
                                     }}
                                 />
-                                <div className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
-                                    <label htmlFor="profile-picture-upload" className="cursor-pointer text-white hover:text-primary transition-colors p-1" title="Upload Picture">
-                                        <Upload className="w-5 h-5" />
-                                    </label>
+                                <div className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1">
+                                    <div className="flex gap-2">
+                                        <label htmlFor="profile-picture-upload" className="cursor-pointer text-white hover:text-primary transition-colors p-1" title="Upload Picture">
+                                            <Upload className="w-5 h-5" />
+                                        </label>
+                                        <button
+                                            type="button"
+                                            onClick={startCamera}
+                                            className="text-white hover:text-primary transition-colors p-1"
+                                            title="Take Photo"
+                                        >
+                                            <Camera className="w-5 h-5" />
+                                        </button>
+                                    </div>
                                     {(editForm.avatarUrl || user.avatarUrl) && (
                                         <button
                                             type="button"
                                             onClick={() => setEditForm(prev => ({ ...prev, avatarUrl: '' }))}
-                                            className="text-white hover:text-destructive transition-colors p-1"
+                                            className="text-white hover:text-destructive transition-colors p-1 mt-1"
                                             title="Remove Picture"
                                         >
                                             <Trash2 className="w-4 h-4" />
@@ -744,7 +1189,6 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
                 </div>
             </div>
 
-            {/* Error Message */}
             {error && (
                 <div className="bg-destructive/10 border border-destructive/20 p-4 rounded-lg flex items-center gap-2 text-destructive">
                     <AlertCircle className="w-5 h-5" />
@@ -752,11 +1196,70 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
                 </div>
             )}
 
+            {/* Unified Basic Info Tile */}
+            <Section title="Basic Info" icon={User} colorTheme="primary">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {isEditing ? (
+                        <>
+                            <SelectField label="Title" value={editForm.title} fieldKey="title" options={[{ label: 'Mr.', value: 'Mr.' }, { label: 'Ms.', value: 'Ms.' }, { label: 'Mrs.', value: 'Mrs.' }, { label: 'Dr.', value: 'Dr.' }]} isEditing={isEditing} setEditForm={setEditForm} />
+                            <Field label="* First Name" helperText="Must match your government-issued ID (verification required later)." value={editForm.firstName} fieldKey="firstName" isEditing={isEditing} setEditForm={setEditForm} placeholder="Mandatory" />
+                            <Field label="Preferred Name" helperText="This name will be visible to other users on the site." value={editForm.preferredName} fieldKey="preferredName" isEditing={isEditing} setEditForm={setEditForm} />
+                            <Field label="Middle Name" value={editForm.middleName} fieldKey="middleName" isEditing={isEditing} setEditForm={setEditForm} />
+                            <Field label="* Last Name" helperText="Must match your government-issued ID (verification required later)." value={editForm.lastName} fieldKey="lastName" isEditing={isEditing} setEditForm={setEditForm} placeholder="Mandatory" />
+                            <SelectField label="* Gender" value={editForm.gender} fieldKey="gender" options={[{ label: 'Male', value: 'Male' }, { label: 'Female', value: 'Female' }, { label: 'Prefer not to answer', value: 'Prefer not to answer' }, { label: 'Other', value: 'Other' }]} isEditing={isEditing} setEditForm={setEditForm} />
+
+                            <div className="w-full">
+                                <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">* Date of Birth</label>
+                                <input type="date" value={editForm.dateOfBirth} onChange={e => setEditForm({ ...editForm, dateOfBirth: e.target.value })} className="w-full pl-3 pr-4 py-3 rounded-xl bg-input border border-border text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none" />
+                                <p className="text-[10px] text-muted-foreground mt-1.5 leading-tight">Must match your government-issued ID (verification required later).</p>
+                            </div>
+
+                            <Field label="* Native Spoken Language" value={editForm.nativeLanguage} fieldKey="nativeLanguage" isEditing={isEditing} setEditForm={setEditForm} placeholder="Mandatory" />
+                        </>
+                    ) : (
+                        <>
+                            <div className="flex flex-col gap-1">
+                                <label className="text-xs font-bold text-muted-foreground uppercase">Full Name</label>
+                                <div className="font-medium text-foreground">
+                                    {user.title ? user.title + ' ' : ''}
+                                    {user.firstName || 'Not set'}
+                                    {user.preferredName ? ` (${user.preferredName})` : ''}
+                                    {' '}{user.middleName ? user.middleName + ' ' : ''}{user.lastName || ''}
+                                </div>
+                            </div>
+                            <div className="flex flex-col gap-1">
+                                <label className="text-xs font-bold text-muted-foreground uppercase">Gender</label>
+                                <div className="font-medium text-foreground">{user.gender || 'Not set'}</div>
+                            </div>
+                            <div className="flex flex-col gap-1">
+                                <label className="text-xs font-bold text-muted-foreground uppercase">Age / DOB</label>
+                                <div className="font-medium text-foreground">{calculateAge(user.dateOfBirth) ? `${calculateAge(user.dateOfBirth)} years` : 'Not set'}</div>
+                            </div>
+                            <div className="flex flex-col gap-1">
+                                <label className="text-xs font-bold text-muted-foreground uppercase">Native Spoken Language</label>
+                                <div className="font-medium text-foreground">{user.nativeLanguage || 'Not set'}</div>
+                            </div>
+                        </>
+                    )}
+                    <div className="flex flex-col gap-1">
+                        <label className="text-xs font-bold text-muted-foreground uppercase">Current Location</label>
+                        <div className="font-medium text-foreground">{(editForm.currentCity || editForm.currentCountry) ? `${editForm.currentCity ? editForm.currentCity + ', ' : ''}${editForm.currentCountry}` : 'Not set'}</div>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-xs font-bold text-muted-foreground uppercase">Member Since</label>
+                        <div className="font-medium text-foreground">{calculateMemberSince(user.createdAt)}</div>
+                    </div>
+                </div>
+            </Section>
+
             {/* Tabs */}
             <div className="flex border-b border-border mb-6 overflow-x-auto">
                 <TabButton id="basic" activeTab={activeTab} setActiveTab={setActiveTab} label="Basic Info" icon={User} />
                 <TabButton id="learning" activeTab={activeTab} setActiveTab={setActiveTab} label="Learning Profile" icon={Book} />
                 <TabButton id="account" activeTab={activeTab} setActiveTab={setActiveTab} label="Account & Settings" icon={Settings} />
+                {editForm.role === 'tutor' && (
+                    <TabButton id="tutor" activeTab={activeTab} setActiveTab={setActiveTab} label="Tutor Dashboard" icon={Briefcase} />
+                )}
             </div>
 
             {/* Tab Content */}
@@ -770,19 +1273,51 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
                             <label className="text-xs font-bold text-muted-foreground uppercase mt-4 mb-2 block">Phone Numbers</label>
                             <ContactListEditor type="phone" contacts={editForm.phones} setContacts={(c) => setEditForm(prev => ({ ...prev, phones: c }))} isEditing={isEditing} icon={Phone} />
 
-                            <SelectField label="Time Zone" value={editForm.timeZone} fieldKey="timeZone" icon={Clock} options={TIMEZONE_OPTIONS} isEditing={isEditing} setEditForm={setEditForm} />
+                            <div id="section-timezone" className="scroll-mt-24 mt-4">
+                                <SelectField
+                                    label="Time Zone"
+                                    value={editForm.timeZone}
+                                    fieldKey="timeZone"
+                                    icon={Clock}
+                                    options={
+                                        editForm.timeZone && !TIMEZONE_OPTIONS.some(o => o.value === editForm.timeZone)
+                                            ? [...TIMEZONE_OPTIONS, { label: editForm.timeZone, value: editForm.timeZone }]
+                                            : TIMEZONE_OPTIONS
+                                    }
+                                    isEditing={isEditing}
+                                    setEditForm={setEditForm}
+                                />
+                            </div>
                         </Section>
 
-                        <Section title="Location" icon={MapPin} colorTheme="secondary">
-                            <div className="grid grid-cols-2 gap-4">
-                                <Field label="Origin City" value={editForm.originCity} fieldKey="originCity" isEditing={isEditing} setEditForm={setEditForm} />
-                                <Field label="Origin Country" value={editForm.originCountry} fieldKey="originCountry" isEditing={isEditing} setEditForm={setEditForm} />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <Field label="Current City" value={editForm.currentCity} fieldKey="currentCity" isEditing={isEditing} setEditForm={setEditForm} />
-                                <Field label="Current Country" value={editForm.currentCountry} fieldKey="currentCountry" isEditing={isEditing} setEditForm={setEditForm} />
-                            </div>
-                        </Section>
+                        <div id="section-location" className="scroll-mt-6">
+                            <Section title="Location" icon={MapPin} colorTheme="secondary">
+                                {isEditing && (
+                                    <div className="mb-4">
+                                        <button
+                                            onClick={handleDetectLocation}
+                                            disabled={isDetectingLocation}
+                                            className="flex items-center gap-2 px-4 py-2 bg-secondary text-secondary-foreground rounded-lg text-sm font-semibold hover:bg-secondary/80 disabled:opacity-50 transition-colors w-full sm:w-auto justify-center"
+                                        >
+                                            {isDetectingLocation ? (
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                            ) : (
+                                                <Locate className="w-4 h-4" />
+                                            )}
+                                            {isDetectingLocation ? 'Detecting...' : 'Detect Current Location & Time Zone'}
+                                        </button>
+                                    </div>
+                                )}
+                                <div className="grid grid-cols-2 gap-4">
+                                    <Field label="Origin City" value={editForm.originCity} fieldKey="originCity" isEditing={isEditing} setEditForm={setEditForm} />
+                                    <Field label="Origin Country" value={editForm.originCountry} fieldKey="originCountry" isEditing={isEditing} setEditForm={setEditForm} />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <Field label="Current City" value={editForm.currentCity} fieldKey="currentCity" isEditing={isEditing} setEditForm={setEditForm} />
+                                    <Field label="Current Country" value={editForm.currentCountry} fieldKey="currentCountry" isEditing={isEditing} setEditForm={setEditForm} />
+                                </div>
+                            </Section>
+                        </div>
 
                         <Section title="Personal" icon={User} colorTheme="accent">
                             <Field label="Profession" value={editForm.profession} fieldKey="profession" icon={Briefcase} isEditing={isEditing} setEditForm={setEditForm} />
@@ -794,7 +1329,6 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
                 {activeTab === 'learning' && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <Section title="Languages" icon={Globe} colorTheme="primary">
-                            <Field label="Native Language" value={editForm.nativeLanguage} fieldKey="nativeLanguage" isEditing={isEditing} setEditForm={setEditForm} />
                             <Field label="Target Language" value={editForm.targetLanguage} fieldKey="targetLanguage" isEditing={isEditing} setEditForm={setEditForm} />
                         </Section>
 
@@ -849,174 +1383,387 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
                         )}
                     </div>
                 )}
+
+                {activeTab === 'tutor' && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <Section title="Identity & Context" icon={Briefcase} colorTheme="primary">
+                            <div className="w-full mb-4">
+                                <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">Display Name</label>
+                                {isEditing ? (
+                                    <input
+                                        type="text"
+                                        value={editForm.tutorData.displayName || ''}
+                                        onChange={e => setEditForm(prev => ({ ...prev, tutorData: { ...prev.tutorData, displayName: e.target.value } as any }))}
+                                        placeholder="Preferred Name (what you prefer to go by)"
+                                        className="w-full p-2 rounded-md border border-input bg-background text-sm"
+                                    />
+                                ) : (
+                                    <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-md min-h-[38px] text-sm">
+                                        <span className={!editForm.tutorData.displayName ? 'text-muted-foreground italic' : ''}>{editForm.tutorData.displayName || 'Not set'}</span>
+                                    </div>
+                                )}
+                            </div>
+                            <TagsInput label="Places Lived" tags={editForm.tutorData.placesLived || []} setTags={(tags) => setEditForm(prev => ({ ...prev, tutorData: { ...prev.tutorData, placesLived: tags } as any }))} isEditing={isEditing} placeholder="e.g. Japan, Spain, New York" />
+                        </Section>
+
+                        <Section title="Linguistic Profile" icon={Globe} colorTheme="secondary">
+                            <TagsInput label="Languages Taught" tags={editForm.tutorData.languagesTaught || []} setTags={(tags) => setEditForm(prev => ({ ...prev, tutorData: { ...prev.tutorData, languagesTaught: tags } as any }))} isEditing={isEditing} placeholder="e.g. English, Spanish" />
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 mb-4">
+                                <div>
+                                    <label className="text-xs font-semibold text-muted-foreground uppercase">Proficiency Level</label>
+                                    {isEditing ? (
+                                        <select
+                                            value={editForm.tutorData.proficiencyLevel || ''}
+                                            onChange={e => setEditForm(prev => ({ ...prev, tutorData: { ...prev.tutorData, proficiencyLevel: e.target.value } as any }))}
+                                            className="w-full mt-1 p-2 rounded-md border border-input bg-background text-sm"
+                                        >
+                                            <option value="">Select Level</option>
+                                            <option value="A1">A1 - Beginner</option>
+                                            <option value="A2">A2 - Elementary</option>
+                                            <option value="B1">B1 - Intermediate</option>
+                                            <option value="B2">B2 - Upper Intermediate</option>
+                                            <option value="C1">C1 - Advanced</option>
+                                            <option value="C2/Native">C2 / Native</option>
+                                        </select>
+                                    ) : (
+                                        <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-md min-h-[38px] text-sm mt-1">
+                                            <span className={!editForm.tutorData.proficiencyLevel ? 'text-muted-foreground italic' : ''}>{editForm.tutorData.proficiencyLevel || 'Not set'}</span>
+                                        </div>
+                                    )}
+                                </div>
+                                <div>
+                                    <label className="text-xs font-semibold text-muted-foreground uppercase">Origin Type</label>
+                                    {isEditing ? (
+                                        <select
+                                            value={editForm.tutorData.originType || ''}
+                                            onChange={e => setEditForm(prev => ({ ...prev, tutorData: { ...prev.tutorData, originType: e.target.value as any } as any }))}
+                                            className="w-full mt-1 p-2 rounded-md border border-input bg-background text-sm"
+                                        >
+                                            <option value="">Select</option>
+                                            <option value="Mother Tongue">Mother Tongue</option>
+                                            <option value="Second Language">Second Language</option>
+                                        </select>
+                                    ) : (
+                                        <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-md min-h-[38px] text-sm mt-1">
+                                            <span className={!editForm.tutorData.originType ? 'text-muted-foreground italic' : ''}>{editForm.tutorData.originType || 'Not set'}</span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            <LanguageLevelEditor languages={editForm.tutorData.otherLanguagesSpoken || []} setLanguages={(langs) => setEditForm(prev => ({ ...prev, tutorData: { ...prev.tutorData, otherLanguagesSpoken: langs } as any }))} isEditing={isEditing} label="Other Languages Spoken" />
+                        </Section>
+
+                        <Section title="Professional Pedigree" icon={Book} colorTheme="accent">
+                            <div className="w-full mb-4">
+                                <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">Bio & Philosophy</label>
+                                {isEditing ? (
+                                    <textarea
+                                        value={editForm.tutorData.bio || ''}
+                                        onChange={e => setEditForm(prev => ({ ...prev, tutorData: { ...prev.tutorData, bio: e.target.value } as any }))}
+                                        placeholder="Introduce yourself..."
+                                        className="w-full p-2 rounded-md border border-input bg-background min-h-[100px] resize-y text-sm"
+                                    />
+                                ) : (
+                                    <div className="p-3 bg-muted/50 rounded-md min-h-[60px] whitespace-pre-wrap text-sm">
+                                        <span className={!editForm.tutorData.bio ? 'text-muted-foreground italic' : ''}>{editForm.tutorData.bio || 'No bio.'}</span>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="mb-4">
+                                <TagsInput label="Teaching Skills / Specialties" tags={editForm.tutorData.teachingSkills || []} setTags={(tags) => setEditForm(prev => ({ ...prev, tutorData: { ...prev.tutorData, teachingSkills: tags } as any }))} isEditing={isEditing} placeholder="e.g. Exam Prep, Business" />
+                            </div>
+
+                            <div className="mb-4">
+                                <TagsInput label="Teaching Certificates" tags={editForm.tutorData.teachingCertificates || []} setTags={(tags) => setEditForm(prev => ({ ...prev, tutorData: { ...prev.tutorData, teachingCertificates: tags } as any }))} isEditing={isEditing} placeholder="e.g. TEFL, CELTA" />
+                            </div>
+
+                            <div className="mb-4">
+                                <EducationEditor education={editForm.tutorData.education || []} setEducation={(edu) => setEditForm(prev => ({ ...prev, tutorData: { ...prev.tutorData, education: edu } as any }))} isEditing={isEditing} />
+                            </div>
+
+                            <div>
+                                <label className="text-xs font-semibold text-muted-foreground uppercase">Years of Experience</label>
+                                {isEditing ? (
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        max="50"
+                                        value={editForm.tutorData.yearsExperience || 0}
+                                        onChange={e => setEditForm(prev => ({ ...prev, tutorData: { ...prev.tutorData, yearsExperience: parseInt(e.target.value) || 0 } as any }))}
+                                        className="w-full mt-1 p-2 rounded-md border border-input bg-background text-sm"
+                                    />
+                                ) : (
+                                    <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-md min-h-[38px] text-sm mt-1">
+                                        <span className={!editForm.tutorData.yearsExperience ? 'text-muted-foreground italic' : ''}>{editForm.tutorData.yearsExperience || '0'} years</span>
+                                    </div>
+                                )}
+                            </div>
+                        </Section>
+
+                        <Section title="Logistics & Pricing" icon={Settings} colorTheme="muted">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-xs font-semibold text-muted-foreground uppercase">Hourly Rate</label>
+                                    <div className="flex gap-2 mt-1">
+                                        {isEditing ? (
+                                            <>
+                                                <select
+                                                    value={editForm.tutorData.currency || 'USD'}
+                                                    onChange={e => setEditForm(prev => ({ ...prev, tutorData: { ...prev.tutorData, currency: e.target.value } as any }))}
+                                                    className="w-24 p-2 rounded-md border border-input bg-background text-sm"
+                                                >
+                                                    <option value="USD">USD</option>
+                                                    <option value="EUR">EUR</option>
+                                                    <option value="GBP">GBP</option>
+                                                    <option value="JPY">JPY</option>
+                                                </select>
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    step="0.5"
+                                                    value={editForm.tutorData.hourlyRate || 0}
+                                                    onChange={e => setEditForm(prev => ({ ...prev, tutorData: { ...prev.tutorData, hourlyRate: parseFloat(e.target.value) || 0 } as any }))}
+                                                    className="flex-1 p-2 rounded-md border border-input bg-background text-sm"
+                                                />
+                                            </>
+                                        ) : (
+                                            <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-md min-h-[38px] w-full text-sm">
+                                                <span className={!editForm.tutorData.hourlyRate ? 'text-muted-foreground italic' : ''}>{editForm.tutorData.hourlyRate ? `${editForm.tutorData.hourlyRate} ${editForm.tutorData.currency || 'USD'}/hr` : 'Not set'}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="flex flex-col justify-center">
+                                    <label className="flex items-center gap-2 cursor-pointer group mt-5">
+                                        <input
+                                            type="checkbox"
+                                            checked={editForm.tutorData.trialLessonAvailable || false}
+                                            onChange={e => setEditForm(prev => ({ ...prev, tutorData: { ...prev.tutorData, trialLessonAvailable: e.target.checked } as any }))}
+                                            disabled={!isEditing}
+                                            className="w-4 h-4 rounded border-border text-primary focus:ring-primary accent-primary disabled:opacity-50"
+                                        />
+                                        <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">Offers Trial Lesson</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </Section>
+                    </div>
+                )}
             </div>
 
             {/* --- Modals (Email/Password) --- */}
             {/* (Reusing existing modal logic/UI from previous file, condensed for brevity in prompt but implementation will be full) */}
 
             {/* Email Verification Modal */}
-            {emailStep !== 'idle' && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4">
-                    <div className="w-full max-w-md bg-card border border-border rounded-xl shadow-2xl p-6">
-                        <div className="flex flex-col items-center mb-6">
-                            <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mb-3 text-primary">
-                                <Mail className="w-6 h-6" />
+            {
+                emailStep !== 'idle' && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4">
+                        <div className="w-full max-w-md bg-card border border-border rounded-xl shadow-2xl p-6">
+                            <div className="flex flex-col items-center mb-6">
+                                <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mb-3 text-primary">
+                                    <Mail className="w-6 h-6" />
+                                </div>
+                                <h3 className="text-xl font-bold text-foreground">
+                                    {emailStep === 'verify-current' ? 'Verify Identity' : 'Verify New Email'}
+                                </h3>
+                                <p className="text-sm text-muted-foreground text-center mt-1">
+                                    Enter the code sent to <span className="font-semibold text-foreground">{emailStep === 'verify-current' ? user.email : tempNewEmail}</span>
+                                </p>
                             </div>
-                            <h3 className="text-xl font-bold text-foreground">
-                                {emailStep === 'verify-current' ? 'Verify Identity' : 'Verify New Email'}
-                            </h3>
-                            <p className="text-sm text-muted-foreground text-center mt-1">
-                                Enter the code sent to <span className="font-semibold text-foreground">{emailStep === 'verify-current' ? user.email : tempNewEmail}</span>
-                            </p>
-                        </div>
-                        <div className="space-y-4">
-                            <input
-                                type="text"
-                                value={userEnteredCode}
-                                onChange={(e) => setUserEnteredCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                                className="w-full px-4 py-3 rounded-lg bg-background border border-input focus:border-primary outline-none text-center text-xl tracking-[0.5em] font-mono"
-                                placeholder="000000"
-                                maxLength={6}
-                                autoFocus
-                            />
-                            {error && <p className="text-destructive text-sm text-center bg-destructive/10 p-2 rounded">{error}</p>}
-                            <button
-                                onClick={emailStep === 'verify-current' ? verifyCurrentEmail : verifyNewEmail}
-                                disabled={userEnteredCode.length !== 6}
-                                className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-all disabled:opacity-50"
-                            >
-                                Verify & Continue
-                            </button>
-                            <div className="flex justify-between items-center text-sm pt-2">
-                                <button onClick={() => setEmailStep('idle')} className="text-muted-foreground hover:text-foreground">Cancel</button>
-                                <button onClick={handleResendCode} disabled={isSendingCode} className="text-primary hover:underline flex items-center gap-1 disabled:opacity-50">
-                                    <RefreshCcw className={`w-3 h-3 ${isSendingCode ? 'animate-spin' : ''}`} /> Resend Code
+                            <div className="space-y-4">
+                                <input
+                                    type="text"
+                                    value={userEnteredCode}
+                                    onChange={(e) => setUserEnteredCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                    className="w-full px-4 py-3 rounded-lg bg-background border border-input focus:border-primary outline-none text-center text-xl tracking-[0.5em] font-mono"
+                                    placeholder="000000"
+                                    maxLength={6}
+                                    autoFocus
+                                />
+                                {error && <p className="text-destructive text-sm text-center bg-destructive/10 p-2 rounded">{error}</p>}
+                                <button
+                                    onClick={emailStep === 'verify-current' ? verifyCurrentEmail : verifyNewEmail}
+                                    disabled={userEnteredCode.length !== 6}
+                                    className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-all disabled:opacity-50"
+                                >
+                                    Verify & Continue
                                 </button>
+                                <div className="flex justify-between items-center text-sm pt-2">
+                                    <button onClick={() => setEmailStep('idle')} className="text-muted-foreground hover:text-foreground">Cancel</button>
+                                    <button onClick={handleResendCode} disabled={isSendingCode} className="text-primary hover:underline flex items-center gap-1 disabled:opacity-50">
+                                        <RefreshCcw className={`w-3 h-3 ${isSendingCode ? 'animate-spin' : ''}`} /> Resend Code
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
             {/* Password Change Modal */}
-            {passwordStep !== 'idle' && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4">
-                    <div className="w-full max-w-md bg-card border border-border rounded-xl shadow-2xl p-6">
-                        <div className="flex flex-col items-center mb-6">
-                            <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mb-3 text-primary">
-                                <Lock className="w-6 h-6" />
+            {
+                passwordStep !== 'idle' && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4">
+                        <div className="w-full max-w-md bg-card border border-border rounded-xl shadow-2xl p-6">
+                            <div className="flex flex-col items-center mb-6">
+                                <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mb-3 text-primary">
+                                    <Lock className="w-6 h-6" />
+                                </div>
+                                <h3 className="text-xl font-bold text-foreground">Change Password</h3>
+                                <p className="text-sm text-muted-foreground text-center mt-1">
+                                    {passwordStep === 'method-selection' && "Choose how to verify your identity."}
+                                    {passwordStep === 'verify-old' && "Enter your current password."}
+                                    {passwordStep === 'verify-email' && `Enter code sent to ${maskEmail(editForm.emails.find(e => e.isRecovery)?.value || 'your email')}.`}
+                                    {passwordStep === 'verify-phone' && `Enter code sent to ${editForm.phones.find(p => p.isRecovery)?.value?.slice(-4).padStart(editForm.phones.find(p => p.isRecovery)?.value?.length || 0, '*') || 'your phone'}.`}
+                                    {passwordStep === 'set-new' && "Create a new strong password."}
+                                </p>
                             </div>
-                            <h3 className="text-xl font-bold text-foreground">Change Password</h3>
-                            <p className="text-sm text-muted-foreground text-center mt-1">
-                                {passwordStep === 'method-selection' && "Choose how to verify your identity."}
-                                {passwordStep === 'verify-old' && "Enter your current password."}
-                                {passwordStep === 'verify-email' && `Enter code sent to ${maskEmail(editForm.emails.find(e => e.isRecovery)?.value || 'your email')}.`}
-                                {passwordStep === 'verify-phone' && `Enter code sent to ${editForm.phones.find(p => p.isRecovery)?.value?.slice(-4).padStart(editForm.phones.find(p => p.isRecovery)?.value?.length || 0, '*') || 'your phone'}.`}
-                                {passwordStep === 'set-new' && "Create a new strong password."}
-                            </p>
-                        </div>
 
-                        <div className="space-y-4">
-                            {passwordStep === 'method-selection' && (
-                                <div className="grid gap-3">
-                                    <button onClick={() => setPasswordStep('verify-old')} className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-secondary/50 transition-colors text-left">
-                                        <div className="p-2 rounded bg-secondary text-foreground"><KeyRound className="w-5 h-5" /></div>
-                                        <div>
-                                            <div className="font-semibold text-sm">Use Current Password</div>
-                                            <div className="text-xs text-muted-foreground">Quickest if you know it.</div>
-                                        </div>
-                                    </button>
-                                    <button onClick={startPasswordResetViaEmail} disabled={!editForm.emails.some(e => e.isRecovery)} className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-secondary/50 transition-colors text-left disabled:opacity-50">
-                                        <div className="p-2 rounded bg-secondary text-foreground"><Mail className="w-5 h-5" /></div>
-                                        <div>
-                                            <div className="font-semibold text-sm">Send Email Code</div>
-                                            <div className="text-xs text-muted-foreground">{editForm.emails.some(e => e.isRecovery) ? `Sent to ${maskEmail(editForm.emails.find(e => e.isRecovery)?.value || '')}` : "No recovery email linked."}</div>
-                                        </div>
-                                    </button>
-                                    <button onClick={startPasswordResetViaPhone} disabled={!editForm.phones.some(p => p.isRecovery)} className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-secondary/50 transition-colors text-left disabled:opacity-50">
-                                        <div className="bg-primary/10 p-2 rounded-md text-primary">
-                                            <Phone className="w-5 h-5" />
-                                        </div>
-                                        <div>
-                                            <div className="font-semibold text-sm">Send SMS Code</div>
-                                            <div className="text-xs text-muted-foreground">{editForm.phones.some(p => p.isRecovery) ? `Sent to ${editForm.phones.find(p => p.isRecovery)?.value?.slice(-4).padStart(editForm.phones.find(p => p.isRecovery)?.value?.length || 0, '*')}` : "No recovery phone linked."}</div>
-                                        </div>
-                                    </button>
-                                </div>
-                            )}
-
-                            {/* Verify Old Password */}
-                            {passwordStep === 'verify-old' && (
-                                <div className="space-y-3">
-                                    <div className="relative">
-                                        <input
-                                            type={showPassword ? "text" : "password"}
-                                            value={passwordForm.oldPassword}
-                                            onChange={e => setPasswordForm({ ...passwordForm, oldPassword: e.target.value })}
-                                            className="w-full p-2 pr-8 rounded bg-background border border-input focus:border-primary outline-none"
-                                            placeholder="Current Password"
-                                            autoFocus
-                                        />
-                                        <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            <div className="space-y-4">
+                                {passwordStep === 'method-selection' && (
+                                    <div className="grid gap-3">
+                                        <button onClick={() => setPasswordStep('verify-old')} className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-secondary/50 transition-colors text-left">
+                                            <div className="p-2 rounded bg-secondary text-foreground"><KeyRound className="w-5 h-5" /></div>
+                                            <div>
+                                                <div className="font-semibold text-sm">Use Current Password</div>
+                                                <div className="text-xs text-muted-foreground">Quickest if you know it.</div>
+                                            </div>
+                                        </button>
+                                        <button onClick={startPasswordResetViaEmail} disabled={!editForm.emails.some(e => e.isRecovery)} className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-secondary/50 transition-colors text-left disabled:opacity-50">
+                                            <div className="p-2 rounded bg-secondary text-foreground"><Mail className="w-5 h-5" /></div>
+                                            <div>
+                                                <div className="font-semibold text-sm">Send Email Code</div>
+                                                <div className="text-xs text-muted-foreground">{editForm.emails.some(e => e.isRecovery) ? `Sent to ${maskEmail(editForm.emails.find(e => e.isRecovery)?.value || '')}` : "No recovery email linked."}</div>
+                                            </div>
+                                        </button>
+                                        <button onClick={startPasswordResetViaPhone} disabled={!editForm.phones.some(p => p.isRecovery)} className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-secondary/50 transition-colors text-left disabled:opacity-50">
+                                            <div className="bg-primary/10 p-2 rounded-md text-primary">
+                                                <Phone className="w-5 h-5" />
+                                            </div>
+                                            <div>
+                                                <div className="font-semibold text-sm">Send SMS Code</div>
+                                                <div className="text-xs text-muted-foreground">{editForm.phones.some(p => p.isRecovery) ? `Sent to ${editForm.phones.find(p => p.isRecovery)?.value?.slice(-4).padStart(editForm.phones.find(p => p.isRecovery)?.value?.length || 0, '*')}` : "No recovery phone linked."}</div>
+                                            </div>
                                         </button>
                                     </div>
-                                    <button onClick={handleVerifyOldPassword} className="w-full py-2 rounded-lg bg-primary text-primary-foreground font-bold hover:bg-primary/90">Verify</button>
-                                </div>
-                            )}
+                                )}
 
-                            {/* Verify Email Code */}
-                            {passwordStep === 'verify-email' && (
-                                <div className="space-y-3">
-                                    <input
-                                        type="text"
-                                        value={userEnteredCode}
-                                        onChange={(e) => setUserEnteredCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                                        className="w-full px-4 py-3 rounded-lg bg-background border border-input focus:border-primary outline-none text-center text-xl tracking-[0.5em] font-mono"
-                                        placeholder="000000"
-                                        maxLength={6}
-                                        autoFocus
-                                    />
-                                    <button onClick={verifyPasswordResetCode} className="w-full py-2 rounded-lg bg-primary text-primary-foreground font-bold hover:bg-primary/90">Verify Code</button>
-                                </div>
-                            )}
+                                {/* Verify Old Password */}
+                                {passwordStep === 'verify-old' && (
+                                    <div className="space-y-3">
+                                        <div className="relative">
+                                            <input
+                                                type={showPassword ? "text" : "password"}
+                                                value={passwordForm.oldPassword}
+                                                onChange={e => setPasswordForm({ ...passwordForm, oldPassword: e.target.value })}
+                                                className="w-full p-2 pr-8 rounded bg-background border border-input focus:border-primary outline-none"
+                                                placeholder="Current Password"
+                                                autoFocus
+                                            />
+                                            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                                                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                            </button>
+                                        </div>
+                                        <button onClick={handleVerifyOldPassword} className="w-full py-2 rounded-lg bg-primary text-primary-foreground font-bold hover:bg-primary/90">Verify</button>
+                                    </div>
+                                )}
 
-                            {/* Set New Password */}
-                            {passwordStep === 'set-new' && (
-                                <div className="space-y-3">
-                                    <div className="relative">
+                                {/* Verify Email Code */}
+                                {passwordStep === 'verify-email' && (
+                                    <div className="space-y-3">
                                         <input
-                                            type={showPassword ? "text" : "password"}
-                                            value={passwordForm.newPassword}
-                                            onChange={e => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-                                            className="w-full p-2 pr-8 rounded bg-background border border-input focus:border-primary outline-none"
-                                            placeholder="New Password"
+                                            type="text"
+                                            value={userEnteredCode}
+                                            onChange={(e) => setUserEnteredCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                            className="w-full px-4 py-3 rounded-lg bg-background border border-input focus:border-primary outline-none text-center text-xl tracking-[0.5em] font-mono"
+                                            placeholder="000000"
+                                            maxLength={6}
                                             autoFocus
                                         />
-                                        <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                                        </button>
+                                        <button onClick={verifyPasswordResetCode} className="w-full py-2 rounded-lg bg-primary text-primary-foreground font-bold hover:bg-primary/90">Verify Code</button>
                                     </div>
-                                    <input
-                                        type={showPassword ? "text" : "password"}
-                                        value={passwordForm.confirmNewPassword}
-                                        onChange={e => setPasswordForm({ ...passwordForm, confirmNewPassword: e.target.value })}
-                                        className="w-full p-2 rounded bg-background border border-input focus:border-primary outline-none"
-                                        placeholder="Confirm New Password"
-                                    />
-                                    <button onClick={handleSaveNewPassword} className="w-full py-2 rounded-lg bg-primary text-primary-foreground font-bold hover:bg-primary/90">Set New Password</button>
+                                )}
+
+                                {/* Set New Password */}
+                                {passwordStep === 'set-new' && (
+                                    <div className="space-y-3">
+                                        <div className="relative">
+                                            <input
+                                                type={showPassword ? "text" : "password"}
+                                                value={passwordForm.newPassword}
+                                                onChange={e => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                                                className="w-full p-2 pr-8 rounded bg-background border border-input focus:border-primary outline-none"
+                                                placeholder="New Password"
+                                                autoFocus
+                                            />
+                                            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                                                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                            </button>
+                                        </div>
+                                        <input
+                                            type={showPassword ? "text" : "password"}
+                                            value={passwordForm.confirmNewPassword}
+                                            onChange={e => setPasswordForm({ ...passwordForm, confirmNewPassword: e.target.value })}
+                                            className="w-full p-2 rounded bg-background border border-input focus:border-primary outline-none"
+                                            placeholder="Confirm New Password"
+                                        />
+                                        <button onClick={handleSaveNewPassword} className="w-full py-2 rounded-lg bg-primary text-primary-foreground font-bold hover:bg-primary/90">Set New Password</button>
+                                    </div>
+                                )}
+
+                                {error && <p className="text-destructive text-sm text-center bg-destructive/10 p-2 rounded">{error}</p>}
+
+                                <div className="text-center pt-2">
+                                    <button onClick={() => { setPasswordStep('idle'); setError(null); }} className="text-sm text-muted-foreground hover:text-foreground">Cancel</button>
                                 </div>
-                            )}
-
-                            {error && <p className="text-destructive text-sm text-center bg-destructive/10 p-2 rounded">{error}</p>}
-
-                            <div className="text-center pt-2">
-                                <button onClick={() => { setPasswordStep('idle'); setError(null); }} className="text-sm text-muted-foreground hover:text-foreground">Cancel</button>
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+            {
+                isCameraActive && (
+                    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4 animate-in fade-in duration-200">
+                        <div className="bg-card w-full max-w-md rounded-2xl shadow-xl border border-border overflow-hidden">
+                            <div className="p-4 border-b border-border flex justify-between items-center">
+                                <h2 className="text-xl font-bold flex items-center gap-2 text-foreground">
+                                    <Camera className="w-5 h-5 text-primary" /> Take a Photo
+                                </h2>
+                                <button onClick={stopCamera} className="p-2 hover:bg-muted rounded-full transition-colors">
+                                    <X className="w-5 h-5 text-muted-foreground" />
+                                </button>
+                            </div>
+                            <div className="p-4 flex flex-col items-center space-y-4">
+                                <div className="relative w-full aspect-square max-w-xs mx-auto overflow-hidden rounded-full bg-black">
+                                    <video
+                                        ref={videoRef}
+                                        autoPlay
+                                        playsInline
+                                        className="w-full h-full object-cover transform -scale-x-100"
+                                    />
+                                </div>
+                                <div className="flex gap-4 w-full">
+                                    <button
+                                        onClick={stopCamera}
+                                        className="flex-1 py-3 bg-secondary text-secondary-foreground font-bold rounded-lg hover:bg-secondary/80 transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={capturePhoto}
+                                        className="flex-1 py-3 bg-primary text-primary-foreground font-bold rounded-lg hover:bg-primary/90 transition-colors"
+                                    >
+                                        Capture
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+        </div >
     );
 }

@@ -14,12 +14,12 @@ interface WelcomeScreenProps {
 }
 
 const CATEGORIES = [
-    { id: 'random', label: 'Random Mix', icon: Shuffle, color: 'bg-gradient-to-br from-gray-800 to-gray-600 text-white border-none' },
-    { id: 'vocabulary', label: 'Vocabulary', icon: BookOpen, color: 'bg-blue-100 text-blue-600' },
-    { id: 'idioms', label: 'Idioms & Sayings', icon: MessageCircle, color: 'bg-purple-100 text-purple-600' },
-    { id: 'phrasal-verbs', label: 'Phrasal Verbs', icon: GitMerge, color: 'bg-green-100 text-green-600' },
-    { id: 'collocations', label: 'Phrases & Collocations', icon: Users, color: 'bg-orange-100 text-orange-600' },
-    { id: 'prepositions', label: 'Prepositions', icon: MapPin, color: 'bg-red-100 text-red-600' },
+    { id: 'random', label: 'Random Mix', icon: Shuffle, color: 'bg-gradient-to-br from-gray-800 to-gray-600 text-white border-none', bgColor: 'bg-zinc-500/25 hover:bg-zinc-500/30 border-zinc-500/20' },
+    { id: 'vocabulary', label: 'Vocabulary', icon: BookOpen, color: 'bg-blue-100 text-blue-600', bgColor: 'bg-blue-500/25 hover:bg-blue-500/30 border-blue-500/20' },
+    { id: 'idioms', label: 'Idioms & Sayings', icon: MessageCircle, color: 'bg-purple-100 text-purple-600', bgColor: 'bg-purple-500/25 hover:bg-purple-500/30 border-purple-500/20' },
+    { id: 'phrasal-verbs', label: 'Phrasal Verbs', icon: GitMerge, color: 'bg-green-100 text-green-600', bgColor: 'bg-green-500/25 hover:bg-green-500/30 border-green-500/20' },
+    { id: 'collocations', label: 'Phrases & Collocations', icon: Users, color: 'bg-orange-100 text-orange-600', bgColor: 'bg-orange-500/25 hover:bg-orange-500/30 border-orange-500/20' },
+    { id: 'prepositions', label: 'Prepositions', icon: MapPin, color: 'bg-red-100 text-red-600', bgColor: 'bg-red-500/25 hover:bg-red-500/30 border-red-500/20' },
 ];
 
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ userName, onSelect, lastSession, favorites, onQuickStart, onSelectFavorite, onToggleFavorite }) => {
@@ -29,8 +29,8 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ userName, onSelect
     const hour = new Date().getHours();
     const timeOfDay = hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening';
 
-    // Helper for consistency
-    const tileClass = "group relative overflow-hidden p-6 rounded-2xl bg-card border border-border hover:border-primary/50 shadow-sm hover:shadow-xl transition-all duration-300 text-left h-full flex flex-col justify-between";
+    // Helper for base tile
+    const baseTileClass = "group relative overflow-hidden p-6 rounded-2xl border shadow-sm hover:shadow-xl transition-all duration-300 text-left h-full flex flex-col justify-between";
 
     return (
         <div className="flex flex-col items-center min-h-[60vh] animate-in fade-in slide-in-from-bottom-4 duration-700 w-full py-8">
@@ -49,7 +49,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ userName, onSelect
                     <button
                         key={cat.id}
                         onClick={() => onSelect(cat.id)}
-                        className={tileClass}
+                        className={`${baseTileClass} ${cat.bgColor}`}
                     >
                         <div className={`absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity ${cat.color}`}>
                             <cat.icon className="w-24 h-24 transform translate-x-4 -translate-y-4" />
@@ -78,7 +78,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ userName, onSelect
                     {lastSession ? (
                         <button
                             onClick={onQuickStart}
-                            className={tileClass}
+                            className={`${baseTileClass} bg-primary/25 hover:bg-primary/30 border-primary/20`}
                         >
                             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity text-primary">
                                 <Clock className="w-24 h-24 transform translate-x-4 -translate-y-4" />
@@ -97,7 +97,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ userName, onSelect
                             </div>
                         </button>
                     ) : (
-                        <div className="relative overflow-hidden p-6 rounded-2xl bg-card border border-border shadow-sm text-left h-full flex flex-col justify-between opacity-80">
+                        <div className="relative overflow-hidden p-6 rounded-2xl bg-primary/25 border border-primary/20 shadow-sm text-left h-full flex flex-col justify-between opacity-80">
                             <div className="absolute top-0 right-0 p-4 opacity-10 text-primary">
                                 <Clock className="w-24 h-24 transform translate-x-4 -translate-y-4" />
                             </div>
@@ -118,7 +118,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ userName, onSelect
                 </div>
 
                 {/* Right: Favorites Tile - Container looks like a tile */}
-                <div className="h-full relative overflow-hidden rounded-2xl bg-card border border-border shadow-sm p-6 flex flex-col justify-between">
+                <div className="h-full relative overflow-hidden rounded-2xl bg-red-500/25 border border-red-500/20 shadow-sm p-6 flex flex-col justify-between">
                     {/* Background Icon Effect */}
                     <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none text-red-500">
                         <Heart className="w-24 h-24 transform translate-x-4 -translate-y-4" />

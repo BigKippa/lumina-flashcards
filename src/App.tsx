@@ -214,6 +214,7 @@ function App() {
     const [adminActiveTab, setAdminActiveTab] = useState('menu');
     const [tutorActiveView, setTutorActiveView] = useState<'dashboard' | 'students' | 'flashcards'>('dashboard');
     const [topicGroupId, setTopicGroupId] = useState<string | null>(null);
+    const [profileScrollTarget, setProfileScrollTarget] = useState<string | null>(null);
     const [studyInputMode, setStudyInputMode] = useState<string | null>(null);
     const { t } = useTranslation();
 
@@ -238,9 +239,9 @@ function App() {
 
     const goBack = () => {
         if (history.length === 0) {
-            // Fallback if no history (e.g., initial load), go home or welcome
-            if (mode !== 'welcome') {
-                setMode('welcome');
+            // Fallback if no history (e.g., initial load), go home
+            if (mode !== 'welcome' && mode !== 'mode-selection') {
+                goHome();
                 setActiveDeckId(null);
             }
             return;
@@ -249,20 +250,27 @@ function App() {
         const previousState = history[history.length - 1];
         const newHistory = history.slice(0, -1);
 
-        setHistory(newHistory);
-        setMode(previousState.mode);
-        setActiveDeckId(previousState.activeDeckId);
-        if (previousState.adminTab) {
-            setAdminActiveTab(previousState.adminTab);
-        }
-        if (previousState.tutorView) {
-            setTutorActiveView(previousState.tutorView);
+        if (previousState && previousState.mode) {
+            setHistory(newHistory);
+            setMode(previousState.mode);
+            setActiveDeckId(previousState.activeDeckId);
+            if (previousState.adminTab) {
+                setAdminActiveTab(previousState.adminTab);
+            }
+            if (previousState.tutorView) {
+                setTutorActiveView(previousState.tutorView);
+            }
+        } else {
+            // Default fallback if state was undefined or empty
+            goHome();
         }
     };
 
     const goHome = () => {
         if (user?.role === 'admin') {
             navigate('mode-selection');
+        } else if (user?.role === 'tutor') {
+            navigate('tutor');
         } else {
             navigate('welcome');
         }
@@ -299,6 +307,8 @@ function App() {
             setMode('profile');
         } else if (user.role === 'admin') {
             setMode('mode-selection');
+        } else if (user.role === 'tutor') {
+            setMode('tutor');
         } else {
             setMode('welcome');
         }
@@ -811,8 +821,7 @@ function App() {
             if (roleChanged) {
                 setHistory([]);
                 setTimeout(() => {
-                    if (updatedProfile.role === 'admin') setMode('admin');
-                    else if (updatedProfile.role === 'tutor') setMode('tutor');
+                    if (updatedProfile.role === 'admin' || updatedProfile.role === 'tutor') setMode('mode-selection');
                     else setMode('welcome'); // User dashboard
                 }, 500);
             }
@@ -833,8 +842,7 @@ function App() {
             if (roleChanged) {
                 setHistory([]);
                 setTimeout(() => {
-                    if (updatedProfile.role === 'admin') setMode('admin');
-                    else if (updatedProfile.role === 'tutor') setMode('tutor');
+                    if (updatedProfile.role === 'admin' || updatedProfile.role === 'tutor') setMode('mode-selection');
                     else setMode('welcome'); // User dashboard
                 }, 500);
             }
@@ -1268,6 +1276,7 @@ function App() {
                                     initialEditMode={isNewUserSession}
                                     onLogout={handleLogout}
                                     onOpenSettings={() => setIsSettingsOpen(true)}
+                                    initialScrollTarget={profileScrollTarget}
                                 />
                             )}
 
@@ -1325,17 +1334,22 @@ function App() {
 
                             {mode === 'tutor' && (
                                 <TutorDashboard
+                                    user={user!}
                                     students={students}
                                     decks={decks}
                                     onUpdateStudent={handleUpdateStudent}
                                     onAddStudent={handleAddStudent}
                                     view={tutorActiveView}
-                                    onViewChange={setTutorActiveView}
+                                    onViewChange={(newView) => navigate('tutor', activeDeckId, adminActiveTab, newView)}
                                     onAddDeck={handleAddDeckGlobal}
                                     onAddCard={handleAddCardToDeck}
                                     onEditCard={handleEditCard}
                                     apiKey={settings.geminiApiKey}
                                     settings={settings}
+                                    onNavigateToProfile={(target) => {
+                                        setProfileScrollTarget(target || null);
+                                        navigate('profile');
+                                    }}
                                 />
                             )}
 

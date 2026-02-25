@@ -47,6 +47,15 @@ export function LoginScreen({ onLogin, showToast }: LoginScreenProps) {
             const adminProfile: UserProfile = {
                 id: 'admin',
                 username: 'Admin',
+                title: '',
+                firstName: 'Admin',
+                preferredName: 'Admin',
+                middleName: '',
+                lastName: 'User',
+                gender: 'Prefer not to answer',
+                dateOfBirth: '1990-01-01',
+                nativeLanguage: 'English',
+                createdAt: new Date(Date.now() - 31536000000).toISOString(), // 1 year ago
                 email: 'admin@example.com',
                 password: 'secure_password',
                 role: 'admin',
@@ -427,6 +436,7 @@ export function LoginScreen({ onLogin, showToast }: LoginScreenProps) {
                                     const guestProfile: UserProfile = {
                                         id: 'guest',
                                         username: 'Guest',
+                                        preferredName: 'Guest',
                                         role: 'user',
                                         progress: {},
                                         history: [],
