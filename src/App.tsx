@@ -1102,7 +1102,7 @@ function App() {
                         </div>
 
                         {/* Brand - Centered relative to container, shifted left in study mode to align with flashcard (compensating for right sidebar) */}
-                        <div className={`absolute left-1/2 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none transition-all duration-300 ${mode === 'study' ? 'md:-translate-x-[calc(50%+9rem)] -translate-x-1/2' : '-translate-x-1/2'}`}>
+                        <div className={`absolute left-1/2 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none transition-all duration-300 drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)] ${mode === 'study' ? 'md:-translate-x-[calc(50%+9rem)] -translate-x-1/2' : '-translate-x-1/2'}`}>
                             {mode === 'welcome' && <Sparkles className="w-5 h-5 text-primary" />}
                             <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
                                 {getPageTitle()}

@@ -12,10 +12,10 @@
        Sand: 37 28% -> 22%
     */
 
-    --background: 37 22% 95%;
-    /* Sand tint */
-    --foreground: 0 0% 0%;
-    /* Pure Black */
+    --background: 215 5% 65%;
+    /* Even Lighter Neutral Slate Gray */
+    --foreground: 210 20% 15%;
+    /* Dark text for visibility */
 
     --card: 180 26% 70%;
     /* Teal */
@@ -55,7 +55,7 @@
   }
 
   body {
-    @apply antialiased text-black min-h-screen bg-background;
+    @apply antialiased text-foreground min-h-screen bg-background;
   }
 }
 

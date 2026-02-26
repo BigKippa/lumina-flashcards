@@ -462,24 +462,36 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {decks.map(deck => (
-                                <div key={deck.id} className="bg-card border border-border rounded-xl p-6 hover:shadow-md transition-all group relative">
-                                    <div className="flex justify-between items-start mb-4">
-                                        <div className="p-3 bg-primary/10 rounded-lg text-primary">
-                                            <Layout className="w-6 h-6" />
+                            {decks.map((deck, index) => {
+                                const colors = [
+                                    { bg: 'bg-sky-500/30', border: 'border-sky-500/40', iconBg: 'bg-sky-500/40', iconText: 'text-sky-400', hoverBg: 'hover:bg-sky-500/35', hoverBorder: 'hover:border-sky-500/50' },
+                                    { bg: 'bg-teal-500/30', border: 'border-teal-500/40', iconBg: 'bg-teal-500/40', iconText: 'text-teal-400', hoverBg: 'hover:bg-teal-500/35', hoverBorder: 'hover:border-teal-500/50' },
+                                    { bg: 'bg-amber-500/30', border: 'border-amber-500/40', iconBg: 'bg-amber-500/40', iconText: 'text-amber-400', hoverBg: 'hover:bg-amber-500/35', hoverBorder: 'hover:border-amber-500/50' },
+                                    { bg: 'bg-cyan-500/30', border: 'border-cyan-500/40', iconBg: 'bg-cyan-500/40', iconText: 'text-cyan-400', hoverBg: 'hover:bg-cyan-500/35', hoverBorder: 'hover:border-cyan-500/50' },
+                                    { bg: 'bg-rose-400/30', border: 'border-rose-400/40', iconBg: 'bg-rose-400/40', iconText: 'text-rose-300', hoverBg: 'hover:bg-rose-400/35', hoverBorder: 'hover:border-rose-400/50' },
+                                    { bg: 'bg-emerald-400/30', border: 'border-emerald-400/40', iconBg: 'bg-emerald-400/40', iconText: 'text-emerald-300', hoverBg: 'hover:bg-emerald-400/35', hoverBorder: 'hover:border-emerald-400/50' },
+                                ];
+                                const color = colors[index % colors.length];
+
+                                return (
+                                    <div key={deck.id} className={`${color.bg} ${color.border} ${color.hoverBg} ${color.hoverBorder} border rounded-xl p-6 hover:shadow-md transition-all group relative backdrop-blur-sm`}>
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div className={`p-3 ${color.iconBg} rounded-lg ${color.iconText}`}>
+                                                <Layout className="w-6 h-6" />
+                                            </div>
+                                            <span className={`px - 2 py - 1 rounded text - xs font - bold uppercase ${deck.status === 'public' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'} `}>
+                                                {deck.status || 'private'}
+                                            </span>
                                         </div>
-                                        <span className={`px - 2 py - 1 rounded text - xs font - bold uppercase ${deck.status === 'public' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'} `}>
-                                            {deck.status || 'private'}
-                                        </span>
+                                        <h3 className="font-bold text-lg mb-1">{deck.title}</h3>
+                                        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{deck.description}</p>
+                                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                            <span className="flex items-center gap-1"><Layout className="w-4 h-4" /> {deck.cards.length} cards</span>
+                                            {deck.level && <span className="flex items-center gap-1"><GraduationCap className="w-4 h-4" /> {deck.level}</span>}
+                                        </div>
                                     </div>
-                                    <h3 className="font-bold text-lg mb-1">{deck.title}</h3>
-                                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{deck.description}</p>
-                                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                                        <span className="flex items-center gap-1"><Layout className="w-4 h-4" /> {deck.cards.length} cards</span>
-                                        {deck.level && <span className="flex items-center gap-1"><GraduationCap className="w-4 h-4" /> {deck.level}</span>}
-                                    </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
 
                         {decks.length === 0 && (
