@@ -33,6 +33,26 @@ export default {
                     DEFAULT: "hsl(var(--card))",
                     foreground: "hsl(var(--card-foreground))",
                 },
+                color1: {
+                    DEFAULT: "hsl(var(--color-1))",
+                    foreground: "hsl(var(--color-1-foreground))",
+                },
+                color2: {
+                    DEFAULT: "hsl(var(--color-2))",
+                    foreground: "hsl(var(--color-2-foreground))",
+                },
+                color3: {
+                    DEFAULT: "hsl(var(--color-3))",
+                    foreground: "hsl(var(--color-3-foreground))",
+                },
+                color4: {
+                    DEFAULT: "hsl(var(--color-4))",
+                    foreground: "hsl(var(--color-4-foreground))",
+                },
+                color5: {
+                    DEFAULT: "hsl(var(--color-5))",
+                    foreground: "hsl(var(--color-5-foreground))",
+                },
                 border: "hsl(var(--border))",
                 input: "hsl(var(--input))",
                 ring: "hsl(var(--ring))",

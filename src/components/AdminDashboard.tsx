@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Word, Deck } from '../data/vocabulary';
-import { Search, Trash2, Edit2, ArrowLeft, Plus, Image as ImageIcon, Video, Volume2, FolderPlus, Library, Lock, Key, Users, UserPlus, GraduationCap, Sparkles, Shield, User, X, Check, AlertTriangle, Merge, Archive, RotateCcw, Settings, Upload, Download } from 'lucide-react';
+import { Search, Trash2, Edit2, ArrowLeft, Plus, Image as ImageIcon, Video, Volume2, FolderPlus, Library, Lock, Key, Users, UserPlus, GraduationCap, Sparkles, Shield, User, X, Check, AlertTriangle, Merge, Archive, RotateCcw, Settings, Upload, Download, Beaker } from 'lucide-react';
 import { CategoryManager } from './CategoryManager';
 import { EditCardModal } from './EditCardModal';
 import { BulkGeneratorModal } from './BulkGeneratorModal';
@@ -59,6 +59,42 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
     const [mergeTargetId, setMergeTargetId] = useState<string>('');
     const [mergeStep, setMergeStep] = useState<1 | 2>(1); // 1: Selection, 2: Confirmation
 
+    // Test Mode State & Logic
+    const [isTestAddStudentModalOpen, setIsTestAddStudentModalOpen] = useState(false);
+    const [quicksendFirst, setQuicksendFirst] = useState('');
+    const [quicksendLast, setQuicksendLast] = useState('');
+    const [quicksendEmail, setQuicksendEmail] = useState('');
+
+    const handleTestReceiveStudentInvite = () => {
+        const params = new URLSearchParams({
+            invite: 'true',
+            email: 'test@example.com',
+            first: 'Test',
+            last: 'Student'
+        });
+        const inviteUrl = `${window.location.origin}/?${params.toString()}`;
+        window.open(inviteUrl, '_blank');
+    };
+
+    const handleTestQuicksendSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        const testFirst = quicksendFirst.toLowerCase().startsWith('test') ? quicksendFirst : `Test ${quicksendFirst}`;
+        const params = new URLSearchParams({
+            invite: 'true',
+            email: quicksendEmail,
+            first: testFirst,
+            last: quicksendLast
+        });
+        const inviteUrl = `${window.location.origin}/?${params.toString()}`;
+
+        window.alert(`Test Quicksend simulated! The student would receive an email containing this link:\n\n${inviteUrl}`);
+
+        setIsTestAddStudentModalOpen(false);
+        setQuicksendFirst('');
+        setQuicksendLast('');
+        setQuicksendEmail('');
+    };
+
 
 
     // Bulk Deletion State
@@ -82,7 +118,15 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
         const storedProfiles = localStorage.getItem('profiles');
         if (storedProfiles) {
             const profiles: Record<string, UserProfile> = JSON.parse(storedProfiles);
-            setUsers(Object.values(profiles));
+            const allUsers = Object.values(profiles);
+            // Deduplicate users based on their 'id' property
+            const uniqueUsersMap = new Map();
+            allUsers.forEach(user => {
+                if (user && user.id) {
+                    uniqueUsersMap.set(user.id, user);
+                }
+            });
+            setUsers(Array.from(uniqueUsersMap.values()));
         }
     };
 
@@ -122,7 +166,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
         profiles[newUserEmail] = newUser;
         localStorage.setItem('profiles', JSON.stringify(profiles));
 
-        setUsers(Object.values(profiles));
+        loadUsers();
         setCreatedUserCreds({ email: newUserEmail, password: generatedPassword });
         setIsCreatingUser(false);
         setNewUserEmail('');
@@ -138,11 +182,16 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
             const storedProfiles = localStorage.getItem('profiles');
             if (storedProfiles) {
                 const profiles: Record<string, UserProfile> = JSON.parse(storedProfiles);
-                const keyToDelete = Object.keys(profiles).find(k => profiles[k].id === userId);
-                if (keyToDelete) {
-                    delete profiles[keyToDelete];
+                let deletedForUser = false;
+                Object.keys(profiles).forEach(k => {
+                    if (profiles[k].id === userId) {
+                        delete profiles[k];
+                        deletedForUser = true;
+                    }
+                });
+                if (deletedForUser) {
                     localStorage.setItem('profiles', JSON.stringify(profiles));
-                    setUsers(Object.values(profiles));
+                    loadUsers();
 
                     // Cleanup selection if deleted
                     if (selectedUserIds.has(userId)) {
@@ -160,11 +209,16 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
         const storedProfiles = localStorage.getItem('profiles');
         if (storedProfiles) {
             const profiles: Record<string, UserProfile> = JSON.parse(storedProfiles);
-            const keyToUpdate = Object.keys(profiles).find(k => profiles[k].id === userId);
-            if (keyToUpdate) {
-                profiles[keyToUpdate].isArchived = isArchiving;
+            let updatedForUser = false;
+            Object.keys(profiles).forEach(k => {
+                if (profiles[k].id === userId) {
+                    profiles[k].isArchived = isArchiving;
+                    updatedForUser = true;
+                }
+            });
+            if (updatedForUser) {
                 localStorage.setItem('profiles', JSON.stringify(profiles));
-                setUsers(Object.values(profiles));
+                loadUsers();
 
                 // Cleanup selection
                 if (selectedUserIds.has(userId)) {
@@ -187,15 +241,18 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                 let count = 0;
 
                 selectedUserIds.forEach(id => {
-                    const keyToUpdate = Object.keys(profiles).find(k => profiles[k].id === id);
-                    if (keyToUpdate && profiles[keyToUpdate].id !== 'admin') {
-                        profiles[keyToUpdate].isArchived = isArchiving;
-                        count++;
-                    }
+                    let updatedForUser = false;
+                    Object.keys(profiles).forEach(k => {
+                        if (profiles[k].id === id && profiles[k].id !== 'admin') {
+                            profiles[k].isArchived = isArchiving;
+                            updatedForUser = true;
+                        }
+                    });
+                    if (updatedForUser) count++;
                 });
 
                 localStorage.setItem('profiles', JSON.stringify(profiles));
-                setUsers(Object.values(profiles));
+                loadUsers();
                 setSelectedUserIds(new Set());
                 alert(`Successfully ${isArchiving ? 'archived' : 'restored'} ${count} users.`);
             }
@@ -232,15 +289,18 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                 let deletedCount = 0;
 
                 selectedUserIds.forEach(id => {
-                    const keyToDelete = Object.keys(profiles).find(k => profiles[k].id === id);
-                    if (keyToDelete && profiles[keyToDelete].id !== 'admin') {
-                        delete profiles[keyToDelete];
-                        deletedCount++;
-                    }
+                    let deletedForUser = false;
+                    Object.keys(profiles).forEach(k => {
+                        if (profiles[k].id === id && profiles[k].id !== 'admin') {
+                            delete profiles[k];
+                            deletedForUser = true;
+                        }
+                    });
+                    if (deletedForUser) deletedCount++;
                 });
 
                 localStorage.setItem('profiles', JSON.stringify(profiles));
-                setUsers(Object.values(profiles));
+                loadUsers();
                 setSelectedUserIds(new Set());
                 alert(`Successfully deleted ${deletedCount} users.`);
             }
@@ -253,14 +313,14 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
         const storedProfiles = localStorage.getItem('profiles');
         const profiles: Record<string, UserProfile> = storedProfiles ? JSON.parse(storedProfiles) : {};
 
-        // Find keys
-        const sourceKey = Object.keys(profiles).find(k => profiles[k].id === mergeSourceId);
-        const targetKey = Object.keys(profiles).find(k => profiles[k].id === mergeTargetId);
+        // Find keys (all keys matching source vs target ID)
+        const sourceKeys = Object.keys(profiles).filter(k => profiles[k].id === mergeSourceId);
+        const targetKeys = Object.keys(profiles).filter(k => profiles[k].id === mergeTargetId);
 
-        if (!sourceKey || !targetKey) return;
+        if (sourceKeys.length === 0 || targetKeys.length === 0) return;
 
-        const sourceUser = profiles[sourceKey];
-        const targetUser = profiles[targetKey];
+        const sourceUser = profiles[sourceKeys[0]];
+        const targetUser = profiles[targetKeys[0]];
 
         // MERGE LOGIC
         const mergedUser = { ...targetUser };
@@ -298,11 +358,15 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
         mergedUser.progress = mergedProgress;
 
         // SAVE & DELETE
-        profiles[targetKey] = mergedUser;
-        delete profiles[sourceKey];
+        targetKeys.forEach(k => {
+            profiles[k] = mergedUser;
+        });
+        sourceKeys.forEach(k => {
+            delete profiles[k];
+        });
 
         localStorage.setItem('profiles', JSON.stringify(profiles));
-        setUsers(Object.values(profiles));
+        loadUsers();
 
         // RESET
         setIsMergeModalOpen(false);
@@ -491,7 +555,9 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                 activeTab === 'cards' ? 'Manage Flashcards' :
                                     activeTab === 'users' ? 'User Database' :
                                         activeTab === 'archived' ? 'Archived Decks' :
-                                            'Support Tickets'}
+                                            activeTab === 'tickets' ? 'Support Tickets' :
+                                                activeTab === 'testMode' ? 'Test Mode' :
+                                                    'Settings'}
                     </h1>
                 </div>
 
@@ -499,83 +565,145 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <button
                             onClick={() => onTabChange('users')}
-                            className="flex flex-col items-center p-8 rounded-2xl bg-blue-500/25 hover:bg-blue-500/30 border border-blue-500/20 transition-all group hover:scale-105 shadow-md"
+                            className="flex flex-col items-center p-8 rounded-2xl bg-color1 text-color1-foreground border border-color5/20 transition-all group hover:scale-105 shadow-md hover:bg-color1/80"
                         >
-                            <div className="w-16 h-16 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mb-6 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                            <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mb-6 group-hover:bg-white/40 transition-colors">
                                 <Users className="w-8 h-8" />
                             </div>
-                            <h3 className="text-xl font-bold text-foreground mb-2">Manage Users</h3>
-                            <p className="text-muted-foreground text-center text-sm">
+                            <h3 className="text-xl font-bold mb-2">Manage Users</h3>
+                            <p className="opacity-80 text-center text-sm">
                                 Create, edit, and remove user accounts.
                             </p>
                         </button>
 
                         <button
                             onClick={() => onTabChange('decks')}
-                            className="flex flex-col items-center p-8 rounded-2xl bg-purple-500/25 hover:bg-purple-500/30 border border-purple-500/20 transition-all group hover:scale-105 shadow-md"
+                            className="flex flex-col items-center p-8 rounded-2xl bg-color2 text-color2-foreground border border-color5/20 transition-all group hover:scale-105 shadow-md hover:bg-color2/80"
                         >
-                            <div className="w-16 h-16 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mb-6 group-hover:bg-purple-600 group-hover:text-white transition-colors">
-                                <Library className="w-8 h-8" />
+                            <div className="w-16 h-16 rounded-full bg-black/10 flex items-center justify-center mb-6 group-hover:bg-black/20 transition-colors">
+                                <Library className="w-8 h-8 opacity-90" />
                             </div>
-                            <h3 className="text-xl font-bold text-foreground mb-2">Manage Decks</h3>
-                            <p className="text-muted-foreground text-center text-sm">
+                            <h3 className="text-xl font-bold mb-2">Manage Decks</h3>
+                            <p className="opacity-80 text-center text-sm">
                                 Create and organize deck collections.
                             </p>
                         </button>
 
                         <button
                             onClick={() => onTabChange('cards')}
-                            className="flex flex-col items-center p-8 rounded-2xl bg-green-500/25 hover:bg-green-500/30 border border-green-500/20 transition-all group hover:scale-105 shadow-md"
+                            className="flex flex-col items-center p-8 rounded-2xl bg-color3 text-color3-foreground border border-color5/20 transition-all group hover:scale-105 shadow-md hover:bg-color3/80"
                         >
-                            <div className="w-16 h-16 rounded-full bg-green-100 text-green-600 flex items-center justify-center mb-6 group-hover:bg-green-600 group-hover:text-white transition-colors">
-                                <Edit2 className="w-8 h-8" />
+                            <div className="w-16 h-16 rounded-full bg-black/10 flex items-center justify-center mb-6 group-hover:bg-black/20 transition-colors">
+                                <Edit2 className="w-8 h-8 opacity-90" />
                             </div>
-                            <h3 className="text-xl font-bold text-foreground mb-2">Manage Flashcards</h3>
-                            <p className="text-muted-foreground text-center text-sm">
+                            <h3 className="text-xl font-bold mb-2">Manage Flashcards</h3>
+                            <p className="opacity-80 text-center text-sm">
                                 View, edit, and bulk upload cards.
                             </p>
                         </button>
 
                         <button
                             onClick={() => onTabChange('tickets')}
-                            className="flex flex-col items-center p-8 rounded-2xl bg-orange-500/25 hover:bg-orange-500/30 border border-orange-500/20 transition-all group hover:scale-105 shadow-md"
+                            className="flex flex-col items-center p-8 rounded-2xl bg-color4 text-color4-foreground border border-color5/20 transition-all group hover:scale-105 shadow-md hover:bg-color4/80"
                         >
-                            <div className="w-16 h-16 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center mb-6 group-hover:bg-orange-600 group-hover:text-white transition-colors">
-                                <Sparkles className="w-8 h-8" />
+                            <div className="w-16 h-16 rounded-full bg-black/10 flex items-center justify-center mb-6 group-hover:bg-black/20 transition-colors">
+                                <Sparkles className="w-8 h-8 opacity-90" />
                             </div>
-                            <h3 className="text-xl font-bold text-foreground mb-2">Support Tickets</h3>
-                            <p className="text-muted-foreground text-center text-sm">
+                            <h3 className="text-xl font-bold mb-2">Support Tickets</h3>
+                            <p className="opacity-80 text-center text-sm">
                                 View feedback and issues from users.
                             </p>
                         </button>
 
                         <button
                             onClick={() => onTabChange('archived')}
-                            className="flex flex-col items-center p-8 rounded-2xl bg-gray-500/25 hover:bg-gray-500/30 border border-gray-500/20 transition-all group hover:scale-105 shadow-md"
+                            className="flex flex-col items-center p-8 rounded-2xl bg-color5 text-color5-foreground border border-color1/20 transition-all group hover:scale-105 shadow-md hover:bg-color5/80"
                         >
-                            <div className="w-16 h-16 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center mb-6 group-hover:bg-gray-600 group-hover:text-white transition-colors">
-                                <Archive className="w-8 h-8" />
+                            <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mb-6 group-hover:bg-white/20 transition-colors">
+                                <Archive className="w-8 h-8 opacity-90" />
                             </div>
-                            <h3 className="text-xl font-bold text-foreground mb-2">Archived</h3>
-                            <p className="text-muted-foreground text-center text-sm">
+                            <h3 className="text-xl font-bold mb-2">Archived</h3>
+                            <p className="opacity-80 text-center text-sm">
                                 Manage archived decks and content.
                             </p>
                         </button>
 
                         <button
                             onClick={() => onTabChange('settings')}
-                            className="flex flex-col items-center p-8 rounded-2xl bg-slate-500/25 hover:bg-slate-500/30 border border-slate-500/20 transition-all group hover:scale-105 shadow-md"
+                            className="flex flex-col items-center p-8 rounded-2xl bg-color1 text-color1-foreground border border-color5/20 transition-all group hover:scale-105 shadow-md hover:bg-color1/80"
                         >
-                            <div className="w-16 h-16 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center mb-6 group-hover:bg-slate-600 group-hover:text-white transition-colors">
-                                <Settings className="w-8 h-8" />
+                            <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mb-6 group-hover:bg-white/40 transition-colors">
+                                <Settings className="w-8 h-8 opacity-90" />
                             </div>
-                            <h3 className="text-xl font-bold text-foreground mb-2">System</h3>
-                            <p className="text-muted-foreground text-center text-sm">
+                            <h3 className="text-xl font-bold mb-2">System</h3>
+                            <p className="opacity-80 text-center text-sm">
                                 Backup, restore, and app configuration.
+                            </p>
+                        </button>
+                        <button
+                            onClick={() => onTabChange('testMode')}
+                            className="flex flex-col items-center p-8 rounded-2xl bg-color2 text-color2-foreground border border-color5/20 transition-all group hover:scale-105 shadow-md hover:bg-color2/80"
+                        >
+                            <div className="w-16 h-16 rounded-full bg-black/10 flex items-center justify-center mb-6 group-hover:bg-black/20 transition-colors">
+                                <Beaker className="w-8 h-8 opacity-90" />
+                            </div>
+                            <h3 className="text-xl font-bold mb-2">Test Mode</h3>
+                            <p className="opacity-80 text-center text-sm">
+                                Replicate user flows and simulate actions.
                             </p>
                         </button>
                     </div>
                 )
+                }
+
+                {
+                    activeTab === 'testMode' && (
+                        <div className="space-y-6">
+                            <div className="flex justify-between items-center bg-card p-6 rounded-2xl border border-border shadow-sm">
+                                <div>
+                                    <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+                                        <Beaker className="w-6 h-6 text-teal-500" />
+                                        Test Mode Commands
+                                    </h2>
+                                    <p className="text-muted-foreground text-sm">Execute simulated actions to test system behavior. Test profiles will have "Test" prepended to their names.</p>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="bg-card p-8 rounded-2xl border border-border shadow-sm flex flex-col items-center text-center group transition-all hover:border-blue-500/50">
+                                    <div className="w-16 h-16 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                        <UserPlus className="w-8 h-8" />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-foreground mb-2">Receive Student Invite</h3>
+                                    <p className="text-muted-foreground text-sm mb-6 flex-1">
+                                        Simulate what happens when a student receives an invite magic link. Opens the mock registration page.
+                                    </p>
+                                    <button
+                                        onClick={handleTestReceiveStudentInvite}
+                                        className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors"
+                                    >
+                                        Start Simulator
+                                    </button>
+                                </div>
+
+                                <div className="bg-card p-8 rounded-2xl border border-border shadow-sm flex flex-col items-center text-center group transition-all hover:border-purple-500/50">
+                                    <div className="w-16 h-16 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                        <GraduationCap className="w-8 h-8" />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-foreground mb-2">Send Student Invite</h3>
+                                    <p className="text-muted-foreground text-sm mb-6 flex-1">
+                                        Simulate what happens when a Tutor opens the add student modal and sends an invite.
+                                    </p>
+                                    <button
+                                        onClick={() => setIsTestAddStudentModalOpen(true)}
+                                        className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl transition-colors"
+                                    >
+                                        Start Simulator
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )
                 }
 
                 {
@@ -589,20 +717,20 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-1 gap-4">
-                                    {tickets.map(ticket => (
-                                        <div key={ticket.id} className={`p-6 rounded-2xl border transition-all ${ticket.status === 'resolved' ? 'bg-secondary/30 border-border opacity-70' : 'bg-card border-border shadow-sm'}`}>
+                                    {tickets.map((ticket, index) => (
+                                        <div key={ticket.id} className={`p-6 rounded-2xl transition-all ${ticket.status === 'resolved' ? 'opacity-60 bg-color5/10 border border-color5/20' : (index % 2 === 0 ? 'bg-color4 text-color4-foreground' : 'bg-color4/20 text-foreground')}`}>
                                             <div className="flex justify-between items-start gap-4">
                                                 <div className="flex-1">
                                                     <div className="flex items-center gap-2 mb-2">
-                                                        <span className={`px-2 py-0.5 rounded-full text-xs font-bold uppercase ${ticket.status === 'open' ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'}`}>
+                                                        <span className={`px-2 py-0.5 rounded-full text-xs font-bold uppercase ${ticket.status === 'open' ? 'bg-color5 text-color5-foreground' : 'bg-color3 text-color3-foreground'}`}>
                                                             {ticket.status}
                                                         </span>
-                                                        <span className="text-sm text-foreground font-semibold">{ticket.username}</span>
-                                                        <span className="text-xs text-muted-foreground">• {new Date(ticket.timestamp).toLocaleString()}</span>
+                                                        <span className="text-sm font-semibold">{ticket.username}</span>
+                                                        <span className="text-xs opacity-60">• {new Date(ticket.timestamp).toLocaleString()}</span>
                                                     </div>
-                                                    <p className="text-foreground whitespace-pre-wrap mb-3">{ticket.description}</p>
+                                                    <p className="whitespace-pre-wrap mb-3 opacity-90">{ticket.description}</p>
 
-                                                    <div className="flex flex-wrap gap-2 text-xs text-muted-foreground font-mono bg-secondary/50 p-2 rounded-lg inline-block">
+                                                    <div className="flex flex-wrap gap-2 text-xs font-mono bg-black/5 p-2 rounded-lg inline-block opacity-80">
                                                         {ticket.context}
                                                     </div>
 
@@ -646,27 +774,30 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                     Archived Decks
                                 </h3>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {decks.filter(d => d.isArchived).map(deck => (
-                                        <div
-                                            key={deck.id}
-                                            className="group relative p-8 rounded-2xl bg-card/50 border border-border/50 grayscale opacity-80 hover:grayscale-0 hover:opacity-100 transition-all hover:bg-card"
-                                        >
-                                            <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
-                                                <button
-                                                    onClick={() => onUnarchiveDeck(deck.id)}
-                                                    className="p-2 rounded-lg text-muted-foreground hover:bg-secondary/80 hover:text-foreground transition-colors"
-                                                    title="Unarchive Deck"
-                                                >
-                                                    <RotateCcw className="w-5 h-5" />
-                                                </button>
+                                    {decks.filter(d => d.isArchived).map((deck, index) => {
+                                        const colorTheme = ['bg-color1 text-color1-foreground border-color5/20', 'bg-color2 text-color2-foreground border-color5/20', 'bg-color3 text-color3-foreground border-color5/20', 'bg-color4 text-color4-foreground border-color5/20', 'bg-color5 text-color5-foreground border-color1/20'][index % 5];
+                                        return (
+                                            <div
+                                                key={deck.id}
+                                                className={`group relative p-8 rounded-2xl ${colorTheme} opacity-80 hover:opacity-100 transition-all hover:scale-105 shadow-sm`}
+                                            >
+                                                <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+                                                    <button
+                                                        onClick={() => onUnarchiveDeck(deck.id)}
+                                                        className="p-2 rounded-lg text-inherit opacity-70 hover:opacity-100 transition-colors bg-black/10"
+                                                        title="Unarchive Deck"
+                                                    >
+                                                        <RotateCcw className="w-5 h-5" />
+                                                    </button>
+                                                </div>
+                                                <h3 className="text-xl font-bold mb-2 transition-colors opacity-90">{deck.title}</h3>
+                                                <p className="opacity-80 text-sm line-clamp-2">{deck.description || "No description"}</p>
+                                                <div className="mt-4 flex items-center gap-4 text-sm font-medium opacity-70">
+                                                    <span>{deck.cards.length} cards</span>
+                                                </div>
                                             </div>
-                                            <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors">{deck.title}</h3>
-                                            <p className="text-muted-foreground text-sm line-clamp-2">{deck.description || "No description"}</p>
-                                            <div className="mt-4 flex items-center gap-4 text-sm font-medium text-muted-foreground">
-                                                <span>{deck.cards.length} cards</span>
-                                            </div>
-                                        </div>
-                                    ))}
+                                        )
+                                    })}
                                     {decks.filter(d => d.isArchived).length === 0 && (
                                         <div className="col-span-full py-12 text-center border-2 border-dashed border-border rounded-xl">
                                             <p className="text-muted-foreground">No archived decks.</p>
@@ -689,64 +820,87 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                         My Private Decks
                                     </h3>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                        {/* Create New Deck Card */}
-                                        <button
-                                            onClick={() => setIsCreatingDeck(true)}
-                                            className="group flex flex-col items-center justify-center p-8 rounded-2xl bg-secondary/20 border-2 border-dashed border-border hover:border-primary/50 hover:bg-secondary/40 transition-all min-h-[200px]"
-                                        >
-                                            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-4 group-hover:scale-110 transition-transform">
-                                                <Plus className="w-8 h-8" />
-                                            </div>
-                                            <h3 className="text-xl font-bold text-foreground">Create New Deck</h3>
-                                            <p className="text-muted-foreground text-sm mt-2">Organize a new collection</p>
-                                        </button>
+                                        {/* Dynamic colors for lists */}
+                                        {(() => {
+                                            const TILE_COLORS = [
+                                                'bg-color1 text-color1-foreground border-color5/20',
+                                                'bg-color2 text-color2-foreground border-color5/20',
+                                                'bg-color3 text-color3-foreground border-color5/20',
+                                                'bg-color4 text-color4-foreground border-color5/20',
+                                                'bg-color5 text-color5-foreground border-color1/20'
+                                            ];
+                                            const ICON_COLORS = [
+                                                'opacity-90', 'opacity-90', 'opacity-90', 'opacity-90', 'opacity-90'
+                                            ];
 
-                                        {/* Bulk Upload Tile */}
-                                        <button
-                                            onClick={() => setIsBulkModalOpen(true)}
-                                            className="group flex flex-col items-center justify-center p-8 rounded-2xl bg-secondary/20 border-2 border-dashed border-border hover:border-primary/50 hover:bg-secondary/40 transition-all min-h-[200px]"
-                                        >
-                                            <div className="w-16 h-16 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-500 mb-4 group-hover:scale-110 transition-transform">
-                                                <FolderPlus className="w-8 h-8" />
-                                            </div>
-                                            <h3 className="text-xl font-bold text-foreground">Bulk Upload</h3>
-                                            <p className="text-muted-foreground text-sm mt-2">Import from CSV or AI</p>
-                                        </button>
-
-                                        {/* Private Decks */}
-                                        {decks.filter(d => (!d.status || d.status === 'private' || d.status === 'rejected') && !d.isArchived).map(deck => (
-                                            <div
-                                                key={deck.id}
-                                                onClick={() => onSelectDeck(deck.id)}
-                                                className="group relative p-8 rounded-2xl bg-card border border-border hover:border-primary/50 cursor-pointer transition-all hover:shadow-lg hover:shadow-primary/5"
-                                            >
-                                                <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
-                                                    {deck.status === 'rejected' && (
-                                                        <span className="text-xs font-bold text-destructive bg-destructive/10 px-2 py-1 rounded-full">Rejected</span>
-                                                    )}
+                                            return (
+                                                <>
+                                                    {/* Create New Deck Card */}
                                                     <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            onArchiveDeck(deck.id);
-                                                        }}
-                                                        className="p-2 rounded-lg text-muted-foreground hover:bg-secondary/80 hover:text-foreground transition-colors"
-                                                        title="Archive Deck"
+                                                        onClick={() => setIsCreatingDeck(true)}
+                                                        className="group flex flex-col items-center justify-center p-8 rounded-2xl bg-secondary/20 border-2 border-dashed border-border hover:border-primary/50 hover:bg-secondary/40 transition-all min-h-[200px]"
                                                     >
-                                                        <Archive className="w-5 h-5" />
+                                                        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-4 group-hover:scale-110 transition-transform">
+                                                            <Plus className="w-8 h-8" />
+                                                        </div>
+                                                        <h3 className="text-xl font-bold text-foreground">Create New Deck</h3>
+                                                        <p className="text-muted-foreground text-sm mt-2">Organize a new collection</p>
                                                     </button>
-                                                </div>
-                                                <div className="flex justify-between items-start mb-4">
-                                                    <div className="w-12 h-12 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center">
-                                                        <Library className="w-6 h-6" />
-                                                    </div>
-                                                </div>
-                                                <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors">{deck.title}</h3>
-                                                <p className="text-muted-foreground text-sm line-clamp-2">{deck.description || "No description"}</p>
-                                                <div className="mt-4 flex items-center gap-4 text-sm font-medium text-muted-foreground">
-                                                    <span>{deck.cards.length} cards</span>
-                                                </div>
-                                            </div>
-                                        ))}
+
+                                                    {/* Bulk Upload Tile */}
+                                                    <button
+                                                        onClick={() => setIsBulkModalOpen(true)}
+                                                        className="group flex flex-col items-center justify-center p-8 rounded-2xl bg-secondary/20 border-2 border-dashed border-border hover:border-primary/50 hover:bg-secondary/40 transition-all min-h-[200px]"
+                                                    >
+                                                        <div className="w-16 h-16 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-500 mb-4 group-hover:scale-110 transition-transform">
+                                                            <FolderPlus className="w-8 h-8" />
+                                                        </div>
+                                                        <h3 className="text-xl font-bold text-foreground">Bulk Upload</h3>
+                                                        <p className="text-muted-foreground text-sm mt-2">Import from CSV or AI</p>
+                                                    </button>
+
+                                                    {/* Private Decks */}
+                                                    {decks.filter(d => (!d.status || d.status === 'private' || d.status === 'rejected') && !d.isArchived).map((deck, index) => {
+                                                        const tileColor = TILE_COLORS[index % TILE_COLORS.length];
+                                                        const iconColor = ICON_COLORS[index % ICON_COLORS.length];
+
+                                                        return (
+                                                            <div
+                                                                key={deck.id}
+                                                                onClick={() => onSelectDeck(deck.id)}
+                                                                className={`group relative p-8 rounded-2xl border cursor-pointer transition-all hover:shadow-lg ${tileColor}`}
+                                                            >
+                                                                <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+                                                                    {deck.status === 'rejected' && (
+                                                                        <span className="text-xs font-bold bg-black/20 px-2 py-1 rounded-full opacity-90">Rejected</span>
+                                                                    )}
+                                                                    <button
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            onArchiveDeck(deck.id);
+                                                                        }}
+                                                                        className="p-2 rounded-lg text-inherit opacity-70 hover:opacity-100 hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
+                                                                        title="Archive Deck"
+                                                                    >
+                                                                        <Archive className="w-5 h-5" />
+                                                                    </button>
+                                                                </div>
+                                                                <div className="flex justify-between items-start mb-4">
+                                                                    <div className="w-12 h-12 rounded-xl bg-black/10 shadow-sm flex items-center justify-center">
+                                                                        <Library className={`w-6 h-6 ${iconColor}`} />
+                                                                    </div>
+                                                                </div>
+                                                                <h3 className="text-xl font-bold mb-2 transition-colors opacity-95">{deck.title}</h3>
+                                                                <p className="opacity-80 text-sm line-clamp-2">{deck.description || "No description"}</p>
+                                                                <div className="mt-4 flex items-center gap-4 text-xs font-bold uppercase tracking-wider opacity-90 bg-black/10 w-fit px-2 py-1 rounded">
+                                                                    <span>{deck.cards.length} cards</span>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </>
+                                            );
+                                        })()}
                                     </div>
                                 </div>
 
@@ -757,42 +911,65 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                         Public Library
                                     </h3>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                        {decks.filter(d => d.status === 'public' && !d.isArchived).map(deck => (
-                                            <div
-                                                key={deck.id}
-                                                onClick={() => onSelectDeck(deck.id)}
-                                                className="group relative p-8 rounded-2xl bg-card border-none ring-1 ring-border hover:ring-primary/50 cursor-pointer transition-all hover:shadow-lg"
-                                            >
-                                                <div className="absolute top-4 right-4 flex gap-2">
-                                                    <span className="bg-primary/10 text-primary text-xs font-bold px-2 py-1 rounded-full">Public</span>
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            onArchiveDeck(deck.id);
-                                                        }}
-                                                        className="p-1 rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
-                                                        title="Archive (Unpublish)"
-                                                    >
-                                                        <Archive className="w-4 h-4" />
-                                                    </button>
-                                                </div>
-                                                <div className="flex justify-between items-start mb-4">
-                                                    <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
-                                                        <Users className="w-6 h-6" />
-                                                    </div>
-                                                </div>
-                                                <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors">{deck.title}</h3>
-                                                <p className="text-muted-foreground text-sm line-clamp-2">{deck.description || "By Community"}</p>
-                                                <div className="mt-4 flex items-center gap-4 text-sm font-medium text-muted-foreground">
-                                                    <span>{deck.cards.length} cards</span>
-                                                </div>
-                                            </div>
-                                        ))}
-                                        {decks.filter(d => d.status === 'public' && !d.isArchived).length === 0 && (
-                                            <div className="col-span-full py-12 text-center border-2 border-dashed border-border rounded-xl">
-                                                <p className="text-muted-foreground">No public decks available yet.</p>
-                                            </div>
-                                        )}
+                                        {/* Dynamic colors for Public lists */}
+                                        {(() => {
+                                            const PUBLIC_COLORS = [
+                                                'bg-color2 text-color2-foreground border-color5/20',
+                                                'bg-color3 text-color3-foreground border-color5/20',
+                                                'bg-color4 text-color4-foreground border-color5/20',
+                                                'bg-color5 text-color5-foreground border-color1/20',
+                                                'bg-color1 text-color1-foreground border-color5/20',
+                                            ];
+                                            const PUBLIC_ICONS = [
+                                                'opacity-90', 'opacity-90', 'opacity-90', 'opacity-90', 'opacity-90'
+                                            ];
+
+                                            return (
+                                                <>
+                                                    {decks.filter(d => d.status === 'public' && !d.isArchived).map((deck, index) => {
+                                                        const tileColor = PUBLIC_COLORS[index % PUBLIC_COLORS.length];
+                                                        const iconColor = PUBLIC_ICONS[index % PUBLIC_ICONS.length];
+
+                                                        return (
+                                                            <div
+                                                                key={deck.id}
+                                                                onClick={() => onSelectDeck(deck.id)}
+                                                                className={`group relative p-8 rounded-2xl border cursor-pointer transition-all hover:shadow-lg ${tileColor}`}
+                                                            >
+                                                                <div className="absolute top-4 right-4 flex gap-2">
+                                                                    <span className="text-xs font-bold px-2 py-1 rounded-full text-inherit bg-black/10 opacity-90">Public</span>
+                                                                    <button
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            onArchiveDeck(deck.id);
+                                                                        }}
+                                                                        className="p-1 rounded-lg text-inherit opacity-70 hover:opacity-100 hover:bg-black/10 dark:hover:bg-white/10 transition-colors opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                        title="Archive (Unpublish)"
+                                                                    >
+                                                                        <Archive className="w-4 h-4" />
+                                                                    </button>
+                                                                </div>
+                                                                <div className="flex justify-between items-start mb-4">
+                                                                    <div className="w-12 h-12 rounded-xl bg-black/10 shadow-sm flex items-center justify-center">
+                                                                        <Users className={`w-6 h-6 ${iconColor}`} />
+                                                                    </div>
+                                                                </div>
+                                                                <h3 className="text-xl font-bold mb-2 transition-colors opacity-95">{deck.title}</h3>
+                                                                <p className="opacity-80 text-sm line-clamp-2">{deck.description || "By Community"}</p>
+                                                                <div className="mt-4 flex items-center gap-4 text-xs font-bold uppercase tracking-wider opacity-90 bg-black/10 w-fit px-2 py-1 rounded">
+                                                                    <span>{deck.cards.length} cards</span>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                    {decks.filter(d => d.status === 'public' && !d.isArchived).length === 0 && (
+                                                        <div className="col-span-full py-12 text-center border-2 border-dashed border-border rounded-xl">
+                                                            <p className="text-muted-foreground">No public decks available yet.</p>
+                                                        </div>
+                                                    )}
+                                                </>
+                                            );
+                                        })()}
                                     </div>
                                 </div>
 
@@ -1010,8 +1187,8 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-border">
-                                            {users.filter(u => showArchivedUsers ? u.isArchived : !u.isArchived).map(user => (
-                                                <tr key={user.id} className={`hover:bg-secondary/10 transition-colors ${selectedUserIds.has(user.id) ? 'bg-primary/5' : ''}`}>
+                                            {users.filter(u => showArchivedUsers ? u.isArchived : !u.isArchived).map((user, index) => (
+                                                <tr key={user.id} className={`transition-colors text-sm ${index % 2 === 0 ? 'bg-color4 text-color4-foreground' : 'bg-color4/20 text-foreground'} hover:brightness-95 ${selectedUserIds.has(user.id) ? 'ring-2 ring-inset ring-color5' : ''}`}>
                                                     <td className="p-4">
                                                         {user.id !== 'admin' && (
                                                             <input
@@ -1028,8 +1205,8 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                                                 {user.username.charAt(0).toUpperCase()}
                                                             </div>
                                                             <div>
-                                                                <div className="font-semibold text-foreground">{user.username}</div>
-                                                                <div className="text-xs text-muted-foreground">{user.email || 'No email'}</div>
+                                                                <div className="font-semibold">{user.username}</div>
+                                                                <div className="text-xs opacity-80">{user.email || 'No email'}</div>
                                                             </div>
                                                         </div>
                                                     </td>
@@ -1045,7 +1222,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                                         </span>
                                                     </td>
                                                     <td className="p-4">
-                                                        <div className="text-sm font-medium text-foreground">
+                                                        <div className="text-sm font-medium">
                                                             {Object.values(user.progress || {}).reduce((acc, curr) => acc + curr.cardsLearned, 0)} cards
                                                         </div>
                                                     </td>
@@ -1062,7 +1239,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                                                 {user.isArchived && (
                                                                     <button
                                                                         onClick={() => handleDeleteUser(user.id, user.username)}
-                                                                        className="p-2 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+                                                                        className="p-2 rounded-lg opacity-60 hover:bg-destructive/10 hover:text-destructive hover:opacity-100 transition-colors"
                                                                         title={t('admin.users.delete_confirm')}
                                                                     >
                                                                         <Trash2 className="w-5 h-5" />
@@ -1722,6 +1899,67 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                     </div>
                 )}
             </div>
+
+            {/* Test Mode Add Student Modal */}
+            {isTestAddStudentModalOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="w-full max-w-[380px] bg-card border border-border rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 relative">
+                        <div className="bg-primary/5 p-6 border-b border-border">
+                            <div className="flex justify-between items-center mb-2">
+                                <h3 className="font-bold text-foreground flex items-center gap-2 text-xl">
+                                    <GraduationCap className="w-6 h-6 text-primary" /> Test Send Invite
+                                </h3>
+                                <button onClick={() => setIsTestAddStudentModalOpen(false)} className="text-muted-foreground hover:text-foreground bg-black/5 dark:bg-white/5 p-1.5 rounded-full transition-colors">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+                            <p className="text-sm text-muted-foreground leading-relaxed mt-2 text-balance">
+                                Simulate sending an invite. The first name will have "Test" automatically prepended to ensure the profile is marked as a test.
+                            </p>
+                        </div>
+                        <div className="p-6">
+                            <form onSubmit={handleTestQuicksendSubmit} className="space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1.5">
+                                        <label className="text-[10px] font-bold text-primary uppercase tracking-wider ml-1">First Name</label>
+                                        <input
+                                            required
+                                            placeholder="John"
+                                            value={quicksendFirst}
+                                            onChange={e => setQuicksendFirst(e.target.value)}
+                                            className="w-full px-3 py-2.5 rounded-xl bg-background border border-input focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-muted-foreground/50 text-sm"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-[10px] font-bold text-primary uppercase tracking-wider ml-1">Last Name</label>
+                                        <input
+                                            required
+                                            placeholder="Doe"
+                                            value={quicksendLast}
+                                            onChange={e => setQuicksendLast(e.target.value)}
+                                            className="w-full px-3 py-2.5 rounded-xl bg-background border border-input focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-muted-foreground/50 text-sm"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-[10px] font-bold text-primary uppercase tracking-wider ml-1">Email Address</label>
+                                    <input
+                                        required
+                                        type="email"
+                                        placeholder="john@example.com"
+                                        value={quicksendEmail}
+                                        onChange={e => setQuicksendEmail(e.target.value)}
+                                        className="w-full px-4 py-3 rounded-xl bg-background border border-input focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-muted-foreground/50 text-sm"
+                                    />
+                                </div>
+                                <button type="submit" className="w-full py-3.5 mt-2 bg-primary text-primary-foreground font-bold rounded-xl text-sm hover:bg-primary/90 transition-all shadow-md shadow-primary/20 flex items-center justify-center gap-2">
+                                    Test Send Invite Link
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div >
     );
 }

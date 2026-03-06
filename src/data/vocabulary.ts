@@ -16,6 +16,15 @@ export interface Word {
     notes?: string;
     disableAudio?: boolean;
     customPronunciation?: string;
+
+    // Alternate fields for edge cases and multiple usages
+    alternateDefinitions?: string[];
+    alternateExamples?: string[];
+    alternatePhonetics?: string[];
+    alternatePronunciations?: string[];
+    alternateImageUrls?: string[];
+    alternateAudioUrls?: string[];
+    alternateCategories?: string[];
 }
 
 export interface Deck {

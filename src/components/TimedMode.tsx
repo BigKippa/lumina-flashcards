@@ -311,24 +311,24 @@ export default function TimedMode({ cards, onExit, settings }: TimedModeProps) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mb-12">
                     <button
                         onClick={() => startSession('manual')}
-                        className="flex flex-col items-center p-8 rounded-2xl bg-card border border-border hover:border-primary/50 hover:bg-secondary/30 transition-all cursor-pointer group"
+                        className="flex flex-col items-center p-8 rounded-2xl border transition-all cursor-pointer group bg-blue-500/10 border-blue-500/20 text-blue-700 hover:bg-blue-500/20 hover:border-blue-500/40 shadow-sm hover:shadow-md hover:scale-[1.02]"
                     >
-                        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
-                            <Keyboard className="w-8 h-8" />
+                        <div className="w-16 h-16 rounded-full bg-white/60 dark:bg-black/10 flex items-center justify-center mb-4 group-hover:bg-blue-500 group-hover:text-white transition-colors shadow-sm">
+                            <Keyboard className="w-8 h-8 text-blue-500 group-hover:text-white transition-colors" />
                         </div>
-                        <h3 className="text-xl font-semibold mb-2">Manual Mode</h3>
-                        <p className="text-sm text-muted-foreground text-center">Type the answers.</p>
+                        <h3 className="text-xl font-bold mb-2">Manual Mode</h3>
+                        <p className="text-sm opacity-80 text-center">Type the answers.</p>
                     </button>
 
                     <button
                         onClick={() => startSession('voice')}
-                        className="flex flex-col items-center p-8 rounded-2xl bg-card border border-border hover:border-accent/50 hover:bg-secondary/30 transition-all cursor-pointer group"
+                        className="flex flex-col items-center p-8 rounded-2xl border transition-all cursor-pointer group bg-purple-500/10 border-purple-500/20 text-purple-700 hover:bg-purple-500/20 hover:border-purple-500/40 shadow-sm hover:shadow-md hover:scale-[1.02]"
                     >
-                        <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-accent group-hover:text-white transition-colors">
-                            <Mic className="w-8 h-8" />
+                        <div className="w-16 h-16 rounded-full bg-white/60 dark:bg-black/10 flex items-center justify-center mb-4 group-hover:bg-purple-500 group-hover:text-white transition-colors shadow-sm">
+                            <Mic className="w-8 h-8 text-purple-500 group-hover:text-white transition-colors" />
                         </div>
-                        <h3 className="text-xl font-semibold mb-2">Voice Mode</h3>
-                        <p className="text-sm text-muted-foreground text-center">Speak the answers.</p>
+                        <h3 className="text-xl font-bold mb-2">Voice Mode</h3>
+                        <p className="text-sm opacity-80 text-center">Speak the answers.</p>
                     </button>
                 </div>
 

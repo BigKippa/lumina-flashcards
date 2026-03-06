@@ -96,6 +96,20 @@ export const TopicSelectionScreen: React.FC<TopicSelectionScreenProps> = ({ onSe
     const { t } = useTranslation();
     const [selectedGroup, setSelectedGroup] = React.useState<TopicGroup | null>(null);
 
+    // Dynamic contrast colors for mapping distinct tiles
+    const TILE_COLORS = [
+        'bg-blue-500/10 border-blue-500/20 text-blue-700 hover:bg-blue-500/20 hover:border-blue-500/40',
+        'bg-purple-500/10 border-purple-500/20 text-purple-700 hover:bg-purple-500/20 hover:border-purple-500/40',
+        'bg-amber-500/10 border-amber-500/20 text-amber-700 hover:bg-amber-500/20 hover:border-amber-500/40',
+        'bg-emerald-500/10 border-emerald-500/20 text-emerald-700 hover:bg-emerald-500/20 hover:border-emerald-500/40',
+        'bg-rose-500/10 border-rose-500/20 text-rose-700 hover:bg-rose-500/20 hover:border-rose-500/40',
+        'bg-cyan-500/10 border-cyan-500/20 text-cyan-700 hover:bg-cyan-500/20 hover:border-cyan-500/40',
+    ];
+
+    const ICON_COLORS = [
+        'text-blue-500', 'text-purple-500', 'text-amber-500', 'text-emerald-500', 'text-rose-500', 'text-cyan-500'
+    ];
+
     React.useEffect(() => {
         if (onGroupSelect) {
             onGroupSelect(selectedGroup ? selectedGroup.id : null);
@@ -162,22 +176,25 @@ export const TopicSelectionScreen: React.FC<TopicSelectionScreenProps> = ({ onSe
 
                     {/* Topics Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {selectedGroup.topics.map((topic) => {
+                        {selectedGroup.topics.map((topic, index) => {
                             const isTopicFav = isFavorite(topic.id);
                             const topicLabel = t(topic.labelKey);
+                            const tileColor = TILE_COLORS[index % TILE_COLORS.length];
+                            const iconColor = ICON_COLORS[index % ICON_COLORS.length];
+
                             return (
                                 <button
                                     key={topic.id}
                                     onClick={() => onSelect(topic.id, topicLabel)}
                                     className={`
-                                        flex flex-col p-6 rounded-xl border border-transparent relative
+                                        flex flex-col p-6 rounded-xl border relative
                                         transition-all duration-200 text-left h-full group
-                                        ${selectedGroup.color} hover:shadow-md hover:scale-[1.02]
+                                        ${tileColor} shadow-sm hover:shadow-md hover:scale-[1.02]
                                     `}
                                 >
                                     <div className="flex justify-between items-start mb-4">
-                                        <div className="p-3 bg-white/50 w-fit rounded-lg">
-                                            <topic.icon className="w-6 h-6" />
+                                        <div className="p-3 bg-white/60 dark:bg-black/10 w-fit rounded-lg shadow-sm">
+                                            <topic.icon className={`w-6 h-6 ${iconColor}`} />
                                         </div>
                                         <div
                                             onClick={(e) => {
@@ -227,22 +244,27 @@ export const TopicSelectionScreen: React.FC<TopicSelectionScreenProps> = ({ onSe
                             {t('topics.selection.student_library')}
                         </h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {studentDecks.map(deck => (
-                                <button
-                                    key={deck.id}
-                                    onClick={() => onSelectDeck?.(deck.id)}
-                                    className="flex flex-col p-6 rounded-xl bg-card border border-border hover:border-primary/50 hover:shadow-lg transition-all text-left group relative overflow-hidden"
-                                >
-                                    <div className="absolute top-0 right-0 p-3 opacity-5 group-hover:opacity-10 transition-opacity">
-                                        <BookOpen className="w-16 h-16 text-primary transform translate-x-4 -translate-y-4" />
-                                    </div>
-                                    <h3 className="font-bold text-lg mb-1 relative z-10">{deck.title}</h3>
-                                    <p className="text-sm text-muted-foreground line-clamp-2 relative z-10 mb-2">{deck.description}</p>
-                                    <div className="mt-auto flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary bg-primary/10 w-fit px-2 py-1 rounded relative z-10">
-                                        <span>{t('topics.selection.cards_count', { count: deck.cards.length })}</span>
-                                    </div>
-                                </button>
-                            ))}
+                            {studentDecks.map((deck, index) => {
+                                const tileColor = TILE_COLORS[index % TILE_COLORS.length];
+                                const iconColor = ICON_COLORS[index % ICON_COLORS.length];
+
+                                return (
+                                    <button
+                                        key={deck.id}
+                                        onClick={() => onSelectDeck?.(deck.id)}
+                                        className={`flex flex-col p-6 rounded-xl border hover:shadow-lg transition-all text-left group relative overflow-hidden ${tileColor}`}
+                                    >
+                                        <div className="absolute top-0 right-0 p-3 opacity-5 group-hover:opacity-10 transition-opacity">
+                                            <BookOpen className={`w-16 h-16 ${iconColor} transform translate-x-4 -translate-y-4`} />
+                                        </div>
+                                        <h3 className="font-bold text-lg mb-1 relative z-10">{deck.title}</h3>
+                                        <p className="text-sm text-muted-foreground line-clamp-2 relative z-10 mb-2">{deck.description}</p>
+                                        <div className="mt-auto flex items-center gap-2 text-xs font-bold uppercase tracking-wider opacity-80 bg-black/5 dark:bg-white/5 w-fit px-2 py-1 rounded relative z-10">
+                                            <span>{t('topics.selection.cards_count', { count: deck.cards.length })}</span>
+                                        </div>
+                                    </button>
+                                );
+                            })}
                         </div>
                         <div className="my-8 border-t border-border" />
                     </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Word } from '../data/vocabulary';
-import { Trash2, Image as ImageIcon, Video, Volume2, Upload, X } from 'lucide-react';
+import { Trash2, Image as ImageIcon, Video, Volume2, Upload, X, Plus, Sparkles, CheckCircle } from 'lucide-react';
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 import { AppSettings } from '../types';
 
@@ -9,8 +10,14 @@ interface EditCardModalProps {
     onSave: (updatedCard: Word) => void;
     onCancel: () => void;
     settings: AppSettings;
-}export function EditCardModal({ card, onSave, onCancel, settings }: EditCardModalProps) {
+    apiKey?: string;
+}
+
+export function EditCardModal({ card, onSave, onCancel, settings, apiKey }: EditCardModalProps) {
     const [editingCard, setEditingCard] = useState<Word>(card);
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [isAiPopulated, setIsAiPopulated] = useState(false);
 
     // Sync if card prop changes, though usually this component is mounted only when needed
     useEffect(() => {
@@ -42,6 +49,127 @@ interface EditCardModalProps {
         reader.readAsDataURL(file);
     };
 
+    const handleAlternateFileSelect = (e: React.ChangeEvent<HTMLInputElement>, field: 'alternateImageUrls' | 'alternateAudioUrls', index: number) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (file.size > 500 * 1024) {
+            if (!window.confirm(`File size is ${(file.size / 1024).toFixed(0)} KB. Large files may fill up your storage quickly. Continue?`)) {
+                e.target.value = '';
+                return;
+            }
+        }
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            const base64String = reader.result as string;
+            setEditingCard(prev => {
+                const currentArray = prev[field] || [];
+                const newArray = [...currentArray];
+                newArray[index] = base64String;
+                return { ...prev, [field]: newArray };
+            });
+        };
+        reader.readAsDataURL(file);
+    };
+
+    const updateAlternateArray = (field: keyof Word, index: number, value: string) => {
+        setEditingCard(prev => {
+            const currentArray = (prev[field] as string[]) || [];
+            const newArray = [...currentArray];
+            newArray[index] = value;
+            return { ...prev, [field]: newArray };
+        });
+    };
+
+    const addAlternateItem = (field: keyof Word) => {
+        setEditingCard(prev => ({
+            ...prev,
+            [field]: [...((prev[field] as string[]) || []), '']
+        }));
+    };
+
+    const removeAlternateItem = (field: keyof Word, index: number) => {
+        setEditingCard(prev => {
+            const currentArray = (prev[field] as string[]) || [];
+            const newArray = [...currentArray];
+            newArray.splice(index, 1);
+            return { ...prev, [field]: newArray };
+        });
+    };
+
+    const handleAutoFillMissing = async () => {
+        if (!editingCard.word || !apiKey) return;
+
+        setIsGenerating(true);
+        setError(null);
+        setIsAiPopulated(false);
+
+        const cleanKey = apiKey.trim();
+        const modelsToTry = [
+            "gemini-2.0-flash",
+            "gemini-2.0-flash-001",
+            "gemini-2.5-flash",
+            "gemini-2.5-pro",
+            "gemini-1.5-flash",
+            "gemini-pro"
+        ];
+
+        let lastError = null;
+
+        try {
+            const genAI = new GoogleGenerativeAI(cleanKey);
+
+            for (const modelName of modelsToTry) {
+                try {
+                    console.log(`Attempting to generate with model: ${modelName}`);
+                    const model = genAI.getGenerativeModel({ model: modelName });
+
+                    const prompt = `
+                        You are an expert English teacher. The user is editing a flashcard for the word/phrase: "${editingCard.word}".
+                        Please fill in the missing information. 
+                        Target level: CEFR B2.
+                        Return ONLY a JSON object with these keys (only include the keys if they would provide useful information):
+                        - definition: A clear, concise definition.
+                        - example: A natural example sentence.
+                        - phonetic: IPA pronunciation.
+                        - category: Part of speech (Noun, Verb, Adjective, Adverb, Pronoun, Preposition, Conjunction, Interjection, Phrasal Verb, Idiom, Slang, Collocation).
+                    `;
+
+                    const result = await model.generateContent(prompt);
+                    const response = await result.response;
+                    const text = response.text().replace(/```json/g, '').replace(/```/g, '').trim();
+                    const data = JSON.parse(text);
+
+                    // Only update fields that are currently empty
+                    setEditingCard(prev => ({
+                        ...prev,
+                        definition: prev.definition || data.definition || '',
+                        example: prev.example || data.example || '',
+                        phonetic: prev.phonetic || data.phonetic || '',
+                        category: prev.category || data.category || 'Other'
+                    }));
+
+                    setIsAiPopulated(true);
+                    return; // Success, exit function
+                } catch (e: any) {
+                    console.warn(`Model ${modelName} failed:`, e.message);
+                    lastError = e;
+                }
+            }
+
+            throw lastError || new Error("All models failed to generate content");
+
+        } catch (error: any) {
+            console.error("AI Generation failed:", error);
+            const errorDetails = error.message || "Unknown error";
+            const shortError = errorDetails.length > 200 ? errorDetails.substring(0, 200) + "..." : errorDetails;
+            setError(`AI Error: ${shortError}`);
+        } finally {
+            setIsGenerating(false);
+        }
+    };
+
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
             <div className="w-full max-w-lg bg-background border border-border rounded-2xl p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto animate-in zoom-in-95">
@@ -71,6 +199,23 @@ interface EditCardModalProps {
                                 onChange={e => setEditingCard({ ...editingCard, phonetic: e.target.value })}
                                 placeholder="/fəˈnɛtɪk/"
                             />
+
+                            {(editingCard.alternatePhonetics || []).map((val, idx) => (
+                                <div key={idx} className="flex gap-2 mt-2 animate-in fade-in slide-in-from-top-1">
+                                    <input
+                                        className="flex-1 px-4 py-3 rounded-lg bg-input border border-border text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none font-mono text-sm"
+                                        value={val}
+                                        onChange={e => updateAlternateArray('alternatePhonetics', idx, e.target.value)}
+                                        placeholder="Alternate IPA..."
+                                    />
+                                    <button type="button" onClick={() => removeAlternateItem('alternatePhonetics', idx)} className="p-3 text-muted-foreground hover:bg-destructive/20 hover:text-destructive rounded-lg transition-colors">
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            ))}
+                            <button type="button" onClick={() => addAlternateItem('alternatePhonetics')} className="mt-2 text-xs font-bold text-primary flex items-center gap-1 hover:underline">
+                                <Plus className="w-3 h-3" /> Add Alternate
+                            </button>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-muted-foreground mb-1">Custom Pronunciation</label>
@@ -80,6 +225,23 @@ interface EditCardModalProps {
                                 onChange={e => setEditingCard({ ...editingCard, customPronunciation: e.target.value })}
                                 placeholder="e.g. fuh-NEH-tik"
                             />
+
+                            {(editingCard.alternatePronunciations || []).map((val, idx) => (
+                                <div key={idx} className="flex gap-2 mt-2 animate-in fade-in slide-in-from-top-1">
+                                    <input
+                                        className="flex-1 px-4 py-3 rounded-lg bg-input border border-border text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm"
+                                        value={val}
+                                        onChange={e => updateAlternateArray('alternatePronunciations', idx, e.target.value)}
+                                        placeholder="Alternate Pronunciation..."
+                                    />
+                                    <button type="button" onClick={() => removeAlternateItem('alternatePronunciations', idx)} className="p-3 text-muted-foreground hover:bg-destructive/20 hover:text-destructive rounded-lg transition-colors">
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            ))}
+                            <button type="button" onClick={() => addAlternateItem('alternatePronunciations')} className="mt-2 text-xs font-bold text-primary flex items-center gap-1 hover:underline">
+                                <Plus className="w-3 h-3" /> Add Alternate
+                            </button>
                         </div>
                     </div>
                     <div>
@@ -89,6 +251,23 @@ interface EditCardModalProps {
                             value={editingCard.definition}
                             onChange={e => setEditingCard({ ...editingCard, definition: e.target.value })}
                         />
+
+                        {(editingCard.alternateDefinitions || []).map((val, idx) => (
+                            <div key={idx} className="flex gap-2 mt-2 animate-in fade-in slide-in-from-top-1">
+                                <textarea
+                                    className="flex-1 px-4 py-3 rounded-lg bg-input border border-border text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none resize-none h-16 text-sm"
+                                    value={val}
+                                    onChange={e => updateAlternateArray('alternateDefinitions', idx, e.target.value)}
+                                    placeholder="Alternate definition..."
+                                />
+                                <button type="button" onClick={() => removeAlternateItem('alternateDefinitions', idx)} className="p-3 text-muted-foreground hover:bg-destructive/20 hover:text-destructive rounded-lg transition-colors h-16 flex items-center justify-center">
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
+                            </div>
+                        ))}
+                        <button type="button" onClick={() => addAlternateItem('alternateDefinitions')} className="mt-2 text-xs font-bold text-primary flex items-center gap-1 hover:underline">
+                            <Plus className="w-3 h-3" /> Add Alternate Definition
+                        </button>
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-muted-foreground mb-1">Example</label>
@@ -97,6 +276,23 @@ interface EditCardModalProps {
                             value={editingCard.example}
                             onChange={e => setEditingCard({ ...editingCard, example: e.target.value })}
                         />
+
+                        {(editingCard.alternateExamples || []).map((val, idx) => (
+                            <div key={idx} className="flex gap-2 mt-2 animate-in fade-in slide-in-from-top-1">
+                                <input
+                                    className="flex-1 px-4 py-3 rounded-lg bg-input border border-border text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm"
+                                    value={val}
+                                    onChange={e => updateAlternateArray('alternateExamples', idx, e.target.value)}
+                                    placeholder="Alternate example..."
+                                />
+                                <button type="button" onClick={() => removeAlternateItem('alternateExamples', idx)} className="p-3 text-muted-foreground hover:bg-destructive/20 hover:text-destructive rounded-lg transition-colors">
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
+                            </div>
+                        ))}
+                        <button type="button" onClick={() => addAlternateItem('alternateExamples')} className="mt-2 text-xs font-bold text-primary flex items-center gap-1 hover:underline">
+                            <Plus className="w-3 h-3" /> Add Alternate Example
+                        </button>
                     </div>
 
                     {/* Category Selection */}
@@ -135,6 +331,24 @@ interface EditCardModalProps {
                                     />
                                 )}
                             </div>
+
+                            {(editingCard.alternateCategories || []).map((val, idx) => (
+                                <div key={idx} className="flex gap-2 mt-2 animate-in fade-in slide-in-from-top-1">
+                                    <input
+                                        className="flex-1 px-4 py-3 rounded-lg bg-input border border-border text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm"
+                                        value={val}
+                                        onChange={e => updateAlternateArray('alternateCategories', idx, e.target.value)}
+                                        placeholder="Alternate Category..."
+                                    />
+                                    <button type="button" onClick={() => removeAlternateItem('alternateCategories', idx)} className="p-3 text-muted-foreground hover:bg-destructive/20 hover:text-destructive rounded-lg transition-colors">
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            ))}
+                            <button type="button" onClick={() => addAlternateItem('alternateCategories')} className="mt-2 text-xs font-bold text-primary flex items-center gap-1 hover:underline">
+                                <Plus className="w-3 h-3" /> Add Alternate Category
+                            </button>
+
                             <p className="text-xs text-muted-foreground mt-2">
                                 Categories determine the styling of the card. You can customize these in Settings.
                             </p>
@@ -201,6 +415,43 @@ interface EditCardModalProps {
                                     </div>
                                 )}
                             </div>
+
+                            {/* Alternate Images */}
+                            {(editingCard.alternateImageUrls || []).map((url, idx) => (
+                                <div key={idx} className="flex flex-col gap-2 mt-4 pt-4 border-t border-border/50 animate-in fade-in slide-in-from-top-1">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-xs font-bold text-muted-foreground uppercase">Alternate Image {idx + 1}</span>
+                                        <button type="button" onClick={() => removeAlternateItem('alternateImageUrls', idx)} className="text-xs text-destructive hover:underline flex items-center gap-1">
+                                            <Trash2 className="w-3 h-3" /> Remove
+                                        </button>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <input
+                                            className="flex-1 px-4 py-3 rounded-lg bg-input border border-border text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm"
+                                            placeholder="https://... or upload file"
+                                            value={url || ''}
+                                            onChange={e => updateAlternateArray('alternateImageUrls', idx, e.target.value)}
+                                        />
+                                        <label className="cursor-pointer px-4 py-3 bg-secondary hover:bg-secondary/80 rounded-lg flex items-center gap-2 transition-colors">
+                                            <Upload className="w-4 h-4" />
+                                            <input
+                                                type="file"
+                                                hidden
+                                                accept="image/*"
+                                                onChange={(e) => handleAlternateFileSelect(e, 'alternateImageUrls', idx)}
+                                            />
+                                        </label>
+                                    </div>
+                                    {url && (
+                                        <div className="relative mt-2 rounded-lg overflow-hidden border border-border h-24 w-full bg-secondary/20">
+                                            <img src={url} alt="Alternate Preview" className="w-full h-full object-contain" />
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                            <button type="button" onClick={() => addAlternateItem('alternateImageUrls')} className="mt-3 text-xs font-bold text-primary flex items-center gap-1 hover:underline">
+                                <Plus className="w-3 h-3" /> Add Alternate Image
+                            </button>
                         </div>
 
                         {/* Audio Upload */}
@@ -226,6 +477,38 @@ interface EditCardModalProps {
                                     />
                                 </label>
                             </div>
+
+                            {/* Alternate Audios */}
+                            {(editingCard.alternateAudioUrls || []).map((url, idx) => (
+                                <div key={idx} className="flex flex-col gap-2 mt-4 pt-4 border-t border-border/50 animate-in fade-in slide-in-from-top-1">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-xs font-bold text-muted-foreground uppercase">Alternate Audio {idx + 1}</span>
+                                        <button type="button" onClick={() => removeAlternateItem('alternateAudioUrls', idx)} className="text-xs text-destructive hover:underline flex items-center gap-1">
+                                            <Trash2 className="w-3 h-3" /> Remove
+                                        </button>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <input
+                                            className="flex-1 px-4 py-3 rounded-lg bg-input border border-border text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm"
+                                            placeholder="https://... or upload file"
+                                            value={url || ''}
+                                            onChange={e => updateAlternateArray('alternateAudioUrls', idx, e.target.value)}
+                                        />
+                                        <label className="cursor-pointer px-4 py-3 bg-secondary hover:bg-secondary/80 rounded-lg flex items-center gap-2 transition-colors">
+                                            <Upload className="w-4 h-4" />
+                                            <input
+                                                type="file"
+                                                hidden
+                                                accept="audio/*"
+                                                onChange={(e) => handleAlternateFileSelect(e, 'alternateAudioUrls', idx)}
+                                            />
+                                        </label>
+                                    </div>
+                                </div>
+                            ))}
+                            <button type="button" onClick={() => addAlternateItem('alternateAudioUrls')} className="mt-3 text-xs font-bold text-primary flex items-center gap-1 hover:underline">
+                                <Plus className="w-3 h-3" /> Add Alternate Audio
+                            </button>
                         </div>
 
                         {/* Video Upload */}
@@ -269,19 +552,36 @@ interface EditCardModalProps {
                         </div>
                     </div>
 
-                    <div className="flex gap-4 pt-4">
+                    <div className="pt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 border-t border-border mt-6">
+                        <div className="flex flex-col">
+                            <button
+                                type="button"
+                                onClick={handleAutoFillMissing}
+                                disabled={!editingCard.word || isGenerating || !apiKey}
+                                className={`w-full py-3 rounded-lg font-bold flex items-center justify-center gap-2 transition-all h-[48px] ${!apiKey ? 'bg-muted text-muted-foreground cursor-not-allowed' : 'bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 dark:bg-purple-900/20 dark:hover:bg-purple-900/40 dark:text-purple-300 dark:border-purple-800'}`}
+                                title={!apiKey ? "Set API Key in Settings to use AI" : "Auto-fill missing details with AI"}
+                            >
+                                <Sparkles className={`w-5 h-5 ${isGenerating ? 'animate-spin' : ''}`} />
+                                {isGenerating ? 'Generating...' : (isAiPopulated ? 'Regenerate' : 'Fill with A.I.')}
+                            </button>
+                            {error && <p className="text-xs text-red-500 mt-2 p-2 bg-red-50 dark:bg-red-950/50 rounded border border-red-200 dark:border-red-900">{error}</p>}
+                            <p className="text-[10px] text-muted-foreground/80 mt-2 text-center leading-tight">A.I. can make mistakes. Please review all fields before saving.</p>
+                        </div>
+
                         <button
                             type="button"
                             onClick={onCancel}
-                            className="flex-1 py-3 bg-secondary hover:bg-secondary/80 text-foreground font-bold rounded-lg transition-colors"
+                            className="w-full py-3 bg-secondary hover:bg-secondary/80 text-foreground font-bold rounded-lg transition-colors border border-border h-[48px]"
                         >
                             Cancel
                         </button>
+
                         <button
                             type="submit"
-                            className="flex-1 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-lg transition-colors"
+                            className={`w-full py-3 font-bold rounded-lg transition-all flex items-center justify-center gap-2 shadow-sm h-[48px] ${isAiPopulated ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-primary hover:bg-primary/90 text-primary-foreground'}`}
                         >
-                            Save Changes
+                            {isAiPopulated && <CheckCircle className="w-4 h-4" />}
+                            {isAiPopulated ? 'Accept & Save' : 'Save Changes'}
                         </button>
                     </div>
                 </form>

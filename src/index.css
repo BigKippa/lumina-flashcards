@@ -12,40 +12,45 @@
        Sand: 37 28% -> 22%
     */
 
-    --background: 215 5% 65%;
-    /* Even Lighter Neutral Slate Gray */
-    --foreground: 210 20% 15%;
-    /* Dark text for visibility */
+    --color-1: 10 2% 86%;   /* Light Gray/Off-white */
+    --color-2: 38 8% 72%;   /* Taupe */
+    --color-3: 32 33% 66%;  /* Sand */
+    --color-4: 202 23% 67%; /* Slate Blue */
+    --color-5: 195 10% 32%; /* Charcoal */
 
-    --card: 180 26% 70%;
-    /* Teal */
-    --card-foreground: 0 0% 0%;
+    --color-1-foreground: var(--color-5);
+    --color-2-foreground: var(--color-5);
+    --color-3-foreground: var(--color-5);
+    --color-4-foreground: var(--color-5);
+    --color-5-foreground: var(--color-1);
 
-    --popover: 36 38% 67%;
-    --popover-foreground: 0 0% 0%;
+    --background: var(--color-1);
+    --foreground: var(--color-5);
 
-    --primary: 205 29% 45%;
-    /* Blue */
-    --primary-foreground: 0 0% 100%;
+    --card: var(--color-1);
+    --card-foreground: var(--color-5);
 
-    --secondary: 36 38% 67%;
-    /* Gold */
-    --secondary-foreground: 0 0% 0%;
+    --popover: var(--color-1);
+    --popover-foreground: var(--color-5);
 
-    --muted: 136 9% 49%;
-    /* Green */
-    --muted-foreground: 0 0% 40%;
+    --primary: var(--color-5);
+    --primary-foreground: var(--color-1);
 
-    --accent: 37 22% 67%;
-    /* Sand */
-    --accent-foreground: 0 0% 0%;
+    --secondary: var(--color-3);
+    --secondary-foreground: var(--color-5);
+
+    --muted: var(--color-2);
+    --muted-foreground: var(--color-5);
+
+    --accent: var(--color-4);
+    --accent-foreground: var(--color-5);
 
     --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: var(--color-1);
 
-    --border: 37 22% 85%;
-    --input: 37 22% 85%;
-    --ring: 205 29% 45%;
+    --border: var(--color-2);
+    --input: var(--color-1);
+    --ring: var(--color-4);
   }
 }
 

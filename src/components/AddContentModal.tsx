@@ -638,18 +638,19 @@ export const AddContentModal: React.FC<AddContentModalProps> = ({
                                 />
                             </div>
 
-                            <div className="pt-4 flex justify-between items-center">
+                            <div className="pt-4 flex justify-between items-start">
                                 <div className="flex flex-col">
                                     <button
                                         onClick={handleAutoFill}
                                         disabled={!newCard.word || isGenerating || !apiKey}
-                                        className={`px-4 py-3 rounded-xl font-bold flex items-center gap-2 transition-all ${!apiKey ? 'bg-muted text-muted-foreground cursor-not-allowed' : 'bg-purple-100 text-purple-700 hover:bg-purple-200'}`}
+                                        className={`px-4 py-3 rounded-xl font-bold flex items-center gap-2 transition-all ${!apiKey ? 'bg-muted text-muted-foreground cursor-not-allowed' : 'bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 dark:bg-purple-900/20 dark:hover:bg-purple-900/40 dark:text-purple-300 dark:border-purple-800'}`}
                                         title={!apiKey ? "Set API Key in Settings to use AI" : "Auto-fill details with AI"}
                                     >
                                         <Sparkles className={`w-5 h-5 ${isGenerating ? 'animate-spin' : ''}`} />
-                                        {isGenerating ? 'Generating...' : (isAiPopulated ? 'Regenerate' : 'Auto-Fill with AI')}
+                                        {isGenerating ? 'Generating...' : (isAiPopulated ? 'Regenerate' : 'Fill with A.I.')}
                                     </button>
                                     {error && <p className="text-xs text-red-500 mt-2 max-w-[350px] bg-red-50 p-2 rounded border border-red-200">{error}</p>}
+                                    <p className="text-[10px] text-muted-foreground/80 mt-2 max-w-[250px] leading-tight">A.I. can make mistakes. Please review all fields before saving.</p>
                                 </div>
 
                                 <button

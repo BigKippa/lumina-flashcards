@@ -385,6 +385,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student, onClose
                 <EditCardModal
                     card={editingCard}
                     settings={settings}
+                    apiKey={apiKey || ''}
                     onSave={(updated) => {
                         onEditCard(updated);
                         setEditingCard(null);

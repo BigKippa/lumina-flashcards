@@ -208,17 +208,17 @@ function App() {
         mode: AppMode;
         activeDeckId: string | null;
         adminTab?: string;
-        tutorView?: 'dashboard' | 'students' | 'flashcards';
+        tutorView?: 'dashboard' | 'students' | 'flashcards' | 'learning-content' | 'manage-flashcards';
     };
     const [history, setHistory] = useState<NavigationState[]>([]);
     const [adminActiveTab, setAdminActiveTab] = useState('menu');
-    const [tutorActiveView, setTutorActiveView] = useState<'dashboard' | 'students' | 'flashcards'>('dashboard');
+    const [tutorActiveView, setTutorActiveView] = useState<'dashboard' | 'students' | 'flashcards' | 'learning-content' | 'manage-flashcards'>('dashboard');
     const [topicGroupId, setTopicGroupId] = useState<string | null>(null);
     const [profileScrollTarget, setProfileScrollTarget] = useState<string | null>(null);
     const [studyInputMode, setStudyInputMode] = useState<string | null>(null);
     const { t } = useTranslation();
 
-    const navigate = (newMode: AppMode, newDeckId: string | null = null, newAdminTab?: string, newTutorView?: 'dashboard' | 'students' | 'flashcards') => {
+    const navigate = (newMode: AppMode, newDeckId: string | null = null, newAdminTab?: string, newTutorView?: 'dashboard' | 'students' | 'flashcards' | 'learning-content' | 'manage-flashcards') => {
         // Push current state to history before changing
         setHistory(prev => [...prev, { mode, activeDeckId, adminTab: adminActiveTab, tutorView: tutorActiveView }]);
 
@@ -1074,7 +1074,7 @@ function App() {
             {/* Using fixed width (w-64/w-72) instead of % to prevent extreme shifts on wide screens */}
             {/* Sidebar / Spacer - Fixed width to shift content right */}
             {/* Using fixed width (w-36 ~144px) to provide a subtle shift without unbalancing the page */}
-            <div className="hidden lg:block w-36 flex-shrink-0" />
+            {user && <div className="hidden lg:block w-36 flex-shrink-0" />}
 
             {/* Main Content Column - Alignment Context */}
             <div className="flex-1 flex flex-col min-w-0 relative">
@@ -1103,9 +1103,9 @@ function App() {
 
                         {/* Brand - Centered relative to container, shifted left in study mode to align with flashcard (compensating for right sidebar) */}
                         <div className={`absolute left-1/2 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none transition-all duration-300 drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)] ${mode === 'study' ? 'md:-translate-x-[calc(50%+9rem)] -translate-x-1/2' : '-translate-x-1/2'}`}>
-                            {mode === 'welcome' && <Sparkles className="w-5 h-5 text-primary" />}
-                            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
-                                {getPageTitle()}
+                            <Sparkles className="w-10 h-10 text-primary" />
+                            <span className="text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
+                                Lumina
                             </span>
                         </div>
 

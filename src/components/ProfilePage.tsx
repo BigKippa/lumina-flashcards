@@ -33,6 +33,8 @@ interface SectionProps {
     icon: any;
     children: React.ReactNode;
     colorTheme?: 'default' | 'primary' | 'secondary' | 'accent' | 'muted';
+    isEditing?: boolean;
+    onSave?: () => void;
 }
 
 interface FieldProps {
@@ -44,6 +46,7 @@ interface FieldProps {
     helperText?: string;
     isEditing: boolean;
     setEditForm: React.Dispatch<React.SetStateAction<any>>;
+    stepNumber?: number;
 }
 
 interface TextAreaProps {
@@ -53,6 +56,7 @@ interface TextAreaProps {
     placeholder?: string;
     isEditing: boolean;
     setEditForm: React.Dispatch<React.SetStateAction<any>>;
+    stepNumber?: number;
 }
 
 interface SelectFieldProps {
@@ -64,6 +68,7 @@ interface SelectFieldProps {
     placeholder?: string;
     isEditing: boolean;
     setEditForm: React.Dispatch<React.SetStateAction<any>>;
+    stepNumber?: number;
 }
 
 // --- Constants ---
@@ -94,51 +99,66 @@ const TabButton = ({ id, activeTab, setActiveTab, label, icon: Icon }: TabButton
     </button>
 );
 
-const Section = ({ title, icon: Icon, children, colorTheme = 'default' }: SectionProps) => {
-    let bgClass = "bg-card";
-    let borderClass = "border-border shadow-sm";
-    let iconClass = "text-primary";
+const Section = ({ title, icon: Icon, children, colorTheme = 'default', isEditing, onSave }: SectionProps) => {
+    let bgClass = "bg-color1 text-color1-foreground";
+    let borderClass = "border-color2 shadow-sm";
+    let iconClass = "text-color1-foreground opacity-70";
+    let btnClass = "bg-color5 text-color5-foreground border hover:bg-color5/90";
 
     if (colorTheme === 'primary') {
-        bgClass = "bg-primary/10";
-        borderClass = "border-primary/30 shadow-md";
-        iconClass = "text-primary";
+        bgClass = "bg-color2 text-color2-foreground";
+        borderClass = "border-color3 shadow-md";
+        iconClass = "text-color2-foreground opacity-70";
+        btnClass = "bg-color5 text-color5-foreground border hover:bg-color5/90";
     } else if (colorTheme === 'secondary') {
-        bgClass = "bg-secondary/50";
-        borderClass = "border-secondary/60 shadow-md";
-        iconClass = "text-secondary-foreground";
+        bgClass = "bg-color3 text-color3-foreground";
+        borderClass = "border-color4 shadow-md";
+        iconClass = "text-color3-foreground opacity-70";
+        btnClass = "bg-color5 text-color5-foreground border hover:bg-color5/90";
     } else if (colorTheme === 'accent') {
-        bgClass = "bg-accent/15";
-        borderClass = "border-accent/30 shadow-md";
-        iconClass = "text-accent-foreground";
+        bgClass = "bg-color4 text-color4-foreground";
+        borderClass = "border-color5 shadow-md";
+        iconClass = "text-color4-foreground opacity-70";
+        btnClass = "bg-color1 text-color1-foreground border hover:bg-color1/90";
     } else if (colorTheme === 'muted') {
-        bgClass = "bg-muted/40";
-        borderClass = "border-muted/60 shadow-sm";
-        iconClass = "text-muted-foreground";
+        bgClass = "bg-color5 text-color5-foreground";
+        borderClass = "border-color1 shadow-sm";
+        iconClass = "text-color5-foreground opacity-70";
+        btnClass = "bg-color1 text-color1-foreground border hover:bg-color1/90";
     }
 
     return (
-        <div className={`${bgClass} p-6 rounded-xl border ${borderClass} mb-6 transition-colors`}>
-            <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-foreground">
+        <div className={`${bgClass} p-6 rounded-xl border-2 ${borderClass} mb-6 transition-colors`}>
+            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
                 <Icon className={`w-5 h-5 ${iconClass}`} /> {title}
             </h3>
-            <div className="space-y-4">
+            <div className={`space-y-4`}>
                 {children}
             </div>
+            {isEditing && onSave && (
+                <div className="mt-6 flex justify-end">
+                    <button onClick={onSave} className={`flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition-all focus:ring-2 focus:ring-offset-2 focus:ring-offset-background ${btnClass}`}>
+                        <Check className="w-4 h-4" /> Save
+                    </button>
+                </div>
+            )}
         </div>
     );
 };
 
-const SelectField = ({ label, value, fieldKey, options, icon: Icon, placeholder, isEditing, setEditForm }: SelectFieldProps) => (
+const SelectField = ({ label, value, fieldKey, options, icon: Icon, placeholder, isEditing, setEditForm, required = false, stepNumber }: SelectFieldProps & { required?: boolean; stepNumber?: number }) => (
     <div className="w-full">
-        <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">{label}</label>
+        <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">
+            {stepNumber && <span className="text-primary mr-1">Step {stepNumber}:</span>}
+            {label.replace(/^\*\s*/, '')} {isEditing && <span className={required ? "text-destructive lowercase font-normal" : "lowercase font-normal"}>({required ? 'required' : 'optional'})</span>}
+        </label>
         {isEditing ? (
             <div className="relative">
                 {Icon && <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />}
                 <select
                     value={value}
                     onChange={e => setEditForm((prev: any) => ({ ...prev, [fieldKey]: e.target.value }))}
-                    className={`w-full p-2 rounded-md border border-input bg-background ${Icon ? 'pl-9' : ''} text-sm`}
+                    className={`w-full p-2 rounded-md border ${required && !value ? 'border-destructive ring-1 ring-destructive/50' : 'border-input'} bg-background ${Icon ? 'pl-9' : ''} text-sm transition-all`}
                 >
                     <option value="" disabled>{placeholder || `Select ${label.toLowerCase()}`}</option>
                     {options.map(opt => (
@@ -157,9 +177,12 @@ const SelectField = ({ label, value, fieldKey, options, icon: Icon, placeholder,
     </div>
 );
 
-const Field = ({ label, value, fieldKey, icon: Icon, placeholder, helperText, isEditing, setEditForm }: FieldProps) => (
+const Field = ({ label, value, fieldKey, icon: Icon, placeholder, helperText, isEditing, setEditForm, required = false, stepNumber }: FieldProps & { required?: boolean; stepNumber?: number }) => (
     <div className="w-full">
-        <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">{label}</label>
+        <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">
+            {stepNumber && <span className="text-primary mr-1">Step {stepNumber}:</span>}
+            {label.replace(/^\*\s*/, '')} {isEditing && <span className={required ? "text-destructive lowercase font-normal" : "lowercase font-normal"}>({required ? 'required' : 'optional'})</span>}
+        </label>
         {isEditing ? (
             <div className="relative">
                 {Icon && <Icon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />}
@@ -168,7 +191,7 @@ const Field = ({ label, value, fieldKey, icon: Icon, placeholder, helperText, is
                     value={value}
                     onChange={e => setEditForm((prev: any) => ({ ...prev, [fieldKey]: e.target.value }))}
                     placeholder={placeholder || `Enter ${label.toLowerCase()}`}
-                    className={`w-full p-2 rounded-md border border-input bg-background ${Icon ? 'pl-9' : ''} text-sm`}
+                    className={`w-full p-2 rounded-md border ${required && !value ? 'border-destructive ring-1 ring-destructive/50' : 'border-input'} bg-background ${Icon ? 'pl-9' : ''} text-sm transition-all`}
                 />
                 {helperText && <p className="text-[10px] text-muted-foreground mt-1.5 leading-tight">{helperText}</p>}
             </div>
@@ -184,15 +207,18 @@ const Field = ({ label, value, fieldKey, icon: Icon, placeholder, helperText, is
     </div>
 );
 
-const TextArea = ({ label, value, fieldKey, placeholder, isEditing, setEditForm }: TextAreaProps) => (
+const TextArea = ({ label, value, fieldKey, placeholder, isEditing, setEditForm, required = false, stepNumber }: TextAreaProps & { required?: boolean; stepNumber?: number }) => (
     <div className="w-full">
-        <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">{label}</label>
+        <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">
+            {stepNumber && <span className="text-primary mr-1">Step {stepNumber}:</span>}
+            {label.replace(/^\*\s*/, '')} {isEditing && <span className={required ? "text-destructive lowercase font-normal" : "lowercase font-normal"}>({required ? 'required' : 'optional'})</span>}
+        </label>
         {isEditing ? (
             <textarea
                 value={value}
                 onChange={e => setEditForm((prev: any) => ({ ...prev, [fieldKey]: e.target.value }))}
                 placeholder={placeholder || `Enter ${label.toLowerCase()}`}
-                className="w-full p-2 rounded-md border border-input bg-background min-h-[100px] resize-y text-sm"
+                className={`w-full p-2 rounded-md border ${required && !value ? 'border-destructive ring-1 ring-destructive/50' : 'border-input'} bg-background text-sm min-h-[100px] resize-y transition-all`}
             />
         ) : (
             <div className="p-3 bg-muted/50 rounded-md min-h-[60px] whitespace-pre-wrap text-sm">
@@ -391,13 +417,15 @@ function TagsInput({
     tags,
     setTags,
     isEditing,
-    placeholder = "Add tag..."
+    placeholder = "Add tag...",
+    required = false
 }: {
     label: string;
     tags: string[];
     setTags: (tags: string[]) => void;
     isEditing: boolean;
     placeholder?: string;
+    required?: boolean;
 }) {
     const [inputValue, setInputValue] = useState("");
 
@@ -417,7 +445,9 @@ function TagsInput({
 
     return (
         <div className="space-y-2 w-full">
-            <label className="text-xs font-bold text-muted-foreground uppercase">{label}</label>
+            <label className="text-xs font-bold text-muted-foreground uppercase">
+                {label.replace(/^\*\s*/, '')} {isEditing && <span className="lowercase font-normal">({required ? 'required' : 'optional'})</span>}
+            </label>
             <div className="flex flex-wrap gap-2">
                 {tags.map(tag => (
                     <span key={tag} className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary text-sm font-medium rounded-full border border-primary/20">
@@ -447,10 +477,11 @@ function TagsInput({
     );
 }
 
-function EducationEditor({ education, setEducation, isEditing }: {
+function EducationEditor({ education, setEducation, isEditing, required = false }: {
     education: { degree: string, institution: string }[];
     setEducation: (edu: { degree: string, institution: string }[]) => void;
     isEditing: boolean;
+    required?: boolean;
 }) {
     const [degree, setDegree] = useState("");
     const [institution, setInstitution] = useState("");
@@ -469,7 +500,9 @@ function EducationEditor({ education, setEducation, isEditing }: {
 
     return (
         <div className="space-y-4 w-full">
-            <label className="text-xs font-bold text-muted-foreground uppercase">Education</label>
+            <label className="text-xs font-bold text-muted-foreground uppercase">
+                Education {isEditing && <span className="lowercase font-normal">({required ? 'required' : 'optional'})</span>}
+            </label>
             {education.length === 0 && !isEditing && (
                 <div className="text-sm text-muted-foreground italic">No education provided.</div>
             )}
@@ -513,11 +546,12 @@ function EducationEditor({ education, setEducation, isEditing }: {
     );
 }
 
-function LanguageLevelEditor({ languages, setLanguages, isEditing, label = "Other Languages Spoken" }: {
+function LanguageLevelEditor({ languages, setLanguages, isEditing, label = "Other Languages Spoken", required = false }: {
     languages: { language: string, level: string }[];
     setLanguages: (langs: { language: string, level: string }[]) => void;
     isEditing: boolean;
     label?: string;
+    required?: boolean;
 }) {
     const [language, setLanguage] = useState("");
     const [level, setLevel] = useState("");
@@ -536,7 +570,9 @@ function LanguageLevelEditor({ languages, setLanguages, isEditing, label = "Othe
 
     return (
         <div className="space-y-4 w-full">
-            <label className="text-xs font-bold text-muted-foreground uppercase">{label}</label>
+            <label className="text-xs font-bold text-muted-foreground uppercase">
+                {label.replace(/^\*\s*/, '')} {isEditing && <span className="lowercase font-normal">({required ? 'required' : 'optional'})</span>}
+            </label>
             {languages.length === 0 && !isEditing && (
                 <div className="text-sm text-muted-foreground italic">None specified.</div>
             )}
@@ -1147,7 +1183,7 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
                                         <option value="admin">Admin</option>
                                     </select>
                                 </div>
-                                <div className="flex gap-2 justify-center sm:justify-start">
+                                <div className="flex gap-2 justify-center sm:justify-start mt-2">
                                     <button onClick={handleSaveProfile} className="flex items-center gap-1 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90">
                                         <Check className="w-4 h-4" /> Save
                                     </button>
@@ -1197,24 +1233,27 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
             )}
 
             {/* Unified Basic Info Tile */}
-            <Section title="Basic Info" icon={User} colorTheme="primary">
+            <Section isEditing={isEditing} onSave={handleSaveProfile} title="Basic Info" icon={User} colorTheme="primary">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     {isEditing ? (
                         <>
                             <SelectField label="Title" value={editForm.title} fieldKey="title" options={[{ label: 'Mr.', value: 'Mr.' }, { label: 'Ms.', value: 'Ms.' }, { label: 'Mrs.', value: 'Mrs.' }, { label: 'Dr.', value: 'Dr.' }]} isEditing={isEditing} setEditForm={setEditForm} />
-                            <Field label="* First Name" helperText="Must match your government-issued ID (verification required later)." value={editForm.firstName} fieldKey="firstName" isEditing={isEditing} setEditForm={setEditForm} placeholder="Mandatory" />
+                            <Field label="First Name" stepNumber={1} helperText="Must match your government-issued ID (verification required later)." value={editForm.firstName} fieldKey="firstName" isEditing={isEditing} setEditForm={setEditForm} placeholder="Mandatory" required={true} />
                             <Field label="Preferred Name" helperText="This name will be visible to other users on the site." value={editForm.preferredName} fieldKey="preferredName" isEditing={isEditing} setEditForm={setEditForm} />
                             <Field label="Middle Name" value={editForm.middleName} fieldKey="middleName" isEditing={isEditing} setEditForm={setEditForm} />
-                            <Field label="* Last Name" helperText="Must match your government-issued ID (verification required later)." value={editForm.lastName} fieldKey="lastName" isEditing={isEditing} setEditForm={setEditForm} placeholder="Mandatory" />
-                            <SelectField label="* Gender" value={editForm.gender} fieldKey="gender" options={[{ label: 'Male', value: 'Male' }, { label: 'Female', value: 'Female' }, { label: 'Prefer not to answer', value: 'Prefer not to answer' }, { label: 'Other', value: 'Other' }]} isEditing={isEditing} setEditForm={setEditForm} />
+                            <Field label="Last Name" stepNumber={2} helperText="Must match your government-issued ID (verification required later)." value={editForm.lastName} fieldKey="lastName" isEditing={isEditing} setEditForm={setEditForm} placeholder="Mandatory" required={true} />
+                            <SelectField label="Gender" stepNumber={3} value={editForm.gender} fieldKey="gender" options={[{ label: 'Male', value: 'Male' }, { label: 'Female', value: 'Female' }, { label: 'Prefer not to answer', value: 'Prefer not to answer' }, { label: 'Other', value: 'Other' }]} isEditing={isEditing} setEditForm={setEditForm} required={true} />
 
                             <div className="w-full">
-                                <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">* Date of Birth</label>
-                                <input type="date" value={editForm.dateOfBirth} onChange={e => setEditForm({ ...editForm, dateOfBirth: e.target.value })} className="w-full pl-3 pr-4 py-3 rounded-xl bg-input border border-border text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none" />
+                                <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">
+                                    <span className="text-primary mr-1">Step 4:</span>
+                                    Date of Birth {isEditing && <span className="text-destructive lowercase font-normal">(required)</span>}
+                                </label>
+                                <input type="date" value={editForm.dateOfBirth} onChange={e => setEditForm({ ...editForm, dateOfBirth: e.target.value })} className={`w-full pl-3 pr-4 py-3 rounded-xl bg-input border ${!editForm.dateOfBirth ? 'border-primary ring-1 ring-primary' : 'border-border'} text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all`} />
                                 <p className="text-[10px] text-muted-foreground mt-1.5 leading-tight">Must match your government-issued ID (verification required later).</p>
                             </div>
 
-                            <Field label="* Native Spoken Language" value={editForm.nativeLanguage} fieldKey="nativeLanguage" isEditing={isEditing} setEditForm={setEditForm} placeholder="Mandatory" />
+                            <Field label="Native Spoken Language" stepNumber={5} value={editForm.nativeLanguage} fieldKey="nativeLanguage" isEditing={isEditing} setEditForm={setEditForm} placeholder="Mandatory" required={true} />
                         </>
                     ) : (
                         <>
@@ -1266,11 +1305,15 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
             <div className="animate-in fade-in duration-300">
                 {activeTab === 'basic' && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <Section title="Contact Info" icon={Mail} colorTheme="primary">
-                            <label className="text-xs font-bold text-muted-foreground uppercase mb-2 block">Emails</label>
+                        <Section isEditing={isEditing} onSave={handleSaveProfile} title="Contact Info" icon={Mail} colorTheme="primary">
+                            <label className="text-xs font-bold text-muted-foreground uppercase mb-2 block">
+                                Emails {isEditing && <span className="text-destructive lowercase font-normal">(required)</span>}
+                            </label>
                             <ContactListEditor type="email" contacts={editForm.emails} setContacts={(c) => setEditForm(prev => ({ ...prev, emails: c }))} isEditing={isEditing} icon={Mail} />
 
-                            <label className="text-xs font-bold text-muted-foreground uppercase mt-4 mb-2 block">Phone Numbers</label>
+                            <label className="text-xs font-bold text-muted-foreground uppercase mt-4 mb-2 block">
+                                Phone Numbers {isEditing && <span className="lowercase font-normal">(optional)</span>}
+                            </label>
                             <ContactListEditor type="phone" contacts={editForm.phones} setContacts={(c) => setEditForm(prev => ({ ...prev, phones: c }))} isEditing={isEditing} icon={Phone} />
 
                             <div id="section-timezone" className="scroll-mt-24 mt-4">
@@ -1291,7 +1334,7 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
                         </Section>
 
                         <div id="section-location" className="scroll-mt-6">
-                            <Section title="Location" icon={MapPin} colorTheme="secondary">
+                            <Section isEditing={isEditing} onSave={handleSaveProfile} title="Location" icon={MapPin} colorTheme="secondary">
                                 {isEditing && (
                                     <div className="mb-4">
                                         <button
@@ -1319,7 +1362,7 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
                             </Section>
                         </div>
 
-                        <Section title="Personal" icon={User} colorTheme="accent">
+                        <Section isEditing={isEditing} onSave={handleSaveProfile} title="Personal" icon={User} colorTheme="accent">
                             <Field label="Profession" value={editForm.profession} fieldKey="profession" icon={Briefcase} isEditing={isEditing} setEditForm={setEditForm} />
                             <Field label="Interests & Hobbies" value={editForm.interests} fieldKey="interests" icon={Heart} placeholder="Travel, Tech, Cooking..." isEditing={isEditing} setEditForm={setEditForm} />
                         </Section>
@@ -1328,21 +1371,21 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
 
                 {activeTab === 'learning' && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <Section title="Languages" icon={Globe} colorTheme="primary">
-                            <Field label="Target Language" value={editForm.targetLanguage} fieldKey="targetLanguage" isEditing={isEditing} setEditForm={setEditForm} />
+                        <Section isEditing={isEditing} onSave={handleSaveProfile} title="Languages" icon={Globe} colorTheme="primary">
+                            <Field label="Target Language" stepNumber={6} value={editForm.targetLanguage} fieldKey="targetLanguage" isEditing={isEditing} setEditForm={setEditForm} required={true} />
                         </Section>
 
-                        <Section title="Level & Goals" icon={Activity} colorTheme="secondary">
+                        <Section isEditing={isEditing} onSave={handleSaveProfile} title="Level & Goals" icon={Activity} colorTheme="secondary">
                             <Field label="English Level" value={editForm.englishLevel} fieldKey="englishLevel" placeholder="e.g. Intermediate (B1)" isEditing={isEditing} setEditForm={setEditForm} />
                             <TextArea label="Goals" value={editForm.goals} fieldKey="goals" placeholder="Why are you learning?" isEditing={isEditing} setEditForm={setEditForm} />
                         </Section>
 
-                        <Section title="Experience" icon={Book} colorTheme="accent">
+                        <Section isEditing={isEditing} onSave={handleSaveProfile} title="Experience" icon={Book} colorTheme="accent">
                             <TextArea label="Environment" value={editForm.englishEnvironment} fieldKey="englishEnvironment" placeholder="Where do you use English?" isEditing={isEditing} setEditForm={setEditForm} />
                             <TextArea label="Schedule & Availability" value={editForm.schedule} fieldKey="schedule" placeholder="Mon/Wed evenings..." isEditing={isEditing} setEditForm={setEditForm} />
                         </Section>
 
-                        <Section title="Preferences" icon={Settings} colorTheme="muted">
+                        <Section isEditing={isEditing} onSave={handleSaveProfile} title="Preferences" icon={Settings} colorTheme="muted">
                             <TextArea label="Learning Preferences" value={editForm.preferences} fieldKey="preferences" placeholder="Visual learner, prefers conversation..." isEditing={isEditing} setEditForm={setEditForm} />
                         </Section>
                     </div>
@@ -1350,7 +1393,7 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
 
                 {activeTab === 'account' && (
                     <div className="space-y-6">
-                        <Section title="Security" icon={Lock} colorTheme="default">
+                        <Section isEditing={isEditing} onSave={handleSaveProfile} title="Security" icon={Lock} colorTheme="default">
                             {!isEditing && (
                                 <button
                                     onClick={startPasswordChange}
@@ -1362,7 +1405,7 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
                             {isEditing && <p className="text-muted-foreground text-sm italic">Finish editing profile to change password.</p>}
                         </Section>
 
-                        <Section title="Flashcard Management" icon={Book} colorTheme="default">
+                        <Section isEditing={isEditing} onSave={handleSaveProfile} title="Flashcard Management" icon={Book} colorTheme="default">
                             <button
                                 onClick={onManageDeck}
                                 className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-secondary/50 transition-colors w-full sm:w-auto justify-center"
@@ -1372,7 +1415,7 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
                         </Section>
 
                         {onOpenSettings && (
-                            <Section title="Application Settings" icon={Settings} colorTheme="secondary">
+                            <Section isEditing={isEditing} onSave={handleSaveProfile} title="Application Settings" icon={Settings} colorTheme="secondary">
                                 <button
                                     onClick={onOpenSettings}
                                     className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-secondary/50 transition-colors w-full sm:w-auto justify-center"
@@ -1386,7 +1429,7 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
 
                 {activeTab === 'tutor' && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <Section title="Identity & Context" icon={Briefcase} colorTheme="primary">
+                        <Section isEditing={isEditing} onSave={handleSaveProfile} title="Identity & Context" icon={Briefcase} colorTheme="primary">
                             <div className="w-full mb-4">
                                 <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">Display Name</label>
                                 {isEditing ? (
@@ -1406,7 +1449,7 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
                             <TagsInput label="Places Lived" tags={editForm.tutorData.placesLived || []} setTags={(tags) => setEditForm(prev => ({ ...prev, tutorData: { ...prev.tutorData, placesLived: tags } as any }))} isEditing={isEditing} placeholder="e.g. Japan, Spain, New York" />
                         </Section>
 
-                        <Section title="Linguistic Profile" icon={Globe} colorTheme="secondary">
+                        <Section isEditing={isEditing} onSave={handleSaveProfile} title="Linguistic Profile" icon={Globe} colorTheme="secondary">
                             <TagsInput label="Languages Taught" tags={editForm.tutorData.languagesTaught || []} setTags={(tags) => setEditForm(prev => ({ ...prev, tutorData: { ...prev.tutorData, languagesTaught: tags } as any }))} isEditing={isEditing} placeholder="e.g. English, Spanish" />
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 mb-4">
@@ -1455,7 +1498,7 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
                             <LanguageLevelEditor languages={editForm.tutorData.otherLanguagesSpoken || []} setLanguages={(langs) => setEditForm(prev => ({ ...prev, tutorData: { ...prev.tutorData, otherLanguagesSpoken: langs } as any }))} isEditing={isEditing} label="Other Languages Spoken" />
                         </Section>
 
-                        <Section title="Professional Pedigree" icon={Book} colorTheme="accent">
+                        <Section isEditing={isEditing} onSave={handleSaveProfile} title="Professional Pedigree" icon={Book} colorTheme="accent">
                             <div className="w-full mb-4">
                                 <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">Bio & Philosophy</label>
                                 {isEditing ? (
@@ -1503,7 +1546,7 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
                             </div>
                         </Section>
 
-                        <Section title="Logistics & Pricing" icon={Settings} colorTheme="muted">
+                        <Section isEditing={isEditing} onSave={handleSaveProfile} title="Logistics & Pricing" icon={Settings} colorTheme="muted">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label className="text-xs font-semibold text-muted-foreground uppercase">Hourly Rate</label>
@@ -1553,6 +1596,17 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
                     </div>
                 )}
             </div>
+
+            {isEditing && (
+                <div className="flex gap-2 justify-center mt-8 mb-6 bg-card p-4 rounded-xl border border-border shadow-sm">
+                    <button onClick={handleSaveProfile} className="flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground text-base font-bold hover:bg-primary/90 shadow-md transition-all focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background">
+                        <Check className="w-5 h-5" /> Save Profile
+                    </button>
+                    <button onClick={handleCancel} className="flex items-center gap-2 px-6 py-3 rounded-xl bg-secondary text-secondary-foreground text-base font-bold hover:bg-secondary/80 focus:ring-2 focus:ring-secondary focus:ring-offset-2 focus:ring-offset-background">
+                        <X className="w-5 h-5" /> Cancel
+                    </button>
+                </div>
+            )}
 
             {/* --- Modals (Email/Password) --- */}
             {/* (Reusing existing modal logic/UI from previous file, condensed for brevity in prompt but implementation will be full) */}
