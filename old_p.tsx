@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect } from 'react';
+﻿import { useState, useRef, useEffect } from 'react';
 import { UserProfile, ContactDetail, TutorProfileData } from '../types';
 import {
     Book, Pencil, Check, X, AlertCircle, Eye, EyeOff, Mail, RefreshCcw, Lock, KeyRound,
-    User, MapPin, Briefcase, Heart, Globe, Clock, Activity, Settings, Shield, UserSquare2, Upload, Trash2, Phone, Locate, Loader2, Camera, CheckCircle2, XCircle
+    User, MapPin, Briefcase, Heart, Globe, Clock, Activity, Settings, Shield, UserSquare2, Upload, Trash2, Phone, Locate, Loader2, Camera
 } from 'lucide-react';
 import { generateVerificationCode, simulateSendEmail, simulateSendSMS } from '../utils/mockEmailService';
 import { countryCodes, findCountryByCode, getDefaultCountryCode } from '../utils/countryCodes';
@@ -15,7 +15,6 @@ interface ProfilePageProps {
     showToast: (message: string, type: 'success' | 'error') => void;
     initialEditMode?: boolean;
     onLogout?: () => void;
-    onDeleteAccount?: () => void;
     onOpenSettings?: () => void;
     initialScrollTarget?: string | null;
 }
@@ -149,16 +148,9 @@ const Section = ({ title, icon: Icon, children, colorTheme = 'default', isEditin
 
 const SelectField = ({ label, value, fieldKey, options, icon: Icon, placeholder, isEditing, setEditForm, required = false, stepNumber }: SelectFieldProps & { required?: boolean; stepNumber?: number }) => (
     <div className="w-full">
-        <label className="text-xs font-bold text-muted-foreground uppercase mb-1 flex items-center gap-1">
+        <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">
             {stepNumber && <span className="text-primary mr-1">Step {stepNumber}:</span>}
-            {label.replace(/^\*\s*/, '')}
-            {isEditing && required && (
-                !value ? (
-                    <XCircle className="w-3.5 h-3.5 text-destructive" />
-                ) : (
-                    <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />
-                )
-            )}
+            {label.replace(/^\*\s*/, '')} {isEditing && <span className={required ? "text-destructive lowercase font-normal" : "lowercase font-normal"}>({required ? 'required' : 'optional'})</span>}
         </label>
         {isEditing ? (
             <div className="relative">
@@ -187,16 +179,9 @@ const SelectField = ({ label, value, fieldKey, options, icon: Icon, placeholder,
 
 const Field = ({ label, value, fieldKey, icon: Icon, placeholder, helperText, isEditing, setEditForm, required = false, stepNumber }: FieldProps & { required?: boolean; stepNumber?: number }) => (
     <div className="w-full">
-        <label className="text-xs font-bold text-muted-foreground uppercase mb-1 flex items-center gap-1">
+        <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">
             {stepNumber && <span className="text-primary mr-1">Step {stepNumber}:</span>}
-            {label.replace(/^\*\s*/, '')}
-            {isEditing && required && (
-                !value ? (
-                    <XCircle className="w-3.5 h-3.5 text-destructive" />
-                ) : (
-                    <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />
-                )
-            )}
+            {label.replace(/^\*\s*/, '')} {isEditing && <span className={required ? "text-destructive lowercase font-normal" : "lowercase font-normal"}>({required ? 'required' : 'optional'})</span>}
         </label>
         {isEditing ? (
             <div className="relative">
@@ -224,16 +209,9 @@ const Field = ({ label, value, fieldKey, icon: Icon, placeholder, helperText, is
 
 const TextArea = ({ label, value, fieldKey, placeholder, isEditing, setEditForm, required = false, stepNumber }: TextAreaProps & { required?: boolean; stepNumber?: number }) => (
     <div className="w-full">
-        <label className="text-xs font-bold text-muted-foreground uppercase mb-1 flex items-center gap-1">
+        <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">
             {stepNumber && <span className="text-primary mr-1">Step {stepNumber}:</span>}
-            {label.replace(/^\*\s*/, '')}
-            {isEditing && required && (
-                !value ? (
-                    <XCircle className="w-3.5 h-3.5 text-destructive" />
-                ) : (
-                    <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />
-                )
-            )}
+            {label.replace(/^\*\s*/, '')} {isEditing && <span className={required ? "text-destructive lowercase font-normal" : "lowercase font-normal"}>({required ? 'required' : 'optional'})</span>}
         </label>
         {isEditing ? (
             <textarea
@@ -324,7 +302,7 @@ const ContactListEditor = ({ type, contacts, setContacts, isEditing, icon: Icon 
                             {isPhone && (
                                 <div className="relative flex items-center">
                                     <span className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none z-10">
-                                        {currentCountry?.flag || '🌐'}
+                                        {currentCountry?.flag || '≡ƒîÉ'}
                                     </span>
                                     <select
                                         value={currentCountry?.code || ''}
@@ -644,10 +622,9 @@ function LanguageLevelEditor({ languages, setLanguages, isEditing, label = "Othe
     );
 }
 
-export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showToast, initialEditMode = false, onLogout, onDeleteAccount, onOpenSettings, initialScrollTarget }: ProfilePageProps) {
+export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showToast, initialEditMode = false, onLogout, onOpenSettings, initialScrollTarget }: ProfilePageProps) {
     const [isEditing, setIsEditing] = useState(initialEditMode);
     const [activeTab, setActiveTab] = useState<'basic' | 'learning' | 'account' | 'tutor'>('basic');
-    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     useEffect(() => {
         if (initialScrollTarget) {
@@ -1438,7 +1415,7 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
                         </Section>
 
                         {onOpenSettings && (
-                            <Section isEditing={isEditing} onSave={undefined} title="Application Settings" icon={Settings} colorTheme="secondary">
+                            <Section isEditing={isEditing} onSave={handleSaveProfile} title="Application Settings" icon={Settings} colorTheme="secondary">
                                 <button
                                     onClick={onOpenSettings}
                                     className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-secondary/50 transition-colors w-full sm:w-auto justify-center"
@@ -1447,23 +1424,6 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
                                 </button>
                             </Section>
                         )}
-
-                        <Section isEditing={isEditing} onSave={undefined} title="Danger Zone" icon={AlertCircle} colorTheme="accent">
-                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 border border-destructive/20 bg-destructive/5 rounded-lg">
-                                <div>
-                                    <h4 className="font-bold text-destructive">Delete Account</h4>
-                                    <p className="text-sm text-foreground mt-1">
-                                        Permanently remove your account and all associated data. This action cannot be undone. All saved flashcards, study stats, and history will be lost.
-                                    </p>
-                                </div>
-                                <button
-                                    className="px-4 py-2 bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-lg font-bold shrink-0 transition-colors"
-                                    onClick={() => setShowDeleteConfirm(true)}
-                                >
-                                    Delete Account
-                                </button>
-                            </div>
-                        </Section>
                     </div>
                 )}
 
@@ -1818,47 +1778,6 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
                     </div>
                 )
             }
-            {/* Delete Account Confirmation Modal */}
-            {
-                showDeleteConfirm && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4 fade-in duration-200">
-                        <div className="w-full max-w-md bg-card border border-destructive/50 rounded-xl shadow-2xl p-6">
-                            <div className="flex flex-col items-center mb-6">
-                                <div className="w-16 h-16 bg-destructive/20 rounded-full flex items-center justify-center mb-4 text-destructive">
-                                    <AlertCircle className="w-8 h-8" />
-                                </div>
-                                <h3 className="text-2xl font-black text-destructive text-center leading-tight">
-                                    Delete Account
-                                </h3>
-                                <p className="text-lg text-foreground text-center mt-2 font-medium">
-                                    Are you absolutely sure?
-                                </p>
-                                <p className="text-sm text-muted-foreground text-center mt-2">
-                                    This action cannot be undone. All your flashcards, study statistics, and history will be permanently deleted.
-                                </p>
-                            </div>
-                            <div className="flex gap-4">
-                                <button
-                                    onClick={() => setShowDeleteConfirm(false)}
-                                    className="flex-1 py-3 bg-secondary text-secondary-foreground font-bold rounded-lg hover:bg-secondary/80 transition-colors"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        setShowDeleteConfirm(false);
-                                        if (onDeleteAccount) onDeleteAccount();
-                                    }}
-                                    className="flex-1 py-3 bg-destructive text-destructive-foreground font-bold rounded-lg hover:bg-destructive/90 transition-colors"
-                                >
-                                    Yes, Delete Account
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )
-            }
-
             {
                 isCameraActive && (
                     <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4 animate-in fade-in duration-200">

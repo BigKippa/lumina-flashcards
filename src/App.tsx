@@ -186,60 +186,71 @@ const INITIAL_STUDENTS: Student[] = [
 
 function App() {
     const { i18n } = useTranslation();
-    const [mode, setMode] = useState<AppMode>('welcome');
-
-    useEffect(() => {
-        document.documentElement.lang = i18n.language;
-        document.documentElement.dir = i18n.dir(i18n.language);
-    }, [i18n.language]);
     const [user, setUser] = useState<UserProfile | null>(null);
     const [lastQuizResult, setLastQuizResult] = useState<QuizResult | null>(null);
     const [decks, setDecks] = useState<Deck[]>(initialDecks);
     const [students, setStudents] = useState<Student[]>(INITIAL_STUDENTS);
-    const [activeDeckId, setActiveDeckId] = useState<string | null>(null);
     const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
     const [quizStyle, setQuizStyle] = useState<'def-to-word' | 'word-to-def' | 'mix'>('word-to-def');
     const [isNewUserSession, setIsNewUserSession] = useState(false);
-
-    // Navigation History
-    type NavigationState = {
-        mode: AppMode;
-        activeDeckId: string | null;
-        adminTab?: string;
-        tutorView?: 'dashboard' | 'students' | 'flashcards' | 'learning-content' | 'manage-flashcards';
-    };
-    const [history, setHistory] = useState<NavigationState[]>([]);
-    const [adminActiveTab, setAdminActiveTab] = useState('menu');
-    const [tutorActiveView, setTutorActiveView] = useState<'dashboard' | 'students' | 'flashcards' | 'learning-content' | 'manage-flashcards'>('dashboard');
-    const [topicGroupId, setTopicGroupId] = useState<string | null>(null);
     const [profileScrollTarget, setProfileScrollTarget] = useState<string | null>(null);
     const [studyInputMode, setStudyInputMode] = useState<string | null>(null);
     const { t } = useTranslation();
 
-    const navigate = (newMode: AppMode, newDeckId: string | null = null, newAdminTab?: string, newTutorView?: 'dashboard' | 'students' | 'flashcards' | 'learning-content' | 'manage-flashcards') => {
-        // Push current state to history before changing
-        setHistory(prev => [...prev, { mode, activeDeckId, adminTab: adminActiveTab, tutorView: tutorActiveView }]);
+    // Unified Routing State
+    type RouteState = {
+        mode: AppMode;
+        activeDeckId: string | null;
+        adminTab: string;
+        tutorView: 'dashboard' | 'students' | 'flashcards' | 'learning-content' | 'manage-flashcards';
+        topicGroupId: string | null;
+    };
 
-        setMode(newMode);
+    const [currentRoute, setCurrentRoute] = useState<RouteState>({
+        mode: 'welcome',
+        activeDeckId: null,
+        adminTab: 'menu',
+        tutorView: 'dashboard',
+        topicGroupId: null
+    });
+
+    const [history, setHistory] = useState<RouteState[]>([]);
+
+    // Backward-Compatible Shims
+    const mode = currentRoute.mode;
+    const activeDeckId = currentRoute.activeDeckId;
+    const adminActiveTab = currentRoute.adminTab;
+    const tutorActiveView = currentRoute.tutorView;
+    const topicGroupId = currentRoute.topicGroupId;
+
+    const setMode = (m: AppMode) => setCurrentRoute(prev => ({ ...prev, mode: m }));
+    const setActiveDeckId = (id: string | null) => setCurrentRoute(prev => ({ ...prev, activeDeckId: id }));
+    const setTopicGroupId = (id: string | null) => setCurrentRoute(prev => ({ ...prev, topicGroupId: id }));
+
+    const navigate = (newMode: AppMode, newDeckId: string | null = null, newAdminTab?: string, newTutorView?: 'dashboard' | 'students' | 'flashcards' | 'learning-content' | 'manage-flashcards') => {
+        // Build the new explicitly strict route object
+        const routeObj: RouteState = {
+            mode: newMode,
+            activeDeckId: newDeckId,
+            adminTab: newAdminTab || 'menu',
+            tutorView: newTutorView || 'dashboard',
+            topicGroupId: currentRoute.topicGroupId
+        };
+
+        // Push full current state map to history
+        setHistory(prev => [...prev, currentRoute]);
+        setCurrentRoute(routeObj);
+
         setIsNewUserSession(false); // Clear new user flag on navigation
         if (newMode === 'study') {
             setStudyInputMode(null); // Reset when entering study mode
-        }
-
-        setActiveDeckId(newDeckId);
-        if (newAdminTab) {
-            setAdminActiveTab(newAdminTab);
-        }
-        if (newTutorView) {
-            setTutorActiveView(newTutorView);
         }
     };
 
     const goBack = () => {
         if (history.length === 0) {
-            // Fallback if no history (e.g., initial load), go home
             if (mode !== 'welcome' && mode !== 'mode-selection') {
                 goHome();
                 setActiveDeckId(null);
@@ -252,16 +263,8 @@ function App() {
 
         if (previousState && previousState.mode) {
             setHistory(newHistory);
-            setMode(previousState.mode);
-            setActiveDeckId(previousState.activeDeckId);
-            if (previousState.adminTab) {
-                setAdminActiveTab(previousState.adminTab);
-            }
-            if (previousState.tutorView) {
-                setTutorActiveView(previousState.tutorView);
-            }
+            setCurrentRoute(previousState);
         } else {
-            // Default fallback if state was undefined or empty
             goHome();
         }
     };
@@ -389,6 +392,36 @@ function App() {
 
 
     useEffect(() => {
+        // Retroactive Ghost Profile Cleanup
+        const storedProfiles = localStorage.getItem('profiles');
+        if (storedProfiles) {
+            try {
+                let modified = false;
+                const profiles: Record<string, UserProfile> = JSON.parse(storedProfiles);
+                Object.keys(profiles).forEach(key => {
+                    const p = profiles[key];
+                    if (!p) return;
+
+                    // 1. Delete ghost alias keys
+                    if (key !== p.username && key !== p.email) {
+                        delete profiles[key];
+                        modified = true;
+                    }
+                    // 2. Repair missing IDs so they aren't invisible to Admin Dashboard
+                    else if (!p.id) {
+                        p.id = crypto.randomUUID();
+                        modified = true;
+                    }
+                });
+                if (modified) {
+                    localStorage.setItem('profiles', JSON.stringify(profiles));
+                    console.log("Scrubbed ghost profiles from storage.");
+                }
+            } catch (e) {
+                console.error("Cleanup failed", e);
+            }
+        }
+
         const storedDecks = localStorage.getItem('decks');
         if (storedDecks) {
             try {
@@ -818,10 +851,12 @@ function App() {
                 localStorage.setItem('rememberedUser', JSON.stringify(updatedProfile));
             }
 
-            if (roleChanged) {
+            if (isNewUserSession || roleChanged) {
+                if (isNewUserSession) setIsNewUserSession(false);
                 setHistory([]);
                 setTimeout(() => {
-                    if (updatedProfile.role === 'admin' || updatedProfile.role === 'tutor') setMode('mode-selection');
+                    if (updatedProfile.role === 'admin') setMode('mode-selection');
+                    else if (updatedProfile.role === 'tutor') setMode('tutor');
                     else setMode('welcome'); // User dashboard
                 }, 500);
             }
@@ -839,10 +874,12 @@ function App() {
                 localStorage.setItem('rememberedUser', JSON.stringify(updatedProfile));
             }
 
-            if (roleChanged) {
+            if (isNewUserSession || roleChanged) {
+                if (isNewUserSession) setIsNewUserSession(false);
                 setHistory([]);
                 setTimeout(() => {
-                    if (updatedProfile.role === 'admin' || updatedProfile.role === 'tutor') setMode('mode-selection');
+                    if (updatedProfile.role === 'admin') setMode('mode-selection');
+                    else if (updatedProfile.role === 'tutor') setMode('tutor');
                     else setMode('welcome'); // User dashboard
                 }, 500);
             }
@@ -995,24 +1032,6 @@ function App() {
         return decks.find(d => d.id === activeDeckId)?.title || "Deck";
     };
 
-    const getPageTitle = () => {
-        switch (mode) {
-            case 'admin': return t('pageTitles.adminDashboard');
-            case 'tutor': return t('pageTitles.tutorDashboard');
-            case 'study': return t('pageTitles.studyMode');
-            case 'quiz': return t('pageTitles.quizMode');
-            case 'timed': return t('pageTitles.timedMode');
-            case 'profile': return t('pageTitles.profile');
-            case 'deck': return getActiveTitle();
-            case 'mode-selection': return t('pageTitles.modeSelection');
-            case 'topic-selection': return t('pageTitles.topicSelection');
-            case 'welcome': return 'Lumina'; // Brand name on welcome
-            case 'typing': return t('pageTitles.typing');
-            case 'quiz-result': return t('pageTitles.quizResult');
-            default: return 'Lumina';
-        }
-    };
-
     const getTicketContext = () => {
         const deckName = activeDeckId ? getActiveTitle() : 'None';
         return `Mode: ${mode}, Page: ${activeDeckId || 'Home'}, Deck: ${deckName}`;
@@ -1066,6 +1085,33 @@ function App() {
     // Admin Handlers (Duplicates Removed)
 
     // Admin Handlers (Duplicates Removed)
+
+
+    const handleDeleteAccount = () => {
+        if (!user) return;
+
+        if (window.confirm("WARNING: This will permanently delete your account and all associated data from this device.")) {
+            // Read all users
+            const storedUsersStr = localStorage.getItem('flashcard_users');
+            if (storedUsersStr) {
+                try {
+                    const allUsers = JSON.parse(storedUsersStr);
+                    // Filter out the current user
+                    const updatedUsers = allUsers.filter((u: any) => u.email !== user.email);
+                    localStorage.setItem('flashcard_users', JSON.stringify(updatedUsers));
+                } catch (e) {
+                    console.error("Failed handling user deletion:", e);
+                }
+            }
+
+            // Clear current login state
+            localStorage.removeItem('flashcard_login_state');
+
+            setUser(null);
+            showToast('Your account was successfully deleted.', 'success');
+            navigate('welcome');
+        }
+    };
 
 
     return (
@@ -1218,7 +1264,7 @@ function App() {
                         <div className="max-w-5xl w-full mx-auto flex-grow flex flex-col">
                             {mode === 'welcome' && (
                                 <WelcomeScreen
-                                    userName={user.username}
+                                    user={user}
                                     onSelect={handleCategorySelect}
                                     lastSession={user.lastSession}
                                     favorites={user.favorites || []}
@@ -1237,7 +1283,7 @@ function App() {
                                             // Persist role selection for this session if needed, 
                                             // but for now just routing.
                                             if (role === 'admin') {
-                                                navigate('admin', null);
+                                                navigate('admin', null, 'menu');
                                             } else if (role === 'tutor') {
                                                 navigate('tutor');
                                             } else {
@@ -1275,6 +1321,7 @@ function App() {
                                     showToast={showToast}
                                     initialEditMode={isNewUserSession}
                                     onLogout={handleLogout}
+                                    onDeleteAccount={handleDeleteAccount}
                                     onOpenSettings={() => setIsSettingsOpen(true)}
                                     initialScrollTarget={profileScrollTarget}
                                 />

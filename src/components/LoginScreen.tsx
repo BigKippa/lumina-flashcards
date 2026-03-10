@@ -4,6 +4,7 @@ import { UserProfile } from '../types';
 import { ArrowRight, Sparkles, Eye, EyeOff, GraduationCap, User, Mail, CheckCircle, RefreshCcw, Lock, Shield } from 'lucide-react';
 import { generateVerificationCode, simulateSendEmail } from '../utils/mockEmailService';
 import { LanguageSelector } from './LanguageSelector';
+import { PermissionsModal } from './PermissionsModal';
 
 interface LoginScreenProps {
   onLogin: (profile: UserProfile, isNewUser?: boolean) => void;
@@ -57,6 +58,10 @@ export function LoginScreen({ onLogin, showToast }: LoginScreenProps) {
   const [newUsername, setNewUsername] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
+
+  // Permissions State for New Users
+  const [showPermissions, setShowPermissions] = useState(false);
+  const [pendingNewUser, setPendingNewUser] = useState<UserProfile | null>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
     // ... (keep existing logic)
@@ -203,24 +208,49 @@ export function LoginScreen({ onLogin, showToast }: LoginScreenProps) {
     }
 
     const storedProfiles = localStorage.getItem('profiles');
-    const profiles: Record<string, UserProfile> = storedProfiles ? JSON.parse(storedProfiles) : {};
-
     const newUser: UserProfile = {
       id: crypto.randomUUID(),
       email: email,
       username: username,
+      title: '',
       firstName: firstName || undefined,
+      preferredName: firstName || '',
+      middleName: '',
       lastName: lastName || undefined,
+      gender: '',
+      dateOfBirth: '',
+      nativeLanguage: 'English',
       password: password,
       role: role,
       progress: {},
       history: [],
       favorites: [],
-      learningHistory: []
+      learningHistory: [],
+      createdAt: new Date().toISOString()
     };
-    profiles[username] = newUser;
+
+    setPendingNewUser(newUser);
+    setShowPermissions(true);
+  };
+
+  const handlePermissionsComplete = (permissionsData: any) => {
+    if (!pendingNewUser) return;
+
+    const userWithPermissions: UserProfile = {
+      ...pendingNewUser,
+      timeZone: permissionsData.locationData?.timeZone || '',
+      currentCity: permissionsData.locationData?.city || '',
+      currentCountry: permissionsData.locationData?.country || ''
+    };
+
+    // Ensure that we only commit to DB now that permissions are set
+    const storedProfiles = localStorage.getItem('profiles');
+    const profiles: Record<string, UserProfile> = storedProfiles ? JSON.parse(storedProfiles) : {};
+    profiles[userWithPermissions.username] = userWithPermissions;
     localStorage.setItem('profiles', JSON.stringify(profiles));
-    loginUser(newUser, true);
+
+    setShowPermissions(false);
+    onLogin(userWithPermissions, true); // true flag triggers tutorial/edit mode
   };
 
   // ... (keep other handlers)
@@ -330,7 +360,9 @@ export function LoginScreen({ onLogin, showToast }: LoginScreenProps) {
   if (isVerifying) {
     return (
       <div className="w-full flex-grow flex flex-col items-center justify-center bg-background p-4 relative overflow-hidden">
-
+        {showPermissions && (
+          <PermissionsModal onComplete={handlePermissionsComplete} />
+        )}
         <div className="max-w-md w-full p-8 rounded-2xl bg-gradient-to-br from-color5/80 to-color4/50 text-color5-foreground backdrop-blur-xl border border-color5/20 shadow-2xl relative z-10 animate-in fade-in zoom-in duration-500">
           <div className="flex flex-col items-center mb-8">
             <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mb-4 text-inherit">
@@ -397,6 +429,11 @@ export function LoginScreen({ onLogin, showToast }: LoginScreenProps) {
 
   return (
     <div className="w-full min-h-screen flex flex-col items-center justify-center bg-background relative overflow-y-auto">
+
+      {showPermissions && (
+        <PermissionsModal onComplete={handlePermissionsComplete} />
+      )}
+
       {/* Background Decorations - Fixed to viewport to avoid scrolling with content */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/10 rounded-full blur-3xl opacity-50 animate-pulse" />

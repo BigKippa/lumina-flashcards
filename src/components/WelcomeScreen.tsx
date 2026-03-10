@@ -1,10 +1,10 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { BookOpen, MessageCircle, GitMerge, Users, MapPin, Shuffle, Clock, Heart } from 'lucide-react';
-import { FavoriteItem, SessionInfo } from '../types';
+import { BookOpen, MessageCircle, GitMerge, Users, MapPin, Shuffle, Clock, Heart, UserCircle, Bell } from 'lucide-react';
+import { FavoriteItem, SessionInfo, UserProfile } from '../types';
 
 interface WelcomeScreenProps {
-    userName: string;
+    user: UserProfile;
     onSelect: (category: string) => void;
     lastSession?: SessionInfo;
     favorites: FavoriteItem[];
@@ -22,11 +22,18 @@ const CATEGORIES = [
     { id: 'prepositions', label: 'Prepositions', icon: MapPin, color: 'opacity-90', bgColor: 'bg-color2 text-color2-foreground border-color5/20 hover:bg-color2/80 hover:scale-105' },
 ];
 
-export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ userName, onSelect, lastSession, favorites, onQuickStart, onSelectFavorite, onToggleFavorite }) => {
+export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, onSelect, lastSession, favorites, onQuickStart, onSelectFavorite, onToggleFavorite }) => {
     const { t } = useTranslation();
+    const [currentTime, setCurrentTime] = React.useState(new Date());
+
+    // Live Clock Timer
+    React.useEffect(() => {
+        const timer = setInterval(() => setCurrentTime(new Date()), 60000);
+        return () => clearInterval(timer);
+    }, []);
 
     // Get time of day for greeting
-    const hour = new Date().getHours();
+    const hour = currentTime.getHours();
     const timeOfDay = hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening';
 
     // Helper for base tile
@@ -34,44 +41,64 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ userName, onSelect
 
     return (
         <div className="flex flex-col items-center min-h-[60vh] animate-in fade-in slide-in-from-bottom-4 duration-700 w-full py-8">
-            <div className="text-center mb-8">
-                <h1 className="text-4xl font-bold text-foreground mb-4">
-                    {t(`welcome.greeting.${timeOfDay}`)}, <span className="text-primary">{userName}</span>
-                </h1>
-                <p className="text-xl text-muted-foreground">
-                    {t('welcome.subtitle')}
-                </p>
-            </div>
 
-            {/* Categories Grid (Top) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-4xl mb-6">
-                {CATEGORIES.map((cat) => (
-                    <button
-                        key={cat.id}
-                        onClick={() => onSelect(cat.id)}
-                        className={`${baseTileClass} ${cat.bgColor}`}
+            {/* Student Hero Tile */}
+            <div className="bg-zinc-700 border border-zinc-600 rounded-3xl p-8 flex flex-col md:flex-row gap-8 items-center shadow-md relative overflow-hidden text-zinc-100 w-full max-w-4xl mb-8">
+                <div className="absolute right-0 top-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+
+                {/* Profile Info (Left) */}
+                <div className="flex items-center gap-6 relative z-10 w-full md:w-auto md:min-w-[320px] shrink-0">
+                    <div className="w-24 h-24 rounded-2xl bg-primary/20 flex items-center justify-center text-primary shadow-inner border border-primary/20 flex-shrink-0 overflow-hidden">
+                        {user.avatarUrl ? (
+                            <img src={user.avatarUrl} alt="Student avatar" className="w-full h-full object-cover" />
+                        ) : (
+                            <UserCircle className="w-12 h-12" />
+                        )}
+                    </div>
+                    <div className="flex-1 z-10">
+                        <h2 className="text-3xl font-bold mb-2 text-white">
+                            {t(`welcome.greeting.${timeOfDay}`)}, <span className="text-white">{user.preferredName || user.firstName || user.username}</span>
+                        </h2>
+                        <div className="flex flex-col gap-y-1.5 mt-3 text-sm text-zinc-400 font-medium">
+                            <span className="flex items-center gap-2">
+                                <MapPin className="w-4 h-4" />
+                                {user.currentCity ? `${user.currentCity}, ${user.currentCountry}` : (user.currentCountry || 'Location Not Set')}
+                            </span>
+                            <span className="flex items-center gap-2">
+                                <Clock className="w-4 h-4" />
+                                {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: user.timeZone || undefined })} ({user.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'Local Time'})
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Engagement / Notification Widgets (Right) */}
+                <div className="flex flex-wrap md:flex-nowrap justify-center gap-4 relative z-10 w-full md:flex-1 md:justify-end">
+
+                    {/* Inbox/Pending Widget */}
+                    <div
+                        onClick={() => alert('Messages Navigation - Coming Soon')}
+                        className="bg-green-500/20 hover:bg-green-500/30 cursor-pointer transition-colors backdrop-blur-sm border border-green-500/30 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm relative"
                     >
-                        <div className={`absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity ${cat.color}`}>
-                            <cat.icon className="w-24 h-24 transform translate-x-4 -translate-y-4" />
-                        </div>
+                        <div className="absolute top-3 right-3 w-2.5 h-2.5 bg-red-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.6)]"></div>
+                        <Bell className="w-5 h-5 text-green-400 mb-2" />
+                        <span className="text-2xl font-bold text-white">1</span>
+                        <span className="text-xs text-zinc-300 text-center line-clamp-2">New<br />Message</span>
+                    </div>
 
-                        <div className="relative z-10 flex items-center gap-4">
-                            <div className={`p-4 rounded-xl bg-black/10 group-hover:bg-black/20 ${cat.color} group-hover:scale-110 transition-all duration-300`}>
-                                <cat.icon className="w-8 h-8" />
-                            </div>
-                            <div>
-                                <h3 className="text-lg font-bold opacity-90 transition-colors">
-                                    {t(`welcome.categories.${cat.id.replace(/-/g, '_')}`)}
-                                </h3>
-                                <p className="text-xs opacity-70 mt-1">{t('welcome.start_session')}</p>
-                            </div>
-                        </div>
-                    </button>
-                ))}
+                    {/* Active Decks Widget */}
+                    <div
+                        className="bg-blue-500/20 hover:bg-blue-500/30 transition-colors backdrop-blur-sm border border-blue-500/30 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm"
+                    >
+                        <BookOpen className="w-5 h-5 text-blue-400 mb-2" />
+                        <span className="text-2xl font-bold text-white">{user.activeDeckIds?.length || 0}</span>
+                        <span className="text-xs text-zinc-300 text-center line-clamp-2">Active<br />Decks</span>
+                    </div>
+                </div>
             </div>
 
-            {/* Bottom Split: Quick Start & Favorites */}
-            <div className="w-full max-w-4xl grid grid-cols-2 gap-6 animate-in slide-in-from-bottom-6 duration-700 delay-200">
+            {/* Top Split: Quick Start & Favorites */}
+            <div className="w-full max-w-4xl grid grid-cols-2 gap-6 mb-6 animate-in slide-in-from-bottom-6 duration-700 delay-200">
 
                 {/* Left: Quick Start - Styled exactly like a category tile */}
                 <div className="h-full">
@@ -80,7 +107,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ userName, onSelect
                             onClick={onQuickStart}
                             className={`${baseTileClass} bg-color3 text-color3-foreground border-color5/20 hover:bg-color3/80 hover:scale-105`}
                         >
-                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-30 transition-opacity z-0 text-white">
                                 <Clock className="w-24 h-24 transform translate-x-4 -translate-y-4" />
                             </div>
 
@@ -98,7 +125,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ userName, onSelect
                         </button>
                     ) : (
                         <div className={`${baseTileClass} bg-color3 text-color3-foreground border-color5/20 opacity-90`}>
-                            <div className="absolute top-0 right-0 p-4 opacity-10">
+                            <div className="absolute top-0 right-0 p-4 opacity-20 z-0 text-white">
                                 <Clock className="w-24 h-24 transform translate-x-4 -translate-y-4" />
                             </div>
 
@@ -120,7 +147,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ userName, onSelect
                 {/* Right: Favorites Tile - Container looks like a tile */}
                 <div className="h-full relative overflow-hidden rounded-2xl bg-color4 text-color4-foreground border border-color5/20 shadow-sm p-6 flex flex-col justify-between">
                     {/* Background Icon Effect */}
-                    <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+                    <div className="absolute top-0 right-0 p-4 opacity-20 pointer-events-none z-0 text-white">
                         <Heart className="w-24 h-24 transform translate-x-4 -translate-y-4" />
                     </div>
 
@@ -176,6 +203,33 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ userName, onSelect
                         )}
                     </div>
                 </div>
+            </div>
+
+            {/* Categories Grid (Bottom) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-4xl">
+                {CATEGORIES.map((cat) => (
+                    <button
+                        key={cat.id}
+                        onClick={() => onSelect(cat.id)}
+                        className={`${baseTileClass} ${cat.bgColor}`}
+                    >
+                        <div className={`absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-30 transition-opacity z-0 text-white`}>
+                            <cat.icon className="w-24 h-24 transform translate-x-4 -translate-y-4" />
+                        </div>
+
+                        <div className="relative z-10 flex items-center gap-4">
+                            <div className={`p-4 rounded-xl bg-black/10 group-hover:bg-black/20 ${cat.color} group-hover:scale-110 transition-all duration-300`}>
+                                <cat.icon className="w-8 h-8" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold opacity-90 transition-colors">
+                                    {t(`welcome.categories.${cat.id.replace(/-/g, '_')}`)}
+                                </h3>
+                                <p className="text-xs opacity-70 mt-1">{t('welcome.start_session')}</p>
+                            </div>
+                        </div>
+                    </button>
+                ))}
             </div>
         </div>
     );
