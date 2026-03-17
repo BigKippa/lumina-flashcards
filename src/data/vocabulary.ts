@@ -16,6 +16,7 @@ export interface Word {
     notes?: string;
     disableAudio?: boolean;
     customPronunciation?: string;
+    isArchived?: boolean;
 
     // Alternate fields for edge cases and multiple usages
     alternateDefinitions?: string[];

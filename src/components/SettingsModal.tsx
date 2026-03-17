@@ -40,6 +40,21 @@ export function SettingsModal({ isOpen, onClose, settings, onSave, onOpenBulkImp
         return `${m}m ${s}s`;
     };
 
+    const handleDownloadTemplate = () => {
+        const csvContent = "Word,Definition,Example\nApple,A round fruit with red or green skin,I ate an apple for lunch.\nRun,To move at a speed faster than a walk,I run every morning.";
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        if (link.download !== undefined) {
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'flashcards_template.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    };
+
     // --- SUB-VIEWS ---
 
     const renderMenu = () => (
@@ -87,17 +102,26 @@ export function SettingsModal({ isOpen, onClose, settings, onSave, onOpenBulkImp
 
             <div className="border-t border-border"></div>
 
-            {/* Bulk Import Option */}
-            <button
-                onClick={() => {
-                    onClose();
-                    onOpenBulkImport();
-                }}
-                className="w-full flex items-center justify-center gap-2 px-4 py-4 bg-purple-500/10 text-purple-600 hover:bg-purple-500/20 rounded-xl transition-colors font-bold"
-            >
-                <Sparkles className="w-5 h-5" />
-                <span>Open Bulk Card Generator</span>
-            </button>
+            <div className="flex flex-col gap-2 w-full">
+                <button
+                    onClick={() => {
+                        onClose();
+                        onOpenBulkImport();
+                    }}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-4 bg-purple-500/10 text-purple-600 hover:bg-purple-500/20 rounded-xl transition-colors font-bold"
+                >
+                    <Sparkles className="w-5 h-5" />
+                    <span>Open Bulk Card Generator</span>
+                </button>
+                <div className="flex justify-center w-full">
+                    <button 
+                        onClick={handleDownloadTemplate}
+                        className="text-sm text-primary hover:underline"
+                    >
+                        Download CSV Template
+                    </button>
+                </div>
+            </div>
 
             <div className="border-t border-border pt-6"></div>
 

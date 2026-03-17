@@ -541,6 +541,24 @@ function App() {
         persistDecks(updatedDecks);
     };
 
+    const handleBulkDeleteCards = (ids: string[]) => {
+        const idSet = new Set(ids);
+        const updatedDecks = decks.map(d => ({
+            ...d,
+            cards: d.cards.filter(c => !idSet.has(String(c.id)))
+        }));
+        persistDecks(updatedDecks);
+    };
+
+    const handleBulkArchiveCards = (ids: string[], isArchiving: boolean) => {
+        const idSet = new Set(ids);
+        const updatedDecks = decks.map(d => ({
+            ...d,
+            cards: d.cards.map(c => idSet.has(String(c.id)) ? { ...c, isArchived: isArchiving } : c)
+        }));
+        persistDecks(updatedDecks);
+    };
+
     const handleEditCard = (updatedWord: Word) => {
         const updatedDecks = decks.map(d => ({
             ...d,
@@ -729,80 +747,6 @@ function App() {
         }
     };
 
-    // Callback for Welcome Screen selection
-    const handleCategorySelect = (category: string) => {
-        if (!user) return;
-        if (category === 'random') {
-            // Create a special deck for random mix of everything
-            const allCards = decks.flatMap(d => d.cards);
-            // Verify we have cards
-            if (allCards.length === 0) {
-                alert("No cards available for random mix!");
-                return;
-            }
-            // We need to set activeDeckId to something so activeCards logic works, OR we need a new state for 'activeCardsOverride'.
-            // Simplest: Create a temporary deck in 'decks' or just handle it here.
-            // But 'activeCards' is derived from 'activeDeckId'.
-            // Let's create a temporary deck ID 'temp-random-mix' and add a dummy deck to 'decks' (or just update activeDeckId and have logic handle it).
-            // Better: Update activeCards logic to handle 'temp-random-mix'.
-            // But activeCards logic is: activeDeckId ? decks.find(...) : decks[0].cards.
-
-            // Strategy: Create a new deck entry in 'decks' for the session? 
-            // We don't want to persist it.
-            // Better: Allow activeCards to be derived differently.
-            // LET'S CHANGE activeCards logic to be stateful or smarter.
-            // OR: Just set 'activeDeckId' to null and default to 'all cards' in that case? No, defaults to deck[0].
-
-            // Let's use a special ID 'random-mix' that we DON'T look up in decks, but handle specially.
-            setActiveDeckId('random-mix');
-            setMode('deck');
-            return;
-        }
-
-        // For specific categories
-        if (category === 'vocabulary') {
-            setMode('topic-selection');
-            return;
-        }
-
-        const subjectMap: Record<string, string> = {
-            'vocabulary': 'Vocabulary', // Fallback if logic changes
-            'idioms': 'Idioms',
-            'phrasal-verbs': 'Phrasal Verbs',
-            'collocations': 'Collocations',
-            'prepositions': 'Prepositions'
-        };
-
-        const targetSubject = subjectMap[category];
-        if (targetSubject) {
-            const matchingDecks = decks.filter(d => d.subject === targetSubject);
-            if (matchingDecks.length === 0) {
-                alert(`No decks found for ${targetSubject}`);
-                return;
-            }
-            // Create a temporary "Session Deck" ID
-            const sessionDeckId = `session-${category}`;
-            setActiveDeckId(sessionDeckId);
-            setMode('deck');
-
-            // Save Last Session
-            const updatedUser = { ...user };
-            updatedUser.lastSession = {
-                deckId: sessionDeckId,
-                mode: 'deck',
-                timestamp: Date.now(),
-                label: targetSubject
-            };
-            setUser(updatedUser);
-            // Persist profile
-            const storedProfiles = localStorage.getItem('profiles');
-            if (storedProfiles) {
-                const profiles = JSON.parse(storedProfiles);
-                profiles[updatedUser.username] = updatedUser;
-                localStorage.setItem('profiles', JSON.stringify(profiles));
-            }
-        }
-    };
 
     const showToast = (message: string, actionLabel?: string, onAction?: () => void) => {
         setToast({ message, actionLabel, onAction });
@@ -1265,12 +1209,12 @@ function App() {
                             {mode === 'welcome' && (
                                 <WelcomeScreen
                                     user={user}
-                                    onSelect={handleCategorySelect}
                                     lastSession={user.lastSession}
                                     favorites={user.favorites || []}
                                     onQuickStart={handleQuickStart}
                                     onSelectFavorite={handleSelectFavorite}
-                                    onToggleFavorite={handleToggleFavorite}
+                                    onNavigate={navigate}
+                                    onUpdateProfile={handleUpdateProfile}
                                 />
                             )}
 
@@ -1397,16 +1341,29 @@ function App() {
                                         setProfileScrollTarget(target || null);
                                         navigate('profile');
                                     }}
+                                    onUpdateProfile={handleUpdateProfile}
+                                    onDeleteCard={handleDeleteCard}
+                                    onBulkDeleteCards={handleBulkDeleteCards}
+                                    onBulkArchiveCards={handleBulkArchiveCards}
                                 />
                             )}
 
-                            {mode === 'admin' && user?.role === 'admin' && (
-                                <AdminDashboard
-                                    decks={decks}
-                                    cards={adminActiveTab === 'cards' && !activeDeckId ? decks.flatMap(d => d.cards) : activeCards}
+                            {mode === 'admin' && user && (() => {
+                                // For non-admins, ONLY show decks they have authored. This prevents them from modifying global public cards
+                                // and correctly triggers the empty state when they have no cards of their own.
+                                const viewableDecks = user.role === 'admin' ? decks : decks.filter(d => d.authorId === user.id);
+                                const totalCards = adminActiveTab === 'cards' && !activeDeckId ? viewableDecks.flatMap(d => d.cards) : (activeCards.length > 0 ? activeCards : viewableDecks.find(d => d.id === activeDeckId)?.cards || []);
+                                
+                                return (
+                                    <AdminDashboard
+                                        userRole={user.role}
+                                        decks={viewableDecks}
+                                        cards={totalCards}
                                     onBack={goBack}
 
                                     onDeleteCard={handleDeleteCard}
+                                    onBulkDeleteCards={handleBulkDeleteCards}
+                                    onBulkArchiveCards={handleBulkArchiveCards}
                                     onEdit={handleEditCard}
                                     onSelectDeck={(id) => navigate('admin', id, adminActiveTab)}
                                     onCreateDeck={handleCreateDeck}
@@ -1419,8 +1376,10 @@ function App() {
                                     onSaveSettings={handleSaveSettings}
                                     onArchiveDeck={handleArchiveDeck}
                                     onUnarchiveDeck={handleUnarchiveDeck}
-                                />
-                            )}
+                                        onBrowsePublic={() => navigate('topic-selection', null)}
+                                    />
+                                );
+                            })()}
                         </div>
                     )}
                 </main>

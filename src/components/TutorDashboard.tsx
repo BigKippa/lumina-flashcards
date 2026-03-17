@@ -1,10 +1,28 @@
 import React, { useState, useMemo } from 'react';
 import { Student, Deck, AppSettings, UserProfile } from '../types';
 import { Word } from '../data/vocabulary';
-import { Search, Plus, UserCircle, ChevronDown, SortAsc, Clock, GraduationCap, Users, Layout, Zap, MessageSquare, CheckSquare, ArrowLeft, MapPin, Bell, Library, ChevronUp, Pencil, Filter, ArrowDownAZ, ArrowUpAZ, X, AlertTriangle, Send } from 'lucide-react';
+import { Search, Plus, UserCircle, ChevronDown, SortAsc, Clock, GraduationCap, Users, Layout, Zap, MessageSquare, CheckSquare, ArrowLeft, MapPin, Bell, Library, ChevronUp, Pencil, Filter, ArrowDownAZ, ArrowUpAZ, X, AlertTriangle, Send, Settings, Check, Move, Eye, Archive, Trash2 } from 'lucide-react';
 import { StudentProfile } from './StudentProfile';
 import { AddContentModal } from './AddContentModal';
 import { EditCardModal } from './EditCardModal';
+import Flashcard from './Flashcard';
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    DragEndEvent
+} from '@dnd-kit/core';
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    rectSortingStrategy,
+    useSortable
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface TutorDashboardProps {
     user: UserProfile;
@@ -20,10 +38,100 @@ interface TutorDashboardProps {
     apiKey?: string;
     settings: AppSettings;
     onNavigateToProfile?: (target?: string) => void;
+    onUpdateProfile?: (oldUsername: string, newUserData: Partial<UserProfile>) => void;
+    onDeleteCard: (id: string) => void;
+    onBulkDeleteCards: (ids: string[]) => void;
+    onBulkArchiveCards: (ids: string[], isArchiving: boolean) => void;
 }
 
-export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, decks, onUpdateStudent, onAddStudent, view, onViewChange, onAddDeck, onAddCard, onEditCard, apiKey, settings, onNavigateToProfile }) => {
+const DEFAULT_TILES = [
+    'all-content',
+    'quickstart',
+    'students',
+    'manage-learning-content',
+    'messages',
+    'to-do'
+];
+
+function SortableDashboardTile({ id, children, isCustomizeMode }: { id: string, children: React.ReactNode, isCustomizeMode: boolean }) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging
+    } = useSortable({ id });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        zIndex: isDragging ? 10 : 1,
+        position: 'relative' as const,
+    };
+
+    return (
+        <div ref={setNodeRef} style={style} className={`h-full ${isDragging ? 'opacity-50 ring-2 ring-primary rounded-xl scale-[1.02] shadow-2xl transition-all' : ''}`}>
+            <div className="relative h-full">
+                {isCustomizeMode && (
+                    <div
+                        {...attributes}
+                        {...listeners}
+                        className="absolute top-3 right-3 p-2 bg-black/40 hover:bg-black/60 rounded-lg cursor-grab active:cursor-grabbing backdrop-blur-md z-20 text-white shadow-sm transition-colors border border-white/10"
+                        title="Drag to reorder"
+                    >
+                        <Move className="w-5 h-5" />
+                    </div>
+                )}
+                <div className={`h-full ${isCustomizeMode ? 'pointer-events-none' : ''}`}>
+                    {children}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, decks, onUpdateStudent, onAddStudent, view, onViewChange, onAddDeck, onAddCard, onEditCard, apiKey, settings, onNavigateToProfile, onUpdateProfile, onDeleteCard, onBulkDeleteCards, onBulkArchiveCards }) => {
     const [currentTime, setCurrentTime] = useState(new Date());
+    const [isCustomizeMode, setIsCustomizeMode] = useState(false);
+    const [tileOrder, setTileOrder] = useState<string[]>([]);
+
+    React.useEffect(() => {
+        const savedOrder = user.tutorDashboardTileOrder;
+        if (savedOrder && savedOrder.length > 0) {
+            const merged = [...savedOrder];
+            DEFAULT_TILES.forEach(id => {
+                if (!merged.includes(id)) merged.push(id);
+            });
+            setTileOrder(merged);
+        } else {
+            setTileOrder(DEFAULT_TILES);
+        }
+    }, [user.tutorDashboardTileOrder]);
+
+    const sensors = useSensors(
+        useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+        useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+    );
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+        if (over && active.id !== over.id) {
+            setTileOrder((items) => {
+                const oldIndex = items.indexOf(active.id as string);
+                const newIndex = items.indexOf(over.id as string);
+                return arrayMove(items, oldIndex, newIndex);
+            });
+        }
+    };
+
+    const toggleCustomizeMode = () => {
+        if (isCustomizeMode && onUpdateProfile) {
+            onUpdateProfile(user.username, { tutorDashboardTileOrder: tileOrder });
+        }
+        setIsCustomizeMode(!isCustomizeMode);
+    };
+
     const [activeTab, setActiveTab] = useState<'active' | 'archived'>('active');
     const [searchQuery, setSearchQuery] = useState('');
     const [sortOption, setSortOption] = useState<'a-z' | 'z-a' | 'newest' | 'oldest'>('a-z');
@@ -36,7 +144,11 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
     const [filterStudentId, setFilterStudentId] = useState('all');
     const [sortConfig, setSortConfig] = useState<{ key: 'word' | 'definition' | 'category' | 'deckTitle' | 'student', direction: 'asc' | 'desc' } | null>({ key: 'word', direction: 'asc' });
     const [editingCard, setEditingCard] = useState<(Word & { deckId: string }) | null>(null);
+    const [previewCard, setPreviewCard] = useState<Word | null>(null);
+    const [isPreviewFlipped, setIsPreviewFlipped] = useState(false);
     const [showMissingOnly, setShowMissingOnly] = useState(false);
+    const [selectedCardIds, setSelectedCardIds] = useState<Set<string>>(new Set());
+    const [showArchivedCards, setShowArchivedCards] = useState(false);
 
     // Add Student / Quicksend State
     const [isAddStudentModalOpen, setIsAddStudentModalOpen] = useState(false);
@@ -161,6 +273,10 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
 
         // 2. Filtering
         let filtered = cardsWithMetadata;
+
+        if (!showArchivedCards) {
+            filtered = filtered.filter(c => !c.isArchived);
+        }
 
         if (showMissingOnly) {
             filtered = filtered.filter(c => !c.definition || !c.example || !c.phonetic || !c.category);
@@ -463,98 +579,149 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                             </div>
                         </div>
 
-                        {/* Control Dashboard Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {/* All Content Tile */}
-                            <div
-                                onClick={() => onViewChange('flashcards')}
-                                className="bg-cyan-500/25 hover:bg-cyan-500/30 border border-cyan-500/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden"
+                        {/* Dashboard Header Elements */}
+                        <div className="flex items-center justify-between mb-2">
+                            <h3 className="text-xl font-bold text-foreground opacity-80 pl-2">Dashboard Actions</h3>
+                            <button
+                                onClick={toggleCustomizeMode}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition-all focus:ring-2 focus:ring-offset-2 focus:ring-offset-background border ${isCustomizeMode ? 'bg-primary text-primary-foreground border-primary hover:bg-primary/90' : 'bg-secondary text-secondary-foreground border-border hover:bg-secondary/80'}`}
                             >
-                                <div className="absolute -right-6 -top-6 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl group-hover:bg-cyan-500/20 transition-colors"></div>
-                                <div className="w-12 h-12 rounded-xl bg-cyan-100 text-cyan-600 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-cyan-200">
-                                    <Library className="w-6 h-6" />
-                                </div>
-                                <div className="relative z-10 font-medium">
-                                    <h2 className="text-xl font-bold mb-1">All Content</h2>
-                                    <p className="text-sm text-muted-foreground line-clamp-2">Browse the complete library of global flashcards and decks.</p>
-                                </div>
-                            </div>
-
-                            {/* Quickstart Tile */}
-                            <div
-                                onClick={() => alert('Quickstart Navigation - Coming Soon')}
-                                className="bg-yellow-500/25 hover:bg-yellow-500/30 border border-yellow-500/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden"
-                            >
-                                <div className="absolute -right-6 -top-6 w-24 h-24 bg-yellow-500/10 rounded-full blur-2xl group-hover:bg-yellow-500/20 transition-colors"></div>
-                                <div className="w-12 h-12 rounded-xl bg-yellow-100 text-yellow-600 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-yellow-200">
-                                    <Zap className="w-6 h-6" />
-                                </div>
-                                <div className="relative z-10 font-medium">
-                                    <h2 className="text-xl font-bold mb-1">Quickstart</h2>
-                                    <p className="text-sm text-muted-foreground line-clamp-2">Jump straight into your next scheduled session or lesson plan.</p>
-                                </div>
-                            </div>
-
-                            {/* Manage Students Tile */}
-                            <div
-                                onClick={() => onViewChange('students')}
-                                className="bg-blue-500/25 hover:bg-blue-500/30 border border-blue-500/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden"
-                            >
-                                <div className="absolute -right-6 -top-6 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-colors"></div>
-                                <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-blue-200">
-                                    <Users className="w-6 h-6" />
-                                </div>
-                                <div className="relative z-10 font-medium">
-                                    <h2 className="text-xl font-bold mb-1 flex items-center gap-2">Students <span className="bg-blue-100 text-blue-800 text-xs py-0.5 px-2 rounded-full font-bold">{students.length}</span></h2>
-                                    <p className="text-sm text-muted-foreground line-clamp-2">View progress, assign homework, and manage student profiles.</p>
-                                </div>
-                            </div>
-
-                            {/* Manage Learning Content Tile */}
-                            <div
-                                onClick={() => onViewChange('learning-content')}
-                                className="bg-green-500/25 hover:bg-green-500/30 border border-green-500/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden"
-                            >
-                                <div className="absolute -right-6 -top-6 w-24 h-24 bg-green-500/10 rounded-full blur-2xl group-hover:bg-green-500/20 transition-colors"></div>
-                                <div className="w-12 h-12 rounded-xl bg-green-100 text-green-600 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-green-200">
-                                    <Layout className="w-6 h-6" />
-                                </div>
-                                <div className="relative z-10 font-medium">
-                                    <h2 className="text-xl font-bold mb-1 flex items-center gap-2">Manage Learning Content</h2>
-                                    <p className="text-sm text-muted-foreground line-clamp-2">Create, edit, and organize flashcard decks for your students.</p>
-                                </div>
-                            </div>
-
-                            {/* Messages Tile */}
-                            <div
-                                onClick={() => alert('Messages Navigation - Coming Soon')}
-                                className="bg-purple-500/25 hover:bg-purple-500/30 border border-purple-500/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden"
-                            >
-                                <div className="absolute -right-6 -top-6 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl group-hover:bg-purple-500/20 transition-colors"></div>
-                                <div className="w-12 h-12 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-purple-200">
-                                    <MessageSquare className="w-6 h-6" />
-                                </div>
-                                <div className="relative z-10 font-medium">
-                                    <h2 className="text-xl font-bold mb-1">Messages</h2>
-                                    <p className="text-sm text-muted-foreground line-clamp-2">Communicate directly with your students and review feedback.</p>
-                                </div>
-                            </div>
-
-                            {/* To-Do List Tile */}
-                            <div
-                                onClick={() => alert('To-Do List Navigation - Coming Soon')}
-                                className="bg-orange-500/25 hover:bg-orange-500/30 border border-orange-500/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden"
-                            >
-                                <div className="absolute -right-6 -top-6 w-24 h-24 bg-orange-500/10 rounded-full blur-2xl group-hover:bg-orange-500/20 transition-colors"></div>
-                                <div className="w-12 h-12 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-orange-200">
-                                    <CheckSquare className="w-6 h-6" />
-                                </div>
-                                <div className="relative z-10 font-medium">
-                                    <h2 className="text-xl font-bold mb-1">To Do List</h2>
-                                    <p className="text-sm text-muted-foreground line-clamp-2">Track your administrative tasks, grading, and upcoming goals.</p>
-                                </div>
-                            </div>
+                                {isCustomizeMode ? (
+                                    <>
+                                        <Check className="w-4 h-4" /> Save Layout
+                                    </>
+                                ) : (
+                                    <>
+                                        <Settings className="w-4 h-4" /> Customize Layout
+                                    </>
+                                )}
+                            </button>
                         </div>
+
+                        {/* Control Dashboard Grid - Draggable */}
+                        <DndContext
+                            sensors={sensors}
+                            collisionDetection={closestCenter}
+                            onDragEnd={handleDragEnd}
+                        >
+                            <SortableContext items={tileOrder} strategy={rectSortingStrategy}>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {tileOrder.map(id => {
+                                        let tileContent = null;
+                                        switch (id) {
+                                            case 'all-content':
+                                                tileContent = (
+                                                    <div
+                                                        onClick={() => onViewChange('flashcards')}
+                                                        className="bg-cyan-500/25 hover:bg-cyan-500/30 border border-cyan-500/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full"
+                                                    >
+                                                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl group-hover:bg-cyan-500/20 transition-colors"></div>
+                                                        <div className="w-12 h-12 rounded-xl bg-cyan-100 text-cyan-600 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-cyan-200 shrink-0">
+                                                            <Library className="w-6 h-6" />
+                                                        </div>
+                                                        <div className="relative z-10 font-medium flex-1">
+                                                            <h2 className="text-xl font-bold mb-1">All Content</h2>
+                                                            <p className="text-sm text-muted-foreground line-clamp-2">Browse the complete library of global flashcards and decks.</p>
+                                                        </div>
+                                                    </div>
+                                                );
+                                                break;
+                                            case 'quickstart':
+                                                tileContent = (
+                                                    <div
+                                                        onClick={() => alert('Quickstart Navigation - Coming Soon')}
+                                                        className="bg-yellow-500/25 hover:bg-yellow-500/30 border border-yellow-500/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full"
+                                                    >
+                                                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-yellow-500/10 rounded-full blur-2xl group-hover:bg-yellow-500/20 transition-colors"></div>
+                                                        <div className="w-12 h-12 rounded-xl bg-yellow-100 text-yellow-600 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-yellow-200 shrink-0">
+                                                            <Zap className="w-6 h-6" />
+                                                        </div>
+                                                        <div className="relative z-10 font-medium flex-1">
+                                                            <h2 className="text-xl font-bold mb-1">Quickstart</h2>
+                                                            <p className="text-sm text-muted-foreground line-clamp-2">Jump straight into your next scheduled session or lesson plan.</p>
+                                                        </div>
+                                                    </div>
+                                                );
+                                                break;
+                                            case 'students':
+                                                tileContent = (
+                                                    <div
+                                                        onClick={() => onViewChange('students')}
+                                                        className="bg-blue-500/25 hover:bg-blue-500/30 border border-blue-500/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full"
+                                                    >
+                                                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-colors"></div>
+                                                        <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-blue-200 shrink-0">
+                                                            <Users className="w-6 h-6" />
+                                                        </div>
+                                                        <div className="relative z-10 font-medium flex-1">
+                                                            <h2 className="text-xl font-bold mb-1 flex items-center gap-2">Students <span className="bg-blue-100 text-blue-800 text-xs py-0.5 px-2 rounded-full font-bold">{students.length}</span></h2>
+                                                            <p className="text-sm text-muted-foreground line-clamp-2">View progress, assign homework, and manage student profiles.</p>
+                                                        </div>
+                                                    </div>
+                                                );
+                                                break;
+                                            case 'manage-learning-content':
+                                                tileContent = (
+                                                    <div
+                                                        onClick={() => onViewChange('learning-content')}
+                                                        className="bg-green-500/25 hover:bg-green-500/30 border border-green-500/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full"
+                                                    >
+                                                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-green-500/10 rounded-full blur-2xl group-hover:bg-green-500/20 transition-colors"></div>
+                                                        <div className="w-12 h-12 rounded-xl bg-green-100 text-green-600 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-green-200 shrink-0">
+                                                            <Layout className="w-6 h-6" />
+                                                        </div>
+                                                        <div className="relative z-10 font-medium flex-1">
+                                                            <h2 className="text-xl font-bold mb-1 flex items-center gap-2">Manage Learning Content</h2>
+                                                            <p className="text-sm text-muted-foreground line-clamp-2">Create, edit, and organize flashcard decks for your students.</p>
+                                                        </div>
+                                                    </div>
+                                                );
+                                                break;
+                                            case 'messages':
+                                                tileContent = (
+                                                    <div
+                                                        onClick={() => alert('Messages Navigation - Coming Soon')}
+                                                        className="bg-purple-500/25 hover:bg-purple-500/30 border border-purple-500/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full"
+                                                    >
+                                                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl group-hover:bg-purple-500/20 transition-colors"></div>
+                                                        <div className="w-12 h-12 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-purple-200 shrink-0">
+                                                            <MessageSquare className="w-6 h-6" />
+                                                        </div>
+                                                        <div className="relative z-10 font-medium flex-1">
+                                                            <h2 className="text-xl font-bold mb-1">Messages</h2>
+                                                            <p className="text-sm text-muted-foreground line-clamp-2">Communicate directly with your students and review feedback.</p>
+                                                        </div>
+                                                    </div>
+                                                );
+                                                break;
+                                            case 'to-do':
+                                                tileContent = (
+                                                    <div
+                                                        onClick={() => alert('To-Do List Navigation - Coming Soon')}
+                                                        className="bg-orange-500/25 hover:bg-orange-500/30 border border-orange-500/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full"
+                                                    >
+                                                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-orange-500/10 rounded-full blur-2xl group-hover:bg-orange-500/20 transition-colors"></div>
+                                                        <div className="w-12 h-12 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-orange-200 shrink-0">
+                                                            <CheckSquare className="w-6 h-6" />
+                                                        </div>
+                                                        <div className="relative z-10 font-medium flex-1">
+                                                            <h2 className="text-xl font-bold mb-1">To Do List</h2>
+                                                            <p className="text-sm text-muted-foreground line-clamp-2">Track your administrative tasks, grading, and upcoming goals.</p>
+                                                        </div>
+                                                    </div>
+                                                );
+                                                break;
+                                        }
+
+                                        return (
+                                            <SortableDashboardTile key={id} id={id} isCustomizeMode={isCustomizeMode}>
+                                                {tileContent}
+                                            </SortableDashboardTile>
+                                        );
+                                    })}
+                                </div>
+                            </SortableContext>
+                        </DndContext>
                     </div>
                 )}
 
@@ -975,6 +1142,54 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                     </div>
                                 </div>
                             </div>
+                            {selectedCardIds.size > 0 && (
+                                <div className="mt-4 bg-primary/5 border border-primary/20 rounded-xl p-3 flex items-center justify-between animate-in fade-in slide-in-from-top-2">
+                                    <div className="flex items-center gap-3">
+                                        <span className="bg-primary text-primary-foreground text-sm font-bold px-2 py-0.5 rounded-md">
+                                            {selectedCardIds.size}
+                                        </span>
+                                        <span className="text-sm font-medium text-foreground">Cards Selected</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => {
+                                                const isArchiving = !Array.from(selectedCardIds).every(id => 
+                                                    allFlashcards.find(c => String(c.id) === id)?.isArchived
+                                                );
+                                                if (window.confirm(`Are you sure you want to ${isArchiving ? 'archive' : 'unarchive'} ${selectedCardIds.size} cards?`)) {
+                                                    onBulkArchiveCards(Array.from(selectedCardIds), isArchiving);
+                                                    setSelectedCardIds(new Set());
+                                                }
+                                            }}
+                                            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-amber-600 bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors border border-amber-200"
+                                        >
+                                            <Archive className="w-4 h-4" />
+                                            Archive
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                if (window.confirm(`Are you sure you want to PERMANENTLY delete ${selectedCardIds.size} cards?`)) {
+                                                    onBulkDeleteCards(Array.from(selectedCardIds));
+                                                    setSelectedCardIds(new Set());
+                                                }
+                                            }}
+                                            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors border border-red-200"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                            Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                            <div className="flex justify-end mt-4">
+                                <button
+                                    onClick={() => setShowArchivedCards(!showArchivedCards)}
+                                    className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors border ${showArchivedCards ? 'bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-200' : 'bg-secondary text-muted-foreground border-transparent hover:bg-secondary/80'}`}
+                                >
+                                    <Archive className="w-4 h-4" />
+                                    {showArchivedCards ? 'Hide Archived' : 'Show Archived'}
+                                </button>
+                            </div>
                         </div>
 
                         {/* Flashcards List */}
@@ -983,6 +1198,20 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                 <table className="w-full text-left border-collapse">
                                     <thead>
                                         <tr className="bg-secondary/50 border-b border-border text-sm text-muted-foreground select-none">
+                                            <th className="py-3 px-4 w-12">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedCardIds.size === allFlashcards.length && allFlashcards.length > 0}
+                                                    onChange={(e) => {
+                                                        if (e.target.checked) {
+                                                            setSelectedCardIds(new Set(allFlashcards.map(c => String(c.id))));
+                                                        } else {
+                                                            setSelectedCardIds(new Set());
+                                                        }
+                                                    }}
+                                                    className="w-4 h-4 rounded border-input text-primary focus:ring-primary/20 transition-all cursor-pointer"
+                                                />
+                                            </th>
                                             <th className="py-3 px-4 font-bold whitespace-nowrap relative">
                                                 <div className="flex items-center gap-1 cursor-pointer hover:text-foreground transition-colors" onClick={() => setActiveColumnMenu(activeColumnMenu === 'word' ? null : 'word')}>
                                                     Word / Phrase {sortConfig?.key === 'word' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />)}
@@ -1047,7 +1276,24 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                             allFlashcards.map((card, index) => {
                                                 const isMissingData = !card.definition || !card.example || !card.phonetic || !card.category;
                                                 return (
-                                                    <tr key={`${card.deckId}-${card.id}-${index}`} className={`border-b border-border hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors ${index % 2 !== 0 ? 'bg-gray-100 dark:bg-gray-900/50' : ''}`}>
+                                                    <tr key={`${card.deckId}-${card.id}-${index}`} className={`border-b border-border hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors ${index % 2 !== 0 ? 'bg-gray-100 dark:bg-gray-900/50' : ''} ${card.isArchived ? 'opacity-60 bg-amber-50/10' : ''}`}>
+                                                        <td className="py-3 px-4">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={selectedCardIds.has(String(card.id))}
+                                                                onChange={(e) => {
+                                                                    const newSelected = new Set(selectedCardIds);
+                                                                    if (e.target.checked) {
+                                                                        newSelected.add(String(card.id));
+                                                                    } else {
+                                                                        newSelected.delete(String(card.id));
+                                                                    }
+                                                                    setSelectedCardIds(newSelected);
+                                                                }}
+                                                                className="w-4 h-4 rounded border-input text-primary focus:ring-primary/20 transition-all cursor-pointer"
+                                                                onClick={(e) => e.stopPropagation()}
+                                                            />
+                                                        </td>
                                                         <td className={`py-3 px-4 font-bold max-w-[200px] ${index % 2 !== 0 ? 'text-white' : 'text-primary'}`}>
                                                             <div className="flex items-center gap-2">
                                                                 {isMissingData && (
@@ -1087,21 +1333,61 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                                             )}
                                                         </td>
                                                         <td className="py-3 px-4 text-right">
-                                                            <button
-                                                                onClick={(e) => { e.stopPropagation(); setEditingCard(card); }}
-                                                                className={`p-1.5 rounded hover:bg-muted transition-colors ${index % 2 !== 0 ? 'text-white hover:text-white/80' : 'text-muted-foreground hover:text-primary'}`}
-                                                                title="Edit Flashcard"
-                                                            >
-                                                                <Pencil className="w-4 h-4" />
-                                                            </button>
+                                                            <div className="flex justify-end gap-2">
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setPreviewCard(card);
+                                                                        setIsPreviewFlipped(false);
+                                                                    }}
+                                                                    className={`p-1.5 rounded hover:bg-muted transition-colors ${index % 2 !== 0 ? 'text-white hover:text-white/80' : 'text-muted-foreground hover:text-secondary-foreground'}`}
+                                                                    title="View as Flashcard"
+                                                                >
+                                                                    <Eye className="w-4 h-4" />
+                                                                </button>
+                                                                <button
+                                                                    onClick={(e) => { e.stopPropagation(); setEditingCard(card); }}
+                                                                    className={`p-1.5 rounded hover:bg-muted transition-colors ${index % 2 !== 0 ? 'text-white hover:text-white/80' : 'text-muted-foreground hover:text-primary'}`}
+                                                                    title="Edit Flashcard"
+                                                                >
+                                                                    <Pencil className="w-4 h-4" />
+                                                                </button>
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        if (window.confirm(`Are you sure you want to delete "${card.word}"?`)) {
+                                                                            onDeleteCard(String(card.id));
+                                                                        }
+                                                                    }}
+                                                                    className={`p-1.5 rounded hover:bg-red-100 transition-colors ${index % 2 !== 0 ? 'text-white hover:text-red-500' : 'text-muted-foreground hover:text-red-500'}`}
+                                                                    title="Delete Flashcard"
+                                                                >
+                                                                    <Trash2 className="w-4 h-4" />
+                                                                </button>
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                 );
                                             })
                                         ) : (
                                             <tr>
-                                                <td colSpan={5} className="py-12 text-center text-muted-foreground">
-                                                    No flashcards found matching your criteria.
+                                                <td colSpan={6} className="py-20 text-center">
+                                                    <div className="flex flex-col items-center justify-center placeholder">
+                                                        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                                                            <Library className="w-8 h-8 text-primary" />
+                                                        </div>
+                                                        <h3 className="text-xl font-bold mb-2 text-foreground">Let's start filling your library!</h3>
+                                                        <p className="text-sm text-muted-foreground max-w-sm mx-auto mb-6">
+                                                            You don't have any flashcards matching your criteria. Create your own custom cards or adjust your search.
+                                                        </p>
+                                                        <button
+                                                            onClick={() => setIsManageContentOpen(true)}
+                                                            className="flex items-center justify-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl font-bold transition-all shadow-sm"
+                                                        >
+                                                            <Plus className="w-4 h-4" />
+                                                            Create New Cards
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         )}
@@ -1152,6 +1438,48 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                     }}
                     onCancel={() => setEditingCard(null)}
                 />
+            )}
+
+            {/* View as Flashcard Preview Modal */}
+            {previewCard && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+                    <div className="bg-background rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col relative animate-in fade-in zoom-in-95 duration-200">
+                        {/* Header */}
+                        <div className="flex items-center justify-between p-6 border-b border-border">
+                            <div>
+                                <h3 className="text-xl font-bold text-foreground">Card Preview</h3>
+                                <p className="text-sm text-muted-foreground">This is how learners see the card.</p>
+                            </div>
+                            <button
+                                onClick={() => setPreviewCard(null)}
+                                className="p-2 hover:bg-secondary rounded-full transition-colors"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                        
+                        {/* Card Container */}
+                        <div className="p-8 flex justify-center bg-secondary/10">
+                            <Flashcard
+                                word={previewCard}
+                                isFlipped={isPreviewFlipped}
+                                onFlip={() => setIsPreviewFlipped(!isPreviewFlipped)}
+                                settings={settings}
+                            />
+                        </div>
+
+                        {/* Footer details */}
+                        <div className="p-4 bg-muted/30 border-t border-border flex justify-between items-center text-sm font-medium text-muted-foreground">
+                            <span>Category: {previewCard.category || 'Vocabulary'}</span>
+                            <button
+                                onClick={() => setIsPreviewFlipped(!isPreviewFlipped)}
+                                className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-bold hover:bg-primary/90 transition-colors shadow-sm"
+                            >
+                                {isPreviewFlipped ? 'Flip to Front' : 'Flip to Back'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );

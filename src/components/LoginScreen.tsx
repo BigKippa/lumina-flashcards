@@ -206,8 +206,6 @@ export function LoginScreen({ onLogin, showToast }: LoginScreenProps) {
       setError("Invalid verification code. Please try again.");
       return;
     }
-
-    const storedProfiles = localStorage.getItem('profiles');
     const newUser: UserProfile = {
       id: crypto.randomUUID(),
       email: email,
@@ -440,22 +438,22 @@ export function LoginScreen({ onLogin, showToast }: LoginScreenProps) {
         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-accent/10 rounded-full blur-3xl opacity-50 animate-pulse delay-700" />
       </div>
 
-      <div className="w-full flex-grow flex flex-col items-center justify-center p-4 relative z-10">
-        <div className="max-w-[380px] w-full p-5 rounded-2xl bg-gradient-to-br from-color5/80 to-color4/50 text-color5-foreground backdrop-blur-xl border border-color5/20 shadow-2xl animate-in fade-in zoom-in duration-500">
+      <div className="w-full flex-grow flex flex-col items-center justify-start pt-[10vh] px-4 pb-4 relative z-10">
+        <div className="max-w-[480px] w-full p-8 rounded-2xl bg-gradient-to-br from-color5/80 to-color4/50 text-color5-foreground backdrop-blur-xl border border-color5/20 shadow-2xl animate-in fade-in zoom-in duration-500">
           <div className="flex flex-col items-center mb-5">
-            <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center mb-3 shadow-lg">
-              <Sparkles className="w-7 h-7 opacity-90 text-inherit" />
+            <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mb-3 shadow-lg">
+               <Sparkles className="w-8 h-8 opacity-90 text-inherit" />
             </div>
-            <h1 className="text-2xl font-bold text-inherit text-center">
+            <h1 className="text-3xl font-bold text-inherit text-center">
               {t('auth.welcome_title')}
             </h1>
-            <p className="opacity-80 mt-1 text-center text-sm">
+            <p className="opacity-80 mt-1 text-center text-base">
               {t('auth.welcome_subtitle')}
             </p>
           </div>
 
           <div className="flex flex-col items-center mb-5 w-full">
-            <p className="text-xs font-bold text-primary uppercase tracking-wider mb-2 text-center">
+            <p className="text-sm font-bold text-primary uppercase tracking-wider mb-2 text-center">
               {t('auth.choose_language')}
             </p>
             <div className="relative z-20">
@@ -464,7 +462,7 @@ export function LoginScreen({ onLogin, showToast }: LoginScreenProps) {
           </div>
 
           {authMode === 'initial' && (
-            <div className="space-y-3">
+            <div className="space-y-4">
               <button
                 onClick={() => {
                   setAuthMode('login');
@@ -472,9 +470,9 @@ export function LoginScreen({ onLogin, showToast }: LoginScreenProps) {
                   setPassword('');
                   setError(null);
                 }}
-                className="w-full py-2.5 px-5 rounded-xl bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-all active:scale-95 text-sm shadow-lg shadow-primary/20 flex items-center justify-center gap-2 "
+                className="w-full py-3 px-6 rounded-xl bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-all active:scale-95 text-base shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
               >
-                <User className="w-5 h-5 text-primary-foreground" /> {t('auth.login')}
+                <User className="w-6 h-6 text-primary-foreground" /> {t('auth.login')}
               </button>
               <button
                 onClick={() => {
@@ -484,16 +482,16 @@ export function LoginScreen({ onLogin, showToast }: LoginScreenProps) {
                   setEmail('');
                   setError(null);
                 }}
-                className="w-full py-2.5 px-5 rounded-xl bg-secondary text-secondary-foreground font-bold hover:bg-secondary/90 transition-all active:scale-95 text-sm flex items-center justify-center gap-2 shadow-lg shadow-primary/20"
+                className="w-full py-3 px-6 rounded-xl bg-secondary text-secondary-foreground font-bold hover:bg-secondary/90 transition-all active:scale-95 text-base flex items-center justify-center gap-2 shadow-lg shadow-primary/20"
               >
-                <Sparkles className="w-5 h-5 text-primary-foreground" /> {t('auth.register')}
+                <Sparkles className="w-6 h-6 text-primary-foreground" /> {t('auth.register')}
               </button>
               <div className="relative my-4">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-color5/20"></div>
                 </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-color4 px-2 opacity-80">{t('common.or')}</span>
+                <div className="relative flex justify-center text-sm uppercase">
+                  <span className="bg-color4 px-3 py-1 rounded-full opacity-80">{t('common.or')}</span>
                 </div>
               </div>
               <button
@@ -510,7 +508,7 @@ export function LoginScreen({ onLogin, showToast }: LoginScreenProps) {
                   };
                   onLogin(guestProfile);
                 }}
-                className="w-full py-3 px-6 rounded-xl bg-secondary/30 text-secondary-foreground font-semibold hover:bg-secondary/50 transition-all active:scale-95 text-sm border border-white/5"
+                className="w-full py-3 px-6 rounded-xl bg-secondary/30 text-secondary-foreground font-semibold hover:bg-secondary/50 transition-all active:scale-95 text-base border border-white/5"
               >
                 {t('auth.guest')}
               </button>

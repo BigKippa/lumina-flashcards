@@ -113,6 +113,9 @@ export interface ContactDetail {
     label: string;
     isCustomLabel: boolean;
     isRecovery: boolean;
+    canReceiveSms?: boolean;
+    allCommunications?: boolean;
+    essentialOnly?: boolean;
 }
 
 export interface TutorEducation {
@@ -180,6 +183,7 @@ export interface UserProfile {
     originCountry?: string;
     currentCity?: string;
     currentCountry?: string;
+    previousLocations?: string[];
 
     // Professional & Identity
     profession?: string;
@@ -193,6 +197,11 @@ export interface UserProfile {
     englishEnvironment?: string;
     schedule?: string;
     preferences?: string;
+
+    // UI Customization
+    profileTileOrder?: Record<string, string[]>; // e.g., { 'basic': ['section-contact', 'section-location', 'section-personal'] }
+    tutorDashboardTileOrder?: string[];
+    studentDashboardTileOrder?: string[];
 
     isArchived?: boolean;
 }

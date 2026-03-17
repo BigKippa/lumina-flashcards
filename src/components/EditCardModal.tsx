@@ -138,16 +138,23 @@ export function EditCardModal({ card, onSave, onCancel, settings, apiKey }: Edit
 
                     const result = await model.generateContent(prompt);
                     const response = await result.response;
-                    const text = response.text().replace(/```json/g, '').replace(/```/g, '').trim();
-                    const data = JSON.parse(text);
+                    const text = response.text();
+                    
+                    // Robustly extract JSON block if wrapped in markdown
+                    let jsonStr = text;
+                    const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+                    if (jsonMatch) {
+                        jsonStr = jsonMatch[1];
+                    }
+                    const data = JSON.parse(jsonStr.trim());
 
-                    // Only update fields that are currently empty
+                    // Overwrite fields with AI data, keep previous if AI didn't return it
                     setEditingCard(prev => ({
                         ...prev,
-                        definition: prev.definition || data.definition || '',
-                        example: prev.example || data.example || '',
-                        phonetic: prev.phonetic || data.phonetic || '',
-                        category: prev.category || data.category || 'Other'
+                        definition: data.definition || prev.definition || '',
+                        example: data.example || prev.example || '',
+                        phonetic: data.phonetic || prev.phonetic || '',
+                        category: data.category || prev.category || 'Other'
                     }));
 
                     setIsAiPopulated(true);
@@ -171,7 +178,7 @@ export function EditCardModal({ card, onSave, onCancel, settings, apiKey }: Edit
     };
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
             <div className="w-full max-w-lg bg-background border border-border rounded-2xl p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto animate-in zoom-in-95">
                 <button
                     onClick={onCancel}

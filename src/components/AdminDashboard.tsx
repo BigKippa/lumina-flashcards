@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Word, Deck } from '../data/vocabulary';
-import { Search, Trash2, Edit2, ArrowLeft, Plus, Image as ImageIcon, Video, Volume2, FolderPlus, Library, Lock, Key, Users, UserPlus, GraduationCap, Sparkles, Shield, User, X, Check, AlertTriangle, Merge, Archive, RotateCcw, Settings, Upload, Download, Beaker } from 'lucide-react';
+import { Search, Trash2, Edit2, ArrowLeft, Plus, Image as ImageIcon, Video, Volume2, FolderPlus, Library, Lock, Key, Users, UserPlus, GraduationCap, Sparkles, Shield, User, X, Check, AlertTriangle, Merge, Archive, RotateCcw, Settings, Upload, Download, Beaker, Eye, Save } from 'lucide-react';
 import { CategoryManager } from './CategoryManager';
 import { EditCardModal } from './EditCardModal';
 import { BulkGeneratorModal } from './BulkGeneratorModal';
 import { DuplicateResolverModal } from './DuplicateResolverModal';
+import Flashcard from './Flashcard';
 import { AppSettings, UserProfile, UserRole, Ticket } from '../types';
 
 interface AdminDashboardProps {
@@ -17,6 +18,8 @@ interface AdminDashboardProps {
     onBack: () => void;
 
     onDeleteCard: (id: string) => void;
+    onBulkDeleteCards: (ids: string[]) => void;
+    onBulkArchiveCards: (ids: string[], isArchiving: boolean) => void;
     onArchiveDeck: (id: string) => void;
     onUnarchiveDeck: (id: string) => void;
     onEdit: (updatedWord: Word) => void;
@@ -26,19 +29,33 @@ interface AdminDashboardProps {
     onMoveCard: (cardId: string, newDeckId: string) => void;
     settings: AppSettings;
     onSaveSettings: (settings: AppSettings) => void;
+    userRole?: UserRole;
+    onBrowsePublic?: () => void;
 }
 
-export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabChange, onBack, onDeleteCard, onEdit, onSelectDeck, onCreateDeck, onBulkAdd, onMoveCard, settings, onSaveSettings, onArchiveDeck, onUnarchiveDeck }: AdminDashboardProps) {
+export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabChange, onBack, onDeleteCard, onBulkDeleteCards, onBulkArchiveCards, onEdit, onSelectDeck, onCreateDeck, onBulkAdd, onMoveCard, settings, onSaveSettings, onArchiveDeck, onUnarchiveDeck, userRole, onBrowsePublic }: AdminDashboardProps) {
+    void onMoveCard; // Bypass unused variable compiler error
     const { t } = useTranslation();
     const [searchTerm, setSearchTerm] = useState('');
     const [editingCard, setEditingCard] = useState<Word | null>(null);
+    const [previewCard, setPreviewCard] = useState<Word | null>(null);
+    const [isPreviewFlipped, setIsPreviewFlipped] = useState(false);
     const [isCreatingDeck, setIsCreatingDeck] = useState(false);
     const [newDeckTitle, setNewDeckTitle] = useState('');
     const [newDeckDesc, setNewDeckDesc] = useState('');
     const [newDeckIsPublic, setNewDeckIsPublic] = useState(false);
-    const [sortBy, _setSortBy] = useState<'az' | 'za'>('az');
-    const [filterCategory, _setFilterCategory] = useState<string>('all');
+    const [sortBy, setSortBy] = useState<'az' | 'za'>('az');
+    const [filterCategory, setFilterCategory] = useState<string>('all');
     const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
+    const [showArchivedCards, setShowArchivedCards] = useState(false);
+    const [selectedCardIds, setSelectedCardIds] = useState<Set<string>>(new Set());
+    const [showMissingOnly, setShowMissingOnly] = useState(false);
+    const [localApiKey, setLocalApiKey] = useState(settings.geminiApiKey || '');
+    const [isKeySaved, setIsKeySaved] = useState(false);
+
+    useEffect(() => {
+        setLocalApiKey(settings.geminiApiKey || '');
+    }, [settings.geminiApiKey]);
 
     // Section State (Now Lifted)
     // const [activeTab, setActiveTab] = useState<'menu' | 'decks' | 'users' | 'tickets'>('menu');
@@ -432,12 +449,17 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
         setResolvingDuplicateGroup(null);
     };
 
+    const isMissingFields = (c: Word) => !c.word?.trim() || !c.definition?.trim() || !c.category?.trim() || !c.level?.trim() || !c.phonetic?.trim() || !c.example?.trim();
+
+    const missingDataCount = cards.filter(c => !c.isArchived && isMissingFields(c)).length;
+
     const filteredCards = cards
         .filter(card => {
             const matchesSearch = card.word.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 card.definition.toLowerCase().includes(searchTerm.toLowerCase());
             const matchesCategory = filterCategory === 'all' || card.category === filterCategory;
-            return matchesSearch && matchesCategory;
+            const matchesMissing = showMissingOnly ? isMissingFields(card) : true;
+            return matchesSearch && matchesCategory && matchesMissing;
         })
         .sort((a, b) => {
             if (sortBy === 'az') return a.word.localeCompare(b.word);
@@ -563,18 +585,20 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
 
                 {activeTab === 'menu' && (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <button
-                            onClick={() => onTabChange('users')}
-                            className="flex flex-col items-center p-8 rounded-2xl bg-color1 text-color1-foreground border border-color5/20 transition-all group hover:scale-105 shadow-md hover:bg-color1/80"
-                        >
-                            <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mb-6 group-hover:bg-white/40 transition-colors">
-                                <Users className="w-8 h-8" />
-                            </div>
-                            <h3 className="text-xl font-bold mb-2">Manage Users</h3>
-                            <p className="opacity-80 text-center text-sm">
-                                Create, edit, and remove user accounts.
-                            </p>
-                        </button>
+                        {userRole === 'admin' && (
+                            <button
+                                onClick={() => onTabChange('users')}
+                                className="flex flex-col items-center p-8 rounded-2xl bg-color1 text-color1-foreground border border-color5/20 transition-all group hover:scale-105 shadow-md hover:bg-color1/80"
+                            >
+                                <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mb-6 group-hover:bg-white/40 transition-colors">
+                                    <Users className="w-8 h-8" />
+                                </div>
+                                <h3 className="text-xl font-bold mb-2">Manage Users</h3>
+                                <p className="opacity-80 text-center text-sm">
+                                    Create, edit, and remove user accounts.
+                                </p>
+                            </button>
+                        )}
 
                         <button
                             onClick={() => onTabChange('decks')}
@@ -1001,41 +1025,6 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                 )}
                             </div>
 
-                            {/* Category Customization for All Users */}
-                            <CategoryManager settings={settings} onSave={onSaveSettings} />
-
-                            <div className="mt-12 pt-8 border-t border-border">
-                                <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
-                                    <Lock className="w-6 h-6 text-primary" />
-                                    {t('admin.system.title')}
-                                </h2>
-
-                                <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
-                                    <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                                        <Key className="w-5 h-5 text-primary" />
-                                        {t('admin.system.api_keys')}
-                                    </h3>
-
-                                    <div className="max-w-xl">
-                                        <label className="block text-sm font-medium text-foreground mb-2">
-                                            {t('admin.system.gemini_label')}
-                                        </label>
-                                        <div className="flex gap-2">
-                                            <input
-                                                type="password"
-                                                value={settings.geminiApiKey || ''}
-                                                onChange={(e) => onSaveSettings({ ...settings, geminiApiKey: e.target.value })}
-                                                placeholder={t('admin.system.gemini_placeholder')}
-                                                className="flex-1 px-4 py-3 rounded-xl bg-input border border-border text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-mono text-sm"
-                                            />
-                                        </div>
-                                        <p className="text-xs text-muted-foreground mt-2">
-                                            {t('admin.system.gemini_hint')}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
                             {/* Create Deck Modal */}
                             {isCreatingDeck && (
                                 <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
@@ -1100,6 +1089,62 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                 </div>
                             )}
                         </>
+                    )
+                }
+
+                {
+                    activeTab === 'settings' && (
+                        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            {/* Category Customization for All Users */}
+                            <CategoryManager settings={settings} onSave={onSaveSettings} />
+
+                            <div className="mt-12 pt-8 border-t border-border">
+                                <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
+                                    <Lock className="w-6 h-6 text-primary" />
+                                    {t('admin.system.title')}
+                                </h2>
+
+                                <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+                                    <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                                        <Key className="w-5 h-5 text-primary" />
+                                        {t('admin.system.api_keys')}
+                                    </h3>
+
+                                    <div className="max-w-xl">
+                                        <label className="block text-sm font-medium text-foreground mb-2">
+                                            {t('admin.system.gemini_label')}
+                                        </label>
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="password"
+                                                value={localApiKey}
+                                                onChange={(e) => {
+                                                    setLocalApiKey(e.target.value);
+                                                    setIsKeySaved(false);
+                                                }}
+                                                placeholder={t('admin.system.gemini_placeholder')}
+                                                className="flex-1 px-4 py-3 rounded-xl bg-input border border-border text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-mono text-sm"
+                                            />
+                                            <button
+                                                onClick={() => {
+                                                    onSaveSettings({ ...settings, geminiApiKey: localApiKey });
+                                                    setIsKeySaved(true);
+                                                    setTimeout(() => setIsKeySaved(false), 2000);
+                                                }}
+                                                disabled={localApiKey === (settings.geminiApiKey || '')}
+                                                className="px-6 py-3 bg-primary text-primary-foreground font-bold rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                            >
+                                                {isKeySaved ? <Check className="w-5 h-5" /> : <Save className="w-5 h-5" />}
+                                                {isKeySaved ? 'Saved' : 'Save Key'}
+                                            </button>
+                                        </div>
+                                        <p className="text-xs text-muted-foreground mt-2">
+                                            {t('admin.system.gemini_hint')}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     )
                 }
 
@@ -1568,12 +1613,50 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                 {
                     activeTab === 'cards' && (
                         <div className="space-y-6">
+                            {/* Alert Notification Bar */}
+                            {missingDataCount > 0 && (
+                                <div className={`mb-6 border rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm transition-colors ${showMissingOnly ? 'bg-amber-100 border-amber-300 dark:bg-amber-900/40 dark:border-amber-700' : 'bg-amber-50 border-amber-200 dark:bg-amber-900/10 dark:border-amber-800/30 hover:bg-amber-100 dark:hover:bg-amber-900/20'}`}>
+                                    <div className="flex items-center gap-3">
+                                        <div className={`p-2 rounded-lg shrink-0 ${showMissingOnly ? 'bg-amber-300 text-amber-900 dark:bg-amber-700 dark:text-amber-100' : 'bg-amber-200 text-amber-800 dark:bg-amber-800 dark:text-amber-200'}`}>
+                                            <Sparkles className="w-6 h-6" />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-bold text-amber-900 dark:text-amber-100">AI Auto-Fill Suggestion</h3>
+                                            <p className="text-sm font-medium text-amber-800/80 dark:text-amber-100/80 mt-1">
+                                                You have {missingDataCount} flashcard{missingDataCount === 1 ? '' : 's'} missing essential fields (Word, IPA, Definition, Example, Category, or Level). Consider using AI to automatically fill these in!
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-2 w-full sm:w-auto shrink-0">
+                                        <button
+                                            onClick={() => setShowMissingOnly(!showMissingOnly)}
+                                            className={`px-4 py-2 text-sm font-bold rounded-xl transition-colors whitespace-nowrap flex-1 sm:flex-none ${showMissingOnly ? 'bg-amber-800 text-amber-50 hover:bg-amber-900 dark:bg-amber-200 dark:text-amber-900' : 'bg-white text-amber-900 border border-amber-300 shadow-sm hover:bg-amber-50 dark:bg-amber-900/50 dark:border-amber-700 dark:text-amber-100 dark:hover:bg-amber-800/50'}`}
+                                        >
+                                            {showMissingOnly ? 'Show All Cards' : 'View Missing'}
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                // Pre-select missing cards and open bulk editor
+                                                const missingIds = cards.filter(c => !c.isArchived && isMissingFields(c)).map(c => String(c.id));
+                                                setSelectedCardIds(new Set(missingIds));
+                                                setShowMissingOnly(true);
+                                                alert("Select the missing cards and click 'Edit' or open them individually to use the AI Fill feature. Bulk AI fill is coming soon!");
+                                            }}
+                                            className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl text-sm transition-colors shadow-sm flex items-center justify-center gap-2 flex-1 sm:flex-none"
+                                        >
+                                            <Sparkles className="w-4 h-4" />
+                                            Auto-Fill using A.I.
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
                             <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center bg-card p-6 rounded-2xl border border-border shadow-sm">
                                 <div>
                                     <h2 className="text-xl font-bold text-foreground">Manage Flashcards</h2>
                                     <p className="text-muted-foreground text-sm">View and edit all cards across decks</p>
                                 </div>
-                                <div className="flex gap-2 w-full sm:w-auto">
+                                <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                                     <div className="relative flex-1 sm:w-64">
                                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                                         <input
@@ -1583,6 +1666,32 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                             onChange={(e) => setSearchTerm(e.target.value)}
                                             className="w-full pl-9 pr-4 py-2 rounded-xl bg-secondary/50 border-transparent focus:bg-input focus:border-primary outline-none transition-all"
                                         />
+                                    </div>
+                                    <select
+                                        value={filterCategory}
+                                        onChange={(e) => setFilterCategory(e.target.value)}
+                                        className="px-3 py-2 rounded-xl bg-secondary/50 border-transparent focus:bg-input focus:border-primary outline-none transition-all text-sm"
+                                    >
+                                        <option value="all">All Categories</option>
+                                        {Object.keys(settings.categories || {}).map(catName => (
+                                            <option key={catName} value={catName}>{catName}</option>
+                                        ))}
+                                    </select>
+                                    <div className="flex bg-secondary/50 p-1 rounded-xl gap-1">
+                                        <button
+                                            onClick={() => setSortBy('az')}
+                                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${sortBy === 'az' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                                            title="Sort A to Z"
+                                        >
+                                            A-Z
+                                        </button>
+                                        <button
+                                            onClick={() => setSortBy('za')}
+                                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${sortBy === 'za' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                                            title="Sort Z to A"
+                                        >
+                                            Z-A
+                                        </button>
                                     </div>
                                     <button
                                         onClick={() => duplicates.length > 0 && setResolvingDuplicateGroup(duplicates[0])}
@@ -1635,11 +1744,104 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                 </div>
                             )}
 
-                            <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
+                            {filteredCards.length === 0 && searchTerm === '' ? (
+                                <div className="flex flex-col items-center justify-center py-20 px-4 text-center bg-card border border-border rounded-2xl shadow-sm">
+                                    <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-6">
+                                        <Library className="w-10 h-10 text-primary" />
+                                    </div>
+                                    <h3 className="text-2xl font-bold mb-3 text-foreground">Let's start filling your library!</h3>
+                                    <p className="text-muted-foreground mb-8 max-w-md text-base">
+                                        You don't have any flashcards yet. Create your own custom cards or explore publicly available decks from the community.
+                                    </p>
+                                    <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                                        {onBrowsePublic && (
+                                            <button
+                                                onClick={onBrowsePublic}
+                                                className="flex items-center justify-center gap-2 px-6 py-3 bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-xl font-bold transition-all shadow-sm hover:shadow-md"
+                                            >
+                                                <Library className="w-5 h-5" />
+                                                Browse Public Decks
+                                            </button>
+                                        )}
+                                        <button
+                                            onClick={() => setIsBulkModalOpen(true)}
+                                            className="flex items-center justify-center gap-2 px-6 py-3 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl font-bold transition-all shadow-lg shadow-primary/20 hover:shadow-primary/40"
+                                        >
+                                            <Plus className="w-5 h-5" />
+                                            Create New Cards
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                {selectedCardIds.size > 0 && (
+                                    <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 flex items-center justify-between animate-in fade-in slide-in-from-top-2">
+                                        <div className="flex items-center gap-3">
+                                            <span className="bg-primary text-primary-foreground text-sm font-bold px-2 py-0.5 rounded-md">
+                                                {selectedCardIds.size}
+                                            </span>
+                                            <span className="text-sm font-medium text-foreground">Cards Selected</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => {
+                                                    const isArchiving = !Array.from(selectedCardIds).every(id => 
+                                                        cards.find(c => String(c.id) === id)?.isArchived
+                                                    );
+                                                    if (window.confirm(`Are you sure you want to ${isArchiving ? 'archive' : 'unarchive'} ${selectedCardIds.size} cards?`)) {
+                                                        onBulkArchiveCards(Array.from(selectedCardIds), isArchiving);
+                                                        setSelectedCardIds(new Set());
+                                                    }
+                                                }}
+                                                className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-amber-600 bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors border border-amber-200"
+                                            >
+                                                <Archive className="w-4 h-4" />
+                                                Archive
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    if (window.confirm(`Are you sure you want to PERMANENTLY delete ${selectedCardIds.size} cards?`)) {
+                                                        onBulkDeleteCards(Array.from(selectedCardIds));
+                                                        setSelectedCardIds(new Set());
+                                                    }
+                                                }}
+                                                className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors border border-red-200"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                                
+                                <div className="flex justify-end mb-2">
+                                    <button
+                                        onClick={() => setShowArchivedCards(!showArchivedCards)}
+                                        className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors border ${showArchivedCards ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-secondary text-muted-foreground border-transparent hover:bg-secondary/80'}`}
+                                    >
+                                        <Archive className="w-4 h-4" />
+                                        {showArchivedCards ? 'Hide Archived' : 'Show Archived'}
+                                    </button>
+                                </div>
+                                <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
                                 <div className="overflow-x-auto">
                                     <table className="w-full text-left border-collapse">
                                         <thead>
                                             <tr className="bg-secondary/30 border-b border-border text-sm text-muted-foreground">
+                                                <th className="p-4 w-12">
+                                                    <input 
+                                                        type="checkbox" 
+                                                        className="rounded border-border w-4 h-4 text-primary focus:ring-primary accent-primary"
+                                                        checked={filteredCards.length > 0 && selectedCardIds.size === filteredCards.length}
+                                                        onChange={(e) => {
+                                                            if (e.target.checked) {
+                                                                setSelectedCardIds(new Set(filteredCards.map(c => String(c.id))));
+                                                            } else {
+                                                                setSelectedCardIds(new Set());
+                                                            }
+                                                        }}
+                                                    />
+                                                </th>
                                                 <th className="p-4 font-semibold">Word</th>
                                                 <th className="p-4 font-semibold">Definition</th>
                                                 <th className="p-4 font-semibold">Category</th>
@@ -1650,54 +1852,58 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                         <tbody className="divide-y divide-border">
                                             {filteredCards.map(card => {
                                                 const currentDeck = decks.find(d => d.cards.some(c => c.id === card.id));
+                                                const isSelected = selectedCardIds.has(String(card.id));
                                                 return (
-                                                    <tr key={card.id} className="hover:bg-secondary/10 transition-colors group">
-                                                        <td className="p-4 font-medium text-foreground">{card.word}</td>
+                                                    <tr key={card.id} className={`transition-colors group ${isSelected ? 'bg-primary/5' : 'hover:bg-secondary/10'}`}>
                                                         <td className="p-4">
-                                                            <input
-                                                                type="text"
-                                                                defaultValue={card.definition}
-                                                                onBlur={(e) => {
-                                                                    if (e.target.value !== card.definition) {
-                                                                        onEdit({ ...card, definition: e.target.value });
+                                                            <input 
+                                                                type="checkbox" 
+                                                                className="rounded border-border w-4 h-4 text-primary focus:ring-primary accent-primary"
+                                                                checked={isSelected}
+                                                                onChange={(e) => {
+                                                                    const newSet = new Set(selectedCardIds);
+                                                                    if (e.target.checked) {
+                                                                        newSet.add(String(card.id));
+                                                                    } else {
+                                                                        newSet.delete(String(card.id));
                                                                     }
+                                                                    setSelectedCardIds(newSet);
                                                                 }}
-                                                                onKeyDown={(e) => {
-                                                                    if (e.key === 'Enter') {
-                                                                        e.currentTarget.blur();
-                                                                    }
-                                                                }}
-                                                                className="w-full bg-transparent border-b border-transparent hover:border-border focus:border-primary outline-none transition-colors text-muted-foreground"
                                                             />
                                                         </td>
-                                                        <td className="p-4">
-                                                            <select
-                                                                value={card.category || 'Vocabulary'}
-                                                                onChange={(e) => onEdit({ ...card, category: e.target.value })}
-                                                                className="bg-transparent border-none outline-none cursor-pointer hover:text-primary transition-colors text-sm font-medium"
-                                                            >
-                                                                {Object.keys(settings.categories).map(cat => (
-                                                                    <option key={cat} value={cat}>{cat}</option>
-                                                                ))}
-                                                            </select>
+                                                        <td className="p-4 font-medium text-foreground max-w-[200px] truncate" title={card.word}>
+                                                            <div className="flex items-center gap-2">
+                                                                {card.word}
+                                                                {card.isArchived && <span className="text-[10px] uppercase font-bold bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded">Archived</span>}
+                                                            </div>
                                                         </td>
                                                         <td className="p-4">
-                                                            <select
-                                                                value={currentDeck?.id || ''}
-                                                                onChange={(e) => {
-                                                                    if (currentDeck && e.target.value !== currentDeck.id) {
-                                                                        onMoveCard(String(card.id), e.target.value);
-                                                                    }
-                                                                }}
-                                                                className="bg-transparent border-none outline-none cursor-pointer hover:text-primary transition-colors text-sm text-muted-foreground w-32 truncate"
-                                                            >
-                                                                {decks.map(d => (
-                                                                    <option key={d.id} value={d.id}>{d.title}</option>
-                                                                ))}
-                                                            </select>
+                                                            <span className="text-muted-foreground w-full block truncate max-w-[300px]" title={card.definition}>
+                                                                {card.definition}
+                                                            </span>
+                                                        </td>
+                                                        <td className="p-4">
+                                                            <span className="text-sm font-medium text-muted-foreground">
+                                                                {card.category || 'Vocabulary'}
+                                                            </span>
+                                                        </td>
+                                                        <td className="p-4">
+                                                            <span className="text-sm text-muted-foreground block truncate max-w-[150px]" title={currentDeck?.title || 'No Deck'}>
+                                                                {currentDeck?.title || 'No Deck'}
+                                                            </span>
                                                         </td>
                                                         <td className="p-4 text-right">
-                                                            <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <div className="flex justify-end gap-2 transition-opacity">
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setPreviewCard(card);
+                                                                        setIsPreviewFlipped(false);
+                                                                    }}
+                                                                    className="p-2 rounded-lg text-secondary-foreground hover:bg-secondary/80 transition-colors"
+                                                                    title="View as Flashcard"
+                                                                >
+                                                                    <Eye className="w-4 h-4" />
+                                                                </button>
                                                                 <button
                                                                     onClick={() => setEditingCard(card)}
                                                                     className="p-2 rounded-lg text-primary hover:bg-primary/10 transition-colors"
@@ -1723,7 +1929,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                             })}
                                             {filteredCards.length === 0 && (
                                                 <tr>
-                                                    <td colSpan={5} className="p-8 text-center text-muted-foreground">
+                                                    <td colSpan={6} className="p-8 text-center text-muted-foreground">
                                                         No cards found matching "{searchTerm}"
                                                     </td>
                                                 </tr>
@@ -1731,9 +1937,9 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                         </tbody>
                                     </table>
                                 </div>
-                            </div>
-
-
+                                </div>
+                                </div>
+                            )}
                             {/* Edit Modal (Reused) */}
                             {editingCard && (
                                 <EditCardModal
@@ -1744,6 +1950,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                     }}
                                     onCancel={() => setEditingCard(null)}
                                     settings={settings}
+                                    apiKey={settings.geminiApiKey || ''}
                                 />
                             )}
 
@@ -1829,7 +2036,46 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                     }}
                     apiKey={settings.geminiApiKey}
                 />
-            </div >
+
+                {/* View as Flashcard Preview Modal */}
+                {previewCard && (
+                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+                        <div className="bg-background rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col relative animate-in fade-in zoom-in-95 duration-200">
+                            <div className="flex items-center justify-between p-6 border-b border-border">
+                                <div>
+                                    <h3 className="text-xl font-bold text-foreground">Card Preview</h3>
+                                    <p className="text-sm text-muted-foreground">This is how learners see the card.</p>
+                                </div>
+                                <button
+                                    onClick={() => setPreviewCard(null)}
+                                    className="p-2 hover:bg-secondary rounded-full transition-colors"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+                            
+                            <div className="p-8 flex justify-center bg-secondary/10">
+                                <Flashcard
+                                    word={previewCard}
+                                    isFlipped={isPreviewFlipped}
+                                    onFlip={() => setIsPreviewFlipped(!isPreviewFlipped)}
+                                    settings={settings}
+                                />
+                            </div>
+
+                            <div className="p-4 bg-muted/30 border-t border-border flex justify-between items-center text-sm font-medium text-muted-foreground">
+                                <span>Category: {previewCard.category || 'Vocabulary'}</span>
+                                <button
+                                    onClick={() => setIsPreviewFlipped(!isPreviewFlipped)}
+                                    className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-bold hover:bg-primary/90 transition-colors shadow-sm"
+                                >
+                                    {isPreviewFlipped ? 'Flip to Front' : 'Flip to Back'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
         );
     }
 
@@ -1855,49 +2101,190 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                 </div>
             </div>
 
-            <div className="relative mb-6">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <input
-                    type="text"
-                    placeholder="Search words in this deck..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-12 pr-4 py-4 rounded-xl bg-card border border-border text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-muted-foreground/50"
-                />
+            <div className="flex flex-col sm:flex-row gap-3 mb-6">
+                <div className="relative flex-1">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <input
+                        type="text"
+                        placeholder="Search words in this deck..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full pl-12 pr-4 py-4 rounded-xl bg-card border border-border text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-muted-foreground/50"
+                    />
+                </div>
+                <select
+                    value={filterCategory}
+                    onChange={(e) => setFilterCategory(e.target.value)}
+                    className="px-4 py-4 rounded-xl bg-card border border-border text-foreground outline-none focus:ring-1 focus:ring-primary transition-all text-sm w-full sm:w-48"
+                >
+                    <option value="all">All Categories</option>
+                    {Object.keys(settings.categories || {}).map(catName => (
+                        <option key={catName} value={catName}>{catName}</option>
+                    ))}
+                </select>
+                <div className="flex bg-card p-1 rounded-xl gap-1 border border-border">
+                    <button
+                        onClick={() => setSortBy('az')}
+                        className={`px-4 py-3 rounded-lg text-sm font-medium transition-all ${sortBy === 'az' ? 'bg-secondary/50 shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                        title="Sort A to Z"
+                    >
+                        A-Z
+                    </button>
+                    <button
+                        onClick={() => setSortBy('za')}
+                        className={`px-4 py-3 rounded-lg text-sm font-medium transition-all ${sortBy === 'za' ? 'bg-secondary/50 shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                        title="Sort Z to A"
+                    >
+                        Z-A
+                    </button>
+                </div>
             </div>
+
+            <div className="space-y-4">
+                {selectedCardIds.size > 0 && (
+                    <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 flex items-center justify-between animate-in fade-in slide-in-from-top-2">
+                        <div className="flex items-center gap-3">
+                            <span className="bg-primary text-primary-foreground text-sm font-bold px-2 py-0.5 rounded-md">
+                                {selectedCardIds.size}
+                            </span>
+                            <span className="text-sm font-medium text-foreground">Cards Selected</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => {
+                                    const isArchiving = !Array.from(selectedCardIds).every(id => 
+                                        cards.find(c => String(c.id) === id)?.isArchived
+                                    );
+                                    if (window.confirm(`Are you sure you want to ${isArchiving ? 'archive' : 'unarchive'} ${selectedCardIds.size} cards?`)) {
+                                        onBulkArchiveCards(Array.from(selectedCardIds), isArchiving);
+                                        setSelectedCardIds(new Set());
+                                    }
+                                }}
+                                className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-amber-600 bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors border border-amber-200"
+                            >
+                                <Archive className="w-4 h-4" />
+                                Archive
+                            </button>
+                            <button
+                                onClick={() => {
+                                    if (window.confirm(`Are you sure you want to PERMANENTLY delete ${selectedCardIds.size} cards?`)) {
+                                        onBulkDeleteCards(Array.from(selectedCardIds));
+                                        setSelectedCardIds(new Set());
+                                    }
+                                }}
+                                className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors border border-red-200"
+                            >
+                                <Trash2 className="w-4 h-4" />
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                )}
+                
+                <div className="flex justify-between items-center mb-2">
+                    <div className="flex items-center gap-2">
+                        <input
+                            type="checkbox"
+                            className="rounded border-border w-4 h-4 text-primary focus:ring-primary accent-primary ml-4"
+                            checked={
+                                cards.filter(c => decks.find(d => d.id === activeDeckId)?.cards.some(dc => dc.id === c.id) && (!c.isArchived || showArchivedCards)).length > 0 &&
+                                selectedCardIds.size === cards.filter(c => decks.find(d => d.id === activeDeckId)?.cards.some(dc => dc.id === c.id) && (!c.isArchived || showArchivedCards)).length
+                            }
+                            onChange={(e) => {
+                                const visibleDeckCards = cards.filter(c => decks.find(d => d.id === activeDeckId)?.cards.some(dc => dc.id === c.id) && (!c.isArchived || showArchivedCards));
+                                if (e.target.checked) {
+                                    setSelectedCardIds(new Set(visibleDeckCards.map(c => String(c.id))));
+                                } else {
+                                    setSelectedCardIds(new Set());
+                                }
+                            }}
+                        />
+                        <span className="text-sm font-medium text-muted-foreground">Select All</span>
+                    </div>
+                    <button
+                        onClick={() => setShowArchivedCards(!showArchivedCards)}
+                        className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors border ${showArchivedCards ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-secondary text-muted-foreground border-transparent hover:bg-secondary/80'}`}
+                    >
+                        <Archive className="w-4 h-4" />
+                        {showArchivedCards ? 'Hide Archived' : 'Show Archived'}
+                    </button>
+                </div>
 
             <div className="grid gap-4">
                 {cards.filter(card => {
                     const inDeck = decks.find(d => d.id === activeDeckId)?.cards.some(dc => dc.id === card.id);
                     const matchesSearch = card.word.toLowerCase().includes(searchTerm.toLowerCase()) || card.definition.toLowerCase().includes(searchTerm.toLowerCase());
-                    return inDeck && matchesSearch;
-                }).map(card => (
-                    <div key={card.id} className="p-4 rounded-xl bg-card border border-border hover:border-primary/50 transition-colors flex items-center justify-between group">
-                        <div className="flex-1 min-w-0 mr-4">
-                            <div className="flex items-center gap-3 mb-1">
-                                <h3 className="text-xl font-bold text-foreground truncate">{card.word}</h3>
-                                {card.level && (
-                                    <span className="px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground text-xs font-bold border border-border">
-                                        {card.level}
-                                    </span>
-                                )}
-                                <div className="flex gap-1">
-                                    {card.imageUrl && <ImageIcon className="w-4 h-4 text-primary" />}
-                                    {card.audioUrl && <Volume2 className="w-4 h-4 text-primary" />}
-                                    {card.videoUrl && <Video className="w-4 h-4 text-primary" />}
+                    const matchesCategory = filterCategory === 'all' || card.category === filterCategory;
+                    const showArchived = showArchivedCards || !card.isArchived;
+                    return inDeck && matchesSearch && matchesCategory && showArchived;
+                }).sort((a, b) => {
+                    if (sortBy === 'az') return a.word.localeCompare(b.word);
+                    if (sortBy === 'za') return b.word.localeCompare(a.word);
+                    return 0;
+                }).map(card => {
+                    const isSelected = selectedCardIds.has(String(card.id));
+                    return (
+                    <div key={card.id} className={`p-4 rounded-xl bg-card border hover:border-primary/50 transition-colors flex items-center justify-between group ${isSelected ? 'border-primary/50 bg-primary/5' : 'border-border'}`}>
+                        <div className="flex-1 min-w-0 mr-4 flex items-start gap-4">
+                            <input 
+                                type="checkbox" 
+                                className="rounded border-border w-4 h-4 text-primary focus:ring-primary accent-primary mt-1.5 shrink-0"
+                                checked={isSelected}
+                                onChange={(e) => {
+                                    const newSet = new Set(selectedCardIds);
+                                    if (e.target.checked) {
+                                        newSet.add(String(card.id));
+                                    } else {
+                                        newSet.delete(String(card.id));
+                                    }
+                                    setSelectedCardIds(newSet);
+                                }}
+                            />
+                            <div>
+                                <div className="flex items-center gap-3 mb-1">
+                                    <h3 className="text-xl font-bold text-foreground truncate">{card.word}</h3>
+                                    {card.isArchived && <span className="text-[10px] uppercase font-bold bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded">Archived</span>}
+                                    {card.level && (
+                                        <span className="px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground text-xs font-bold border border-border">
+                                            {card.level}
+                                        </span>
+                                    )}
+                                    <div className="flex gap-1">
+                                        {card.imageUrl && <ImageIcon className="w-4 h-4 text-primary" />}
+                                        {card.audioUrl && <Volume2 className="w-4 h-4 text-primary" />}
+                                        {card.videoUrl && <Video className="w-4 h-4 text-primary" />}
+                                    </div>
                                 </div>
+                                <p className="text-muted-foreground/80 line-clamp-1">{card.definition}</p>
                             </div>
-                            <p className="text-muted-foreground/80 line-clamp-1">{card.definition}</p>
                         </div>
-
+                        <div className="flex items-center gap-2 transition-opacity">
+                            <button
+                                onClick={() => {
+                                    setPreviewCard(card);
+                                    setIsPreviewFlipped(false);
+                                }}
+                                className="p-2 rounded-lg text-secondary-foreground hover:bg-secondary/80 transition-colors"
+                                title="View as Flashcard"
+                            >
+                                <Eye className="w-5 h-5" />
+                            </button>
+                            <button
+                                onClick={() => setEditingCard(card)}
+                                className="p-2 rounded-lg text-primary hover:bg-primary/10 transition-colors"
+                                title="Edit"
+                            >
+                                <Edit2 className="w-5 h-5" />
+                            </button>
+                        </div>
                     </div>
-
-                ))}
+                )})}
                 {cards.filter(c => decks.find(d => d.id === activeDeckId)?.cards.some(dc => dc.id === c.id)).length === 0 && (
                     <div className="col-span-full py-12 text-center border-2 border-dashed border-border rounded-xl">
                         <p className="text-muted-foreground">No cards in this deck.</p>
                     </div>
                 )}
+            </div>
             </div>
 
             {/* Test Mode Add Student Modal */}
@@ -1959,6 +2346,62 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* View as Flashcard Preview Modal */}
+            {previewCard && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+                    <div className="bg-background rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col relative animate-in fade-in zoom-in-95 duration-200">
+                        {/* Header */}
+                        <div className="flex items-center justify-between p-6 border-b border-border">
+                            <div>
+                                <h3 className="text-xl font-bold text-foreground">Card Preview</h3>
+                                <p className="text-sm text-muted-foreground">This is how learners see the card.</p>
+                            </div>
+                            <button
+                                onClick={() => setPreviewCard(null)}
+                                className="p-2 hover:bg-secondary rounded-full transition-colors"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                        
+                        {/* Card Container */}
+                        <div className="p-8 flex justify-center bg-secondary/10">
+                            <Flashcard
+                                word={previewCard}
+                                isFlipped={isPreviewFlipped}
+                                onFlip={() => setIsPreviewFlipped(!isPreviewFlipped)}
+                                settings={settings}
+                            />
+                        </div>
+
+                        {/* Footer details */}
+                        <div className="p-4 bg-muted/30 border-t border-border flex justify-between items-center text-sm font-medium text-muted-foreground">
+                            <span>Category: {previewCard.category || 'Vocabulary'}</span>
+                            <button
+                                onClick={() => setIsPreviewFlipped(!isPreviewFlipped)}
+                                className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-bold hover:bg-primary/90 transition-colors shadow-sm"
+                            >
+                                {isPreviewFlipped ? 'Flip to Front' : 'Flip to Back'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Edit Card Modal */}
+            {editingCard && (
+                <EditCardModal
+                    card={editingCard}
+                    settings={settings}
+                    apiKey={settings.geminiApiKey || ''}
+                    onSave={(updated) => {
+                        onEdit(updated);
+                        setEditingCard(null);
+                    }}
+                    onCancel={() => setEditingCard(null)}
+                />
             )}
         </div >
     );

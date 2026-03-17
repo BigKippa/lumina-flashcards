@@ -195,8 +195,15 @@ export const AddContentModal: React.FC<AddContentModalProps> = ({
 
                     const result = await model.generateContent(prompt);
                     const response = await result.response;
-                    const text = response.text().replace(/```json/g, '').replace(/```/g, '').trim();
-                    const data = JSON.parse(text);
+                    const text = response.text();
+                    
+                    // Robustly extract JSON block if wrapped in markdown
+                    let jsonStr = text;
+                    const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+                    if (jsonMatch) {
+                        jsonStr = jsonMatch[1];
+                    }
+                    const data = JSON.parse(jsonStr.trim());
 
                     setNewCard(prev => ({
                         ...prev,
