@@ -472,7 +472,7 @@ function CardEditor({
     };
 
     return (
-        <div className="relative h-full flex flex-col">
+        <div className="relative">
             {isGenerating && (
                 <div className="absolute inset-0 z-10 bg-background/50 backdrop-blur-[2px] flex flex-col items-center justify-center rounded-xl overflow-hidden">
                     <div className="bg-background shadow-xl border border-border p-6 rounded-2xl flex flex-col items-center max-w-[90%] text-center animate-in zoom-in duration-300">
@@ -482,7 +482,7 @@ function CardEditor({
                     </div>
                 </div>
             )}
-            <div className={`space-y-4 flex-1 transition-opacity duration-300 ${isGenerating ? 'opacity-30 pointer-events-none select-none' : ''}`}>
+            <div className={`space-y-4 transition-opacity duration-300 ${isGenerating ? 'opacity-30 pointer-events-none select-none' : ''}`}>
                 <div>
                 <label className="block text-sm font-medium text-current/70 mb-1">Word</label>
                 <input
