@@ -277,6 +277,18 @@ export function EditCardModal({ card, onSave, onCancel, settings, apiKey, isAiRe
                     )}
                 </h2>
 
+                {!isGenerating && (isAiPopulated || isAiResolveMode) && (
+                    <div className="bg-blue-50 border border-blue-200 p-4 rounded-xl mb-4 shrink-0 flex items-start gap-3 dark:bg-blue-900/20 dark:border-blue-800">
+                        <Sparkles className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+                        <div>
+                            <h3 className="font-bold text-blue-900 dark:text-blue-300 leading-none mb-1">A.I. Suggestions Ready</h3>
+                            <p className="text-sm text-blue-800 dark:text-blue-200">
+                                A.I. has finished resolving issues. Please review the suggestions carefully before approving them, because A.I. can make mistakes.
+                            </p>
+                        </div>
+                    </div>
+                )}
+
                 {pendingAlternateMeanings.length > 0 && (
                     <div className="bg-amber-100 border border-amber-300 p-4 rounded-xl mb-4 shrink-0 flex items-start gap-3">
                         <Sparkles className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
@@ -460,8 +472,18 @@ function CardEditor({
     };
 
     return (
-        <div className="space-y-4">
-            <div>
+        <div className="relative h-full flex flex-col">
+            {isGenerating && (
+                <div className="absolute inset-0 z-10 bg-background/50 backdrop-blur-[2px] flex flex-col items-center justify-center rounded-xl overflow-hidden">
+                    <div className="bg-background shadow-xl border border-border p-6 rounded-2xl flex flex-col items-center max-w-[90%] text-center animate-in zoom-in duration-300">
+                        <Sparkles className="w-8 h-8 text-primary animate-pulse mb-3" />
+                        <h3 className="font-bold text-lg mb-1 text-foreground">A.I. is working...</h3>
+                        <p className="text-sm text-muted-foreground">Please be patient while A.I. resolves the issues with this card.</p>
+                    </div>
+                </div>
+            )}
+            <div className={`space-y-4 flex-1 transition-opacity duration-300 ${isGenerating ? 'opacity-30 pointer-events-none select-none' : ''}`}>
+                <div>
                 <label className="block text-sm font-medium text-current/70 mb-1">Word</label>
                 <input
                     className={`w-full px-4 py-3 rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none ${isChanged('word') ? highlightedClass : defaultClass}`}
@@ -816,6 +838,7 @@ function CardEditor({
                 {error && <p className="text-xs text-red-500 mt-2 p-2 bg-red-50 dark:bg-red-950/50 rounded border border-red-200 dark:border-red-900">{error}</p>}
                 <p className="text-[10px] text-muted-foreground/80 mt-2 text-center leading-tight">A.I. can make mistakes. Please review all fields before saving.</p>
             </div>
+        </div>
         </div>
     );
 }
