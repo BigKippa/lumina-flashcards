@@ -1797,10 +1797,21 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                     isAiResolveMode={true}
                     aiResolveQueueInfo={{ current: originalAiResolveTotal - pendingAiResolveCards.length + 1, total: originalAiResolveTotal }}
                     onSave={(updated, additionalCards) => {
-                        onEditCard(updated);
-                        if (additionalCards && additionalCards.length > 0) {
-                            additionalCards.forEach(ac => onAddCard(ac, pendingAiResolveCards[0].deckId));
-                        }
+                        // 1. We must replace the old ghost card in the local staging queue
+                        // 2. We must seamlessly inject the generated 'split' cards right next to it
+                        setPendingQuickAddCards(prev => {
+                            const clone = [...prev];
+                            const targetIdx = clone.findIndex(c => c.id === updated.id);
+                            if (targetIdx !== -1) {
+                                clone[targetIdx] = updated;
+                                if (additionalCards && additionalCards.length > 0) {
+                                    // Inject split cards precisely beneath the newly resolved original word
+                                    clone.splice(targetIdx + 1, 0, ...additionalCards);
+                                }
+                            }
+                            return clone;
+                        });
+                        
                         setPendingAiResolveCards(prev => prev.slice(1));
                     }}
                     onDecline={() => {
