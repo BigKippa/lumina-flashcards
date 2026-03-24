@@ -162,23 +162,14 @@ export const AddContentModal: React.FC<AddContentModalProps> = ({
         setIsAiPopulated(false);
 
         const cleanKey = apiKey.trim();
-        // Updated list based on user's available models
-        const modelsToTry = [
-            "gemini-1.5-flash",
-            "gemini-1.5-pro",
-            "gemini-2.0-flash",
-            "gemini-2.0-flash-exp"
-        ];
-
-        let lastError = null;
 
         try {
             const genAI = new GoogleGenerativeAI(cleanKey);
+            const modelName = "gemini-1.5-flash";
 
-            for (const modelName of modelsToTry) {
-                try {
-                    console.log(`Attempting to generate with model: ${modelName}`);
-                    const model = genAI.getGenerativeModel({ model: modelName });
+            try {
+                console.log(`Attempting to generate with model: ${modelName}`);
+                const model = genAI.getGenerativeModel({ model: modelName });
 
                     const prompt = `
                         You are an expert English teacher. Create a flashcard for the word/phrase: "${newCard.word}".
@@ -215,17 +206,8 @@ export const AddContentModal: React.FC<AddContentModalProps> = ({
                     return; // Success, exit function
                 } catch (e: any) {
                     console.warn(`Model ${modelName} failed:`, e.message);
-                    lastError = e;
-                    
-                    const msg = e.message?.toLowerCase() || "";
-                    if (!msg.includes("404") && !msg.includes("not found")) {
-                        throw e;
-                    }
+                    throw e; // Bubble true error natively
                 }
-            }
-
-            // If we get here, all models failed
-            throw lastError || new Error("All models failed to generate content");
 
         } catch (error: any) {
             console.error("AI Generation failed:", error);

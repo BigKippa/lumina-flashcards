@@ -102,22 +102,14 @@ export function EditCardModal({ card, onSave, onCancel, settings, apiKey, isAiRe
         setIsAiPopulated(false);
 
         const cleanKey = apiKey.trim();
-        const modelsToTry = [
-            "gemini-1.5-flash",
-            "gemini-1.5-pro",
-            "gemini-2.0-flash",
-            "gemini-2.0-flash-exp"
-        ];
-
-        let lastError = null;
 
         try {
             const genAI = new GoogleGenerativeAI(cleanKey);
+            const modelName = "gemini-1.5-flash";
 
-            for (const modelName of modelsToTry) {
-                try {
-                    console.log(`Attempting to generate with model: ${modelName}`);
-                    const model = genAI.getGenerativeModel({ model: modelName });
+            try {
+                console.log(`Attempting to generate with model: ${modelName}`);
+                const model = genAI.getGenerativeModel({ model: modelName });
 
                     const prompt = `
                         You are an expert English teacher. The user is editing a flashcard for the word/phrase: "${targetCard.word}".
@@ -177,18 +169,8 @@ export function EditCardModal({ card, onSave, onCancel, settings, apiKey, isAiRe
                     return; 
                 } catch (e: any) {
                     console.warn(`Model ${modelName} failed:`, e.message);
-                    lastError = e;
-                    
-                    // Unmask fatal errors! Only fallback if the model physically doesn't exist (404 / 'not found')
-                    // If it's a 400 (Bad Request), 403 (Forbidden), 429 (Rate Limit), we MUST bubble the true error up!
-                    const msg = e.message?.toLowerCase() || "";
-                    if (!msg.includes("404") && !msg.includes("not found")) {
-                        throw e;
-                    }
+                    throw e; // Bubble true error natively
                 }
-            }
-
-            throw lastError || new Error("All models failed to generate content");
 
         } catch (error: any) {
             console.error("AI Generation failed:", error);
