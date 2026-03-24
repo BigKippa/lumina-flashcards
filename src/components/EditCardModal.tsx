@@ -474,12 +474,12 @@ function CardEditor({
     return (
         <div className="relative">
             {isGenerating && (
-                <div className="absolute inset-0 z-10 bg-background/50 backdrop-blur-[2px] rounded-xl overflow-hidden">
-                    <div className="sticky top-[50vh] -translate-y-1/2 mt-[50vh] flex flex-col items-center justify-center pointer-events-none mx-auto w-full px-4">
-                        <div className="bg-background shadow-2xl border border-border p-6 rounded-2xl flex flex-col items-center text-center animate-in zoom-in duration-300 pointer-events-auto">
-                            <Sparkles className="w-8 h-8 text-primary animate-pulse mb-3" />
-                            <h3 className="font-bold text-lg mb-1 text-foreground whitespace-nowrap">A.I. is working...</h3>
-                            <p className="text-sm text-muted-foreground max-w-[250px]">Please be patient while A.I. resolves the issues with this card.</p>
+                <div className="absolute inset-0 z-50 bg-background/50 backdrop-blur-[2px] rounded-xl overflow-hidden">
+                    <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center pointer-events-none w-full px-4 z-[100]">
+                        <div className="bg-background shadow-2xl border-2 border-primary/20 p-8 rounded-2xl flex flex-col items-center text-center animate-in zoom-in duration-300 pointer-events-auto max-w-sm">
+                            <Sparkles className="w-10 h-10 text-primary animate-pulse mb-4" />
+                            <h3 className="font-bold text-xl mb-2 text-foreground whitespace-nowrap">A.I. is working...</h3>
+                            <p className="text-sm text-muted-foreground font-medium">Please be patient while A.I. resolves the issues with this card.</p>
                         </div>
                     </div>
                 </div>
