@@ -1797,20 +1797,30 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                     isAiResolveMode={true}
                     aiResolveQueueInfo={{ current: originalAiResolveTotal - pendingAiResolveCards.length + 1, total: originalAiResolveTotal }}
                     onSave={(updated, additionalCards) => {
-                        // 1. We must replace the old ghost card in the local staging queue
-                        // 2. We must seamlessly inject the generated 'split' cards right next to it
+                        // Polymorphic Save: The AI Bulk Resolver might be triggered from 
+                        // the local uncommitted QuickAdd queue OR the global Manage Flashcards library.
+                        
+                        // 1. Attempt local staging queue sync
                         setPendingQuickAddCards(prev => {
                             const clone = [...prev];
                             const targetIdx = clone.findIndex(c => c.id === updated.id);
                             if (targetIdx !== -1) {
                                 clone[targetIdx] = updated;
                                 if (additionalCards && additionalCards.length > 0) {
-                                    // Inject split cards precisely beneath the newly resolved original word
                                     clone.splice(targetIdx + 1, 0, ...additionalCards);
                                 }
                             }
                             return clone;
                         });
+
+                        // 2. Attempt explicit global library sync
+                        onEditCard(updated);
+                        if (additionalCards && additionalCards.length > 0) {
+                            const targetDeckId = (updated as any).deckId || (pendingAiResolveCards[0] as any).deckId;
+                            if (targetDeckId) {
+                                additionalCards.forEach(ac => onAddCard(ac, targetDeckId));
+                            }
+                        }
                         
                         setPendingAiResolveCards(prev => prev.slice(1));
                     }}
