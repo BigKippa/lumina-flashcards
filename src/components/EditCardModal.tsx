@@ -474,11 +474,13 @@ function CardEditor({
     return (
         <div className="relative">
             {isGenerating && (
-                <div className="absolute inset-0 z-10 bg-background/50 backdrop-blur-[2px] flex flex-col items-center justify-center rounded-xl overflow-hidden">
-                    <div className="bg-background shadow-xl border border-border p-6 rounded-2xl flex flex-col items-center max-w-[90%] text-center animate-in zoom-in duration-300">
-                        <Sparkles className="w-8 h-8 text-primary animate-pulse mb-3" />
-                        <h3 className="font-bold text-lg mb-1 text-foreground">A.I. is working...</h3>
-                        <p className="text-sm text-muted-foreground">Please be patient while A.I. resolves the issues with this card.</p>
+                <div className="absolute inset-0 z-10 bg-background/50 backdrop-blur-[2px] rounded-xl overflow-hidden">
+                    <div className="sticky top-[50vh] -translate-y-1/2 mt-[50vh] flex flex-col items-center justify-center pointer-events-none mx-auto w-full px-4">
+                        <div className="bg-background shadow-2xl border border-border p-6 rounded-2xl flex flex-col items-center text-center animate-in zoom-in duration-300 pointer-events-auto">
+                            <Sparkles className="w-8 h-8 text-primary animate-pulse mb-3" />
+                            <h3 className="font-bold text-lg mb-1 text-foreground whitespace-nowrap">A.I. is working...</h3>
+                            <p className="text-sm text-muted-foreground max-w-[250px]">Please be patient while A.I. resolves the issues with this card.</p>
+                        </div>
                     </div>
                 </div>
             )}
