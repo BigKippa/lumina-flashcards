@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Word } from '../data/vocabulary';
 import { Trash2, Image as ImageIcon, Video, Volume2, Upload, X, Plus, Sparkles, CheckCircle } from 'lucide-react';
 import { GoogleGenerativeAI } from "@google/generative-ai";
@@ -474,15 +475,17 @@ function CardEditor({
     return (
         <div className="relative">
             {isGenerating && (
-                <div className="absolute inset-0 z-50 bg-background/50 backdrop-blur-[2px] rounded-xl overflow-hidden">
-                    <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center pointer-events-none w-full px-4 z-[100]">
-                        <div className="bg-background shadow-2xl border-2 border-primary/20 p-8 rounded-2xl flex flex-col items-center text-center animate-in zoom-in duration-300 pointer-events-auto max-w-sm">
-                            <Sparkles className="w-10 h-10 text-primary animate-pulse mb-4" />
-                            <h3 className="font-bold text-xl mb-2 text-foreground whitespace-nowrap">A.I. is working...</h3>
-                            <p className="text-sm text-muted-foreground font-medium">Please be patient while A.I. resolves the issues with this card.</p>
-                        </div>
+                <div className="absolute inset-0 z-50 bg-background/50 backdrop-blur-[2px] rounded-xl overflow-hidden pointer-events-auto" />
+            )}
+            {isGenerating && createPortal(
+                <div className="fixed inset-0 z-[200] flex items-center justify-center pointer-events-none">
+                    <div className="relative bg-background shadow-2xl border-2 border-primary/20 p-8 rounded-2xl flex flex-col items-center text-center animate-in zoom-in duration-300 pointer-events-auto max-w-sm">
+                        <Sparkles className="w-10 h-10 text-primary animate-pulse mb-4" />
+                        <h3 className="font-bold text-xl mb-2 text-foreground whitespace-nowrap">A.I. is working...</h3>
+                        <p className="text-sm text-muted-foreground font-medium">Please be patient while A.I. resolves the issues with this card.</p>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
             <div className={`space-y-4 transition-opacity duration-300 ${isGenerating ? 'opacity-30 pointer-events-none select-none' : ''}`}>
                 <div>
