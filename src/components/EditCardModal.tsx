@@ -102,14 +102,25 @@ export function EditCardModal({ card, onSave, onCancel, settings, apiKey, isAiRe
         setIsAiPopulated(false);
 
         const cleanKey = apiKey.trim();
+        
+        // Paid Tier 1 API Keys actively reject generic aliases (like 'gemini-1.5-flash') with a 404.
+        // We MUST use explicit, stable point-release versions for production billing environments!
+        const modelsToTry = [
+            "gemini-2.5-flash",
+            "gemini-1.5-flash-002",
+            "gemini-1.5-pro-002",
+            "gemini-2.0-flash-001"
+        ];
+
+        let lastError = null;
 
         try {
             const genAI = new GoogleGenerativeAI(cleanKey);
-            const modelName = "gemini-2.0-flash";
 
-            try {
-                console.log(`Attempting to generate with model: ${modelName}`);
-                const model = genAI.getGenerativeModel({ model: modelName });
+            for (const modelName of modelsToTry) {
+                try {
+                    console.log(`Attempting to generate with strict production model: ${modelName}`);
+                    const model = genAI.getGenerativeModel({ model: modelName });
 
                     const prompt = `
                         You are an expert English teacher. The user is editing a flashcard for the word/phrase: "${targetCard.word}".
@@ -169,8 +180,17 @@ export function EditCardModal({ card, onSave, onCancel, settings, apiKey, isAiRe
                     return; 
                 } catch (e: any) {
                     console.warn(`Model ${modelName} failed:`, e.message);
-                    throw e; // Bubble true error natively
+                    lastError = e;
+                    
+                    const msg = e.message?.toLowerCase() || "";
+                    // If it is NOT a 404 (or deprecated), THROW the real billing/quota error!
+                    if (!msg.includes("404") && !msg.includes("not found") && !msg.includes("no longer available")) {
+                        throw e;
+                    }
                 }
+            }
+
+            throw lastError || new Error(`No compatible production model found for this Paid Tier key.`);
 
         } catch (error: any) {
             console.error("AI Generation failed:", error);
