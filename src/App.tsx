@@ -29,10 +29,18 @@ import './i18n';
 
 const DEFAULT_SETTINGS: AppSettings = {
     categories: {
-        'Noun': { backgroundColor: '#bfdbfe', titleColor: '#1e3a8a', textColor: '#1e293b' }, // Blue
-        'Verb': { backgroundColor: '#bbf7d0', titleColor: '#14532d', textColor: '#1e293b' }, // Green
-        'Adjective': { backgroundColor: '#fecaca', titleColor: '#7f1d1d', textColor: '#1e293b' }, // Red
-        'Adverb': { backgroundColor: '#fde68a', titleColor: '#78350f', textColor: '#1e293b' }, // Amber
+        'Adjectives': { backgroundColor: '#fecaca', titleColor: '#7f1d1d', textColor: '#1e293b' },
+        'Collocations': { backgroundColor: '#e9d5ff', titleColor: '#6b21a8', textColor: '#1e293b' },
+        'Conjunctions': { backgroundColor: '#fed7aa', titleColor: '#c2410c', textColor: '#1e293b' },
+        'Determiners': { backgroundColor: '#fef08a', titleColor: '#a16207', textColor: '#1e293b' },
+        'Idioms & Sayings': { backgroundColor: '#fbcfe8', titleColor: '#be185d', textColor: '#1e293b' },
+        'Modal Verbs': { backgroundColor: '#ccfbf1', titleColor: '#0f766e', textColor: '#1e293b' },
+        'Nouns': { backgroundColor: '#bfdbfe', titleColor: '#1e3a8a', textColor: '#1e293b' },
+        'Phrasal Verbs': { backgroundColor: '#a7f3d0', titleColor: '#047857', textColor: '#1e293b' },
+        'Prepositional Phrases': { backgroundColor: '#cffafe', titleColor: '#0e7490', textColor: '#1e293b' },
+        'Prepositions': { backgroundColor: '#bae6fd', titleColor: '#0369a1', textColor: '#1e293b' },
+        'Pronouns': { backgroundColor: '#c7d2fe', titleColor: '#3730a3', textColor: '#1e293b' },
+        'Verbs': { backgroundColor: '#bbf7d0', titleColor: '#14532d', textColor: '#1e293b' },
     },
     autoAdvanceDelay: 2000,
     autoAdvanceEnabled: true
@@ -204,7 +212,7 @@ function App() {
         mode: AppMode;
         activeDeckId: string | null;
         adminTab: string;
-        tutorView: 'dashboard' | 'students' | 'flashcards' | 'learning-content' | 'manage-flashcards';
+        tutorView: 'dashboard' | 'students' | 'flashcards' | 'learning-content' | 'manage-flashcards' | 'review-new-flashcards';
         topicGroupId: string | null;
     };
 
@@ -229,7 +237,7 @@ function App() {
     const setActiveDeckId = (id: string | null) => setCurrentRoute(prev => ({ ...prev, activeDeckId: id }));
     const setTopicGroupId = (id: string | null) => setCurrentRoute(prev => ({ ...prev, topicGroupId: id }));
 
-    const navigate = (newMode: AppMode, newDeckId: string | null = null, newAdminTab?: string, newTutorView?: 'dashboard' | 'students' | 'flashcards' | 'learning-content' | 'manage-flashcards') => {
+    const navigate = (newMode: AppMode, newDeckId: string | null = null, newAdminTab?: string, newTutorView?: 'dashboard' | 'students' | 'flashcards' | 'learning-content' | 'manage-flashcards' | 'review-new-flashcards') => {
         // Build the new explicitly strict route object
         const routeObj: RouteState = {
             mode: newMode,
@@ -455,6 +463,16 @@ function App() {
                 if (loadedSettings.autoAdvanceDelay === 7000) {
                     loadedSettings.autoAdvanceDelay = 2000;
                 }
+
+                // Identify if categories are purely the old default or heavily customized
+                if (loadedSettings.categories) {
+                    const keys = Object.keys(loadedSettings.categories);
+                    // If they just have the old default 4 keys, overwrite them with the new comprehensive list
+                    if (keys.length === 4 && keys.includes('Noun') && keys.includes('Verb')) {
+                        delete loadedSettings.categories;
+                    }
+                }
+
                 setSettings({ ...DEFAULT_SETTINGS, ...loadedSettings });
             } catch (e) {
                 console.error("Failed to load settings", e);
@@ -1013,9 +1031,14 @@ function App() {
         setDecks(prev => prev.map(d => d.id === deckId ? { ...d, isArchived: false } : d));
     };
 
-    // Tutor Mode Handlers
     const handleUpdateStudent = (updatedStudent: Student) => {
         const newStudents = students.map(s => s.id === updatedStudent.id ? updatedStudent : s);
+        setStudents(newStudents);
+        localStorage.setItem('students', JSON.stringify(newStudents));
+    };
+
+    const handleDeleteStudent = (id: string) => {
+        const newStudents = students.filter(s => s.id !== id);
         setStudents(newStudents);
         localStorage.setItem('students', JSON.stringify(newStudents));
     };
@@ -1330,6 +1353,7 @@ function App() {
                                     decks={decks}
                                     onUpdateStudent={handleUpdateStudent}
                                     onAddStudent={handleAddStudent}
+                                    onDeleteStudent={handleDeleteStudent}
                                     view={tutorActiveView}
                                     onViewChange={(newView) => navigate('tutor', activeDeckId, adminActiveTab, newView)}
                                     onAddDeck={handleAddDeckGlobal}

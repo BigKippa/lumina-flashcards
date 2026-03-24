@@ -1346,7 +1346,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                                         onClick={() => setNewUserRole('user')}
                                                         className={`p-3 rounded-xl border flex items-center justify-center gap-2 transition-all ${newUserRole === 'user' ? 'bg-primary/10 border-primary text-primary font-bold' : 'border-border hover:bg-secondary'}`}
                                                     >
-                                                        <Sparkles className="w-5 h-5" /> Learner
+                                                        <Sparkles className="w-5 h-5" /> Student
                                                     </button>
                                                     <button
                                                         type="button"
@@ -1944,8 +1944,11 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                             {editingCard && (
                                 <EditCardModal
                                     card={editingCard}
-                                    onSave={(updatedCard) => {
+                                    onSave={(updatedCard, additionalCards) => {
                                         onEdit(updatedCard);
+                                        if (additionalCards && additionalCards.length > 0) {
+                                            onBulkAdd(additionalCards);
+                                        }
                                         setEditingCard(null);
                                     }}
                                     onCancel={() => setEditingCard(null)}
@@ -2396,8 +2399,11 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                     card={editingCard}
                     settings={settings}
                     apiKey={settings.geminiApiKey || ''}
-                    onSave={(updated) => {
+                    onSave={(updated, additionalCards) => {
                         onEdit(updated);
+                        if (additionalCards && additionalCards.length > 0) {
+                            onBulkAdd(additionalCards);
+                        }
                         setEditingCard(null);
                     }}
                     onCancel={() => setEditingCard(null)}

@@ -272,7 +272,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, lastSession,
                                     {t(`welcome.greeting.${timeOfDay}`)}, <span className="text-white">{user.preferredName || user.firstName || user.username}</span>
                                 </h2>
                                 <div className="flex flex-col gap-y-1.5 mt-3 text-sm text-zinc-400 font-medium">
-                                    <span className="flex items-center gap-2"><BookOpen className="w-4 h-4 text-zinc-300" /> <span className="text-zinc-300 pointer-events-none">Language Learner</span></span>
+                                    <span className="flex items-center gap-2"><BookOpen className="w-4 h-4 text-zinc-300" /> <span className="text-zinc-300 pointer-events-none">Language Student</span></span>
                                     <span className="flex items-center gap-2 hover:text-white transition-colors">
                                         <MapPin className="w-4 h-4" />
                                         {user.currentCity ? `${user.currentCity}, ${user.currentCountry}` : (user.currentCountry || 'Location Not Set')}

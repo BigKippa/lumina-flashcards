@@ -62,8 +62,9 @@
         "verify_create": "Verify & Create Account",
         "resend_code": "Resend Code",
         "back_to_login": "Back to Login",
-        "role_learner": "Learner",
+        "role_learner": "Student",
         "role_tutor": "Tutor",
+        "continue_with_google": "Continue with Google",
         "i_am_a": "I am a...",
         "or": "Or"
     },
@@ -184,12 +185,12 @@
     "roles": {
         "admin": "Administrator",
         "adminTutor": "Admin (Tutor Mode)",
-        "adminLearner": "Admin (Learner Mode)"
+        "adminLearner": "Admin (Student Mode)"
     },
     "mode": {
         "title": "User Mode",
         "subtitle": "Select your active role for this session.",
-        "learner": "Learner",
+        "learner": "Student",
         "learner_desc": "Master vocabulary with interactive flashcards and quizzes.",
         "tutor": "Tutor",
         "tutor_desc": "Manage students, assign decks, and track progress.",

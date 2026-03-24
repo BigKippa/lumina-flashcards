@@ -165,11 +165,9 @@ export const AddContentModal: React.FC<AddContentModalProps> = ({
         // Updated list based on user's available models
         const modelsToTry = [
             "gemini-2.0-flash",
-            "gemini-2.0-flash-001",
-            "gemini-2.5-flash",
-            "gemini-2.5-pro",
-            "gemini-1.5-flash", // Keep legacy just in case
-            "gemini-pro"
+            "gemini-2.0-flash-exp",
+            "gemini-1.5-flash",
+            "gemini-1.5-pro"
         ];
 
         let lastError = null;
@@ -429,24 +427,11 @@ export const AddContentModal: React.FC<AddContentModalProps> = ({
                                                 className="p-2 bg-secondary rounded-lg hover:bg-secondary/80 disabled:opacity-50"
                                                 title="Preview Pronunciation"
                                             >
-                                                <Volume2 className="w-5 h-5" />
                                             </button>
                                         </div>
 
-                                        <div className="flex items-center gap-2 my-2">
-                                            <span className="text-xs font-medium text-muted-foreground">Card Audio:</span>
-                                            <button
-                                                onClick={() => setNewCard(prev => ({ ...prev, disableAudio: !prev.disableAudio }))}
-                                                className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${!newCard.disableAudio ? 'bg-primary' : 'bg-muted'}`}
-                                                title={!newCard.disableAudio ? "Audio will be included on card" : "Audio will be disabled on card"}
-                                            >
-                                                <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${!newCard.disableAudio ? 'translate-x-5' : 'translate-x-1'}`} />
-                                            </button>
-                                            <span className="text-xs text-muted-foreground">{!newCard.disableAudio ? 'Enabled' : 'Disabled'}</span>
-                                        </div>
-
-
-                                        <div className="space-y-2">
+                                        <div className="pt-2 border-t border-border mt-3 space-y-2">
+                                            <label className="block text-sm font-medium mb-1">Category / Part of Speech</label>
                                             <select
                                                 value={CATEGORIES.includes(newCard.category || '') ? newCard.category : 'Other'}
                                                 onChange={e => {
@@ -477,6 +462,19 @@ export const AddContentModal: React.FC<AddContentModalProps> = ({
                                                 />
                                             )}
                                         </div>
+
+                                        <div className="flex items-center gap-2 my-2">
+                                            <span className="text-xs font-medium text-muted-foreground">Card Audio:</span>
+                                            <button
+                                                onClick={() => setNewCard(prev => ({ ...prev, disableAudio: !prev.disableAudio }))}
+                                                className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${!newCard.disableAudio ? 'bg-primary' : 'bg-muted'}`}
+                                                title={!newCard.disableAudio ? "Audio will be included on card" : "Audio will be disabled on card"}
+                                            >
+                                                <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${!newCard.disableAudio ? 'translate-x-5' : 'translate-x-1'}`} />
+                                            </button>
+                                            <span className="text-xs text-muted-foreground">{!newCard.disableAudio ? 'Enabled' : 'Disabled'}</span>
+                                        </div>
+
 
                                         {/* Media Attachments */}
                                         <div className="space-y-4 pt-2 border-t border-border mt-4">

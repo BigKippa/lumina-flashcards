@@ -1,10 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { Student, Deck, AppSettings, UserProfile } from '../types';
 import { Word } from '../data/vocabulary';
-import { Search, Plus, UserCircle, ChevronDown, SortAsc, Clock, GraduationCap, Users, Layout, Zap, MessageSquare, CheckSquare, ArrowLeft, MapPin, Bell, Library, ChevronUp, Pencil, Filter, ArrowDownAZ, ArrowUpAZ, X, AlertTriangle, Send, Settings, Check, Move, Eye, Archive, Trash2 } from 'lucide-react';
+import { Search, Plus, UserCircle, ChevronDown, SortAsc, Clock, GraduationCap, Users, Layout, Zap, MessageSquare, CheckSquare, ArrowLeft, MapPin, Bell, Library, ChevronUp, Pencil, Filter, ArrowDownAZ, ArrowUpAZ, X, AlertTriangle, Send, Settings, Check, Move, Eye, Archive, Trash2, Sparkles, MoreVertical } from 'lucide-react';
 import { StudentProfile } from './StudentProfile';
 import { AddContentModal } from './AddContentModal';
 import { EditCardModal } from './EditCardModal';
+import { QuickAddFlashcardsModal } from './QuickAddFlashcardsModal';
 import Flashcard from './Flashcard';
 import {
     DndContext,
@@ -30,8 +31,8 @@ interface TutorDashboardProps {
     decks: Deck[];
     onUpdateStudent: (student: Student) => void;
     onAddStudent: (student: Student) => void;
-    view: 'dashboard' | 'students' | 'flashcards' | 'learning-content' | 'manage-flashcards';
-    onViewChange: (view: 'dashboard' | 'students' | 'flashcards' | 'learning-content' | 'manage-flashcards') => void;
+    view: 'dashboard' | 'students' | 'flashcards' | 'learning-content' | 'manage-flashcards' | 'review-new-flashcards';
+    onViewChange: (view: 'dashboard' | 'students' | 'flashcards' | 'learning-content' | 'manage-flashcards' | 'review-new-flashcards') => void;
     onAddDeck: (deck: Deck) => void;
     onAddCard: (card: Word, deckId: string) => void;
     onEditCard: (card: Word) => void;
@@ -42,6 +43,7 @@ interface TutorDashboardProps {
     onDeleteCard: (id: string) => void;
     onBulkDeleteCards: (ids: string[]) => void;
     onBulkArchiveCards: (ids: string[], isArchiving: boolean) => void;
+    onDeleteStudent: (id: string) => void;
 }
 
 const DEFAULT_TILES = [
@@ -91,10 +93,90 @@ function SortableDashboardTile({ id, children, isCustomizeMode }: { id: string, 
     );
 }
 
-export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, decks, onUpdateStudent, onAddStudent, view, onViewChange, onAddDeck, onAddCard, onEditCard, apiKey, settings, onNavigateToProfile, onUpdateProfile, onDeleteCard, onBulkDeleteCards, onBulkArchiveCards }) => {
+export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, decks, onUpdateStudent, onAddStudent, onDeleteStudent, view, onViewChange, onAddDeck, onAddCard, onEditCard, apiKey, settings, onNavigateToProfile, onUpdateProfile, onDeleteCard, onBulkDeleteCards, onBulkArchiveCards }) => {
     const [currentTime, setCurrentTime] = useState(new Date());
     const [isCustomizeMode, setIsCustomizeMode] = useState(false);
     const [tileOrder, setTileOrder] = useState<string[]>([]);
+    const [studentMenuOpenId, setStudentMenuOpenId] = useState<string | null>(null);
+    
+    // Quick Add Flashcards State
+    const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
+    const [pendingQuickAddCards, setPendingQuickAddCards] = useState<Word[]>([]);
+    const [quickAddAudience, setQuickAddAudience] = useState('');
+    const [quickAddStudentId, setQuickAddStudentId] = useState('');
+    const [editingPendingCard, setEditingPendingCard] = useState<Word | null>(null);
+
+    // AI Bulk Resolution State
+    const [pendingAiResolveCards, setPendingAiResolveCards] = useState<(Word & { deckId: string })[]>([]);
+    const [originalAiResolveTotal, setOriginalAiResolveTotal] = useState(0);
+
+    const [quickAddAiQueue, setQuickAddAiQueue] = useState<Word[]>([]);
+    const [quickAddAiTotal, setQuickAddAiTotal] = useState(0);
+
+    // Close student action menu on external click
+    React.useEffect(() => {
+        const handleClickOutside = () => setStudentMenuOpenId(null);
+        document.addEventListener('click', handleClickOutside);
+        return () => document.removeEventListener('click', handleClickOutside);
+    }, []);
+
+    const commitCardsToLibrary = (cardsToCommit: Word[], shouldNavAway: boolean = false) => {
+        if (cardsToCommit.length === 0) return;
+
+        // 1. Create a "New Flashcards" deck if it doesn't exist
+        const existingDeck = decks.find(d => d.title === "New Flashcards");
+        
+        const targetDeck = existingDeck || {
+            id: crypto.randomUUID(),
+            title: "New Flashcards",
+            description: "Quickly added flashcards",
+            subject: "Vocabulary",
+            level: "All Levels",
+            tags: ["QuickAdd"],
+            cards: [...cardsToCommit],
+            status: 'private',
+            authorId: user.id
+        };
+
+        if (!existingDeck) {
+            onAddDeck(targetDeck);
+        } else {
+            // Add cards to this deck
+            cardsToCommit.forEach(card => {
+                onAddCard(card, targetDeck.id);
+            });
+        }
+
+        // 2. Assign to audience if needed
+        if (quickAddAudience === 'specific_student' && quickAddStudentId) {
+            const student = students.find(s => s.id === quickAddStudentId);
+            if (student && !student.activeDeckIds.includes(targetDeck.id)) {
+                onUpdateStudent({ ...student, activeDeckIds: [...student.activeDeckIds, targetDeck.id] });
+            }
+        } else if (quickAddAudience === 'all_students') {
+            students.forEach(student => {
+                if (!student.activeDeckIds.includes(targetDeck.id)) {
+                    onUpdateStudent({ ...student, activeDeckIds: [...student.activeDeckIds, targetDeck.id] });
+                }
+            });
+        }
+
+        // 3. Remove committed cards from the local visible pending array
+        setPendingQuickAddCards(prev => prev.filter(p => !cardsToCommit.some(c => c.id === p.id)));
+
+        // 4. Handle navigation and cleanup if finishing the batch
+        if (shouldNavAway) {
+            setPendingQuickAddCards([]);
+            setQuickAddAudience('');
+            setQuickAddStudentId('');
+            onViewChange('dashboard');
+            setTimeout(() => alert(`Successfully approved and added ${cardsToCommit.length} flashcards to "${targetDeck.title}".`), 100);
+        }
+    };
+
+    const handleApprovePendingCards = () => {
+        commitCardsToLibrary(pendingQuickAddCards, true);
+    };
 
     React.useEffect(() => {
         const savedOrder = user.tutorDashboardTileOrder;
@@ -152,6 +234,7 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
 
     // Add Student / Quicksend State
     const [isAddStudentModalOpen, setIsAddStudentModalOpen] = useState(false);
+    const [quickAddInitialParams, setQuickAddInitialParams] = useState<{audience: string, studentId: string} | null>(null);
     const [quicksendFirst, setQuicksendFirst] = useState('');
     const [quicksendLast, setQuicksendLast] = useState('');
     const [quicksendEmail, setQuicksendEmail] = useState('');
@@ -488,6 +571,26 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                 </div>
                             </div>
                         )}
+                        
+                        {/* Quick Add Flashcards Modal */}
+                        {isQuickAddOpen && (
+                            <QuickAddFlashcardsModal
+                                students={students}
+                                initialAudience={quickAddInitialParams?.audience}
+                                initialSpecificStudentId={quickAddInitialParams?.studentId}
+                                onClose={() => { setIsQuickAddOpen(false); setQuickAddInitialParams(null); }}
+                                onComplete={(cards, audience, specificStudentId) => {
+                                    setPendingQuickAddCards(cards);
+                                    setQuickAddAudience(audience);
+                                    if (specificStudentId) setQuickAddStudentId(specificStudentId);
+                                    setIsQuickAddOpen(false);
+                                    setQuickAddInitialParams(null);
+                                    if (cards.length > 0) {
+                                        onViewChange('review-new-flashcards');
+                                    }
+                                }}
+                            />
+                        )}
                     </div>
                 </div>
 
@@ -575,6 +678,15 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                 >
                                     <Plus className="w-6 h-6 text-primary mb-2 group-hover:scale-110 transition-transform" />
                                     <span className="text-sm font-bold text-white text-center leading-tight">Add<br />Student</span>
+                                </div>
+
+                                {/* Create Flashcards Widget */}
+                                <div
+                                    onClick={() => setIsQuickAddOpen(true)}
+                                    className="bg-amber-500/20 hover:bg-amber-500/30 cursor-pointer transition-colors backdrop-blur-sm border border-amber-500/30 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm group"
+                                >
+                                    <Library className="w-6 h-6 text-amber-400 mb-2 group-hover:scale-110 transition-transform" />
+                                    <span className="text-sm font-bold text-white text-center leading-tight">Create<br />Flashcards</span>
                                 </div>
                             </div>
                         </div>
@@ -910,20 +1022,32 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                             {(() => {
                                 const TILE_COLORS = [
-                                    'bg-green-100 border-green-200 text-green-900', // Pastel green
-                                    'bg-blue-100 border-blue-200 text-blue-900',   // Pastel blue
-                                    'bg-[#F5F5DC] border-[#E6E6CA] text-stone-900'   // Pastel tan (Beige)
+                                    'bg-color2 border-color3 text-color2-foreground',
+                                    'bg-color3 border-color4 text-color3-foreground',
+                                    'bg-color4 border-color5 text-color4-foreground',
+                                    'bg-color5 border-color4 text-color5-foreground',
+                                    'bg-white dark:bg-black/80 border-color2 text-color5'
                                 ];
                                 const ICON_COLORS = [
-                                    'bg-white/60 text-green-700',
-                                    'bg-white/60 text-blue-700',
-                                    'bg-white/60 text-stone-700',
+                                    'bg-black/10 dark:bg-white/10 text-color2-foreground',
+                                    'bg-black/10 dark:bg-white/10 text-color3-foreground',
+                                    'bg-black/10 dark:bg-white/10 text-color4-foreground',
+                                    'bg-black/10 dark:bg-white/10 text-color5-foreground',
+                                    'bg-color1 text-color5'
+                                ];
+                                const BUTTON_COLORS = [
+                                    'bg-color5 text-color5-foreground hover:bg-color5/90', // on color2 -> use color5
+                                    'bg-color5 text-color5-foreground hover:bg-color5/90', // on color3 -> use color5
+                                    'bg-color5 text-color5-foreground hover:bg-color5/90', // on color4 -> use color5
+                                    'bg-color2 text-color2-foreground hover:bg-color2/90', // on color5 -> use color2
+                                    'bg-color5 text-color5-foreground hover:bg-color5/90', // on white -> use color5
                                 ];
 
                                 return filteredStudents.length > 0 ? (
                                     filteredStudents.map((student, index) => {
                                         const tileColor = TILE_COLORS[index % TILE_COLORS.length];
                                         const iconColor = ICON_COLORS[index % ICON_COLORS.length];
+                                        const buttonColor = BUTTON_COLORS[index % BUTTON_COLORS.length];
 
                                         return (
                                             <div
@@ -931,14 +1055,36 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                                 onClick={() => setSelectedStudentId(student.id)}
                                                 className={`group relative border rounded-xl p-5 cursor-pointer transition-all hover:shadow-md hover:shadow-primary/5 active:scale-[0.98] ${tileColor}`}
                                             >
-                                                <div className="flex items-start justify-between mb-4">
+                                                <div className="flex items-start justify-between mb-4 relative">
                                                     <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg overflow-hidden shrink-0 ${iconColor}`}>
                                                         {student.avatarUrl ? <img src={student.avatarUrl} className="w-full h-full object-cover" /> : <UserCircle className="w-8 h-8" />}
                                                     </div>
-                                                    <div className="flex flex-col items-end">
-                                                        <span className={`px-3 py-1 rounded-full text-xs uppercase font-extrabold tracking-widest shadow-sm ${student.status === 'active' ? 'bg-emerald-500 text-white' : 'bg-zinc-200 text-zinc-500'} `}>
-                                                            {student.status}
-                                                        </span>
+                                                    <div className="flex flex-col items-end gap-2">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className={`px-3 py-1 rounded-full text-xs uppercase font-extrabold tracking-widest shadow-sm ${student.status === 'active' ? 'bg-emerald-500 text-white' : 'bg-zinc-200 text-zinc-500'} `}>
+                                                                {student.status}
+                                                            </span>
+                                                            <button 
+                                                                onClick={(e) => { 
+                                                                    e.stopPropagation(); 
+                                                                    // We need a slight delay to avoid the document level click listener firing immediately
+                                                                    setTimeout(() => {
+                                                                        setStudentMenuOpenId(studentMenuOpenId === student.id ? null : student.id); 
+                                                                    }, 0);
+                                                                }}
+                                                                className="p-1.5 hover:bg-black/10 dark:hover:bg-white/10 rounded-lg transition-colors"
+                                                            >
+                                                                <MoreVertical className="w-4 h-4" />
+                                                            </button>
+                                                        </div>
+                                                        {studentMenuOpenId === student.id && (
+                                                            <div className="absolute top-10 right-0 w-36 bg-background border border-border rounded-xl shadow-xl p-1 z-20 animate-in fade-in zoom-in-95" onClick={e => e.stopPropagation()}>
+                                                                <button onClick={(e) => { e.stopPropagation(); setSelectedStudentId(student.id); setStudentMenuOpenId(null); }} className="w-full text-left px-3 py-2 text-sm hover:bg-secondary rounded-lg flex items-center gap-2 text-foreground"><Pencil className="w-4 h-4" /> Edit</button>
+                                                                <button onClick={(e) => { e.stopPropagation(); onUpdateStudent({ ...student, status: student.status === 'archived' ? 'active' : 'archived' }); setStudentMenuOpenId(null); }} className="w-full text-left px-3 py-2 text-sm hover:bg-secondary rounded-lg flex items-center gap-2 text-foreground"><Archive className="w-4 h-4" /> {student.status === 'archived' ? 'Unarchive' : 'Archive'}</button>
+                                                                <div className="h-px bg-border my-1" />
+                                                                <button onClick={(e) => { e.stopPropagation(); if(window.confirm(`Are you sure you want to delete ${student.name}?`)) { onDeleteStudent(student.id); } setStudentMenuOpenId(null); }} className="w-full text-left px-3 py-2 text-sm hover:bg-secondary rounded-lg flex items-center gap-2 text-foreground"><Trash2 className="w-4 h-4" /> Delete</button>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
 
@@ -954,9 +1100,22 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                                 </div>
 
                                                 {/* Footer Info */}
-                                                <div className="mt-4 pt-3 border-t border-current/10 flex justify-between text-xs opacity-70">
-                                                    <span>Level: {student.englishLevel || 'N/A'}</span>
-                                                    <span className="font-bold">{student.requestsHomework ? '📚 HW' : ''}</span>
+                                                <div className="mt-4 pt-3 border-t border-current/15 flex flex-col gap-2.5 text-xs opacity-90">
+                                                    <div className="flex justify-between items-center px-1">
+                                                        <span><span className="opacity-80">Lvl:</span> <span className="font-bold">{student.englishLevel || 'N/A'}</span></span>
+                                                        <span><span className="opacity-80">Cards:</span> <span className="font-bold text-sm tracking-tight">{decks.filter(d => student.activeDeckIds.includes(d.id)).reduce((acc, deck) => acc + deck.cards.length, 0)}</span></span>
+                                                    </div>
+                                                    
+                                                    <button 
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setQuickAddInitialParams({ audience: 'specific_student', studentId: student.id });
+                                                            setIsQuickAddOpen(true);
+                                                        }}
+                                                        className={`w-full py-2 rounded-lg flex items-center justify-center gap-1.5 transition-colors font-bold shadow-sm hover:shadow active:scale-95 border border-transparent ${buttonColor}`}
+                                                    >
+                                                        <Zap className="w-3.5 h-3.5" /> QuickCards
+                                                    </button>
                                                 </div>
                                             </div>
                                         );
@@ -1072,12 +1231,24 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                         </p>
                                     </div>
                                 </div>
-                                <button
-                                    onClick={() => setShowMissingOnly(!showMissingOnly)}
-                                    className={`px-4 py-2 text-sm font-bold rounded-lg transition-colors whitespace-nowrap shrink-0 ${showMissingOnly ? 'bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200' : 'bg-white text-slate-900 border border-slate-300 shadow-sm hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100 dark:hover:bg-slate-700'}`}
-                                >
-                                    {showMissingOnly ? 'Show All Cards' : 'View Alerts'}
-                                </button>
+                                <div className="flex gap-2 shrink-0">
+                                    <button
+                                        onClick={() => setShowMissingOnly(!showMissingOnly)}
+                                        className={`px-4 py-2 text-sm font-bold rounded-lg transition-colors whitespace-nowrap shrink-0 ${showMissingOnly ? 'bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200' : 'bg-white text-slate-900 border border-slate-300 shadow-sm hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100 dark:hover:bg-slate-700'}`}
+                                    >
+                                        {showMissingOnly ? 'Show All Cards' : 'View Alerts'}
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            const missing = allFlashcards.filter(c => !c.definition || !c.example || !c.phonetic || !c.category);
+                                            setPendingAiResolveCards(missing);
+                                            setOriginalAiResolveTotal(missing.length);
+                                        }}
+                                        className="px-4 py-2 text-sm font-bold rounded-lg transition-colors whitespace-nowrap shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2"
+                                    >
+                                        <Sparkles className="w-4 h-4" /> Auto-Resolve with A.I.
+                                    </button>
+                                </div>
                             </div>
                         )}
 
@@ -1397,6 +1568,131 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                         </div>
                     </div>
                 )}
+
+                {/* Review New Flashcards View */}
+                {view === 'review-new-flashcards' && (
+                    <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-2">
+                        <div className="flex items-center justify-between border-b border-border pb-4">
+                            <div className="flex items-center gap-4">
+                                <button
+                                    onClick={() => onViewChange('dashboard')}
+                                    className="p-2 rounded-full hover:bg-secondary text-muted-foreground transition-all"
+                                    title="Back to Dashboard"
+                                >
+                                    <ArrowLeft className="w-5 h-5" />
+                                </button>
+                                <div>
+                                    <h2 className="text-2xl font-bold flex items-center gap-2">
+                                        Review New Flashcards 
+                                        <span className="bg-primary/20 text-primary text-sm px-2 py-0.5 rounded-full">{pendingQuickAddCards.length} Pending</span>
+                                    </h2>
+                                    <p className="text-muted-foreground text-sm">Review, edit, and approve the flashcards you just created.</p>
+                                </div>
+                            </div>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => {
+                                        const missing = pendingQuickAddCards.filter(c => !c.definition || !c.category);
+                                        if (missing.length === 0) {
+                                            alert("All pending cards already have definitions and categories!");
+                                            return;
+                                        }
+                                        setQuickAddAiTotal(missing.length);
+                                        setQuickAddAiQueue(missing);
+                                    }}
+                                    disabled={pendingQuickAddCards.length === 0 || !apiKey}
+                                    className={`px-4 py-2 font-bold rounded-xl transition-all shadow-sm flex items-center gap-2 ${!apiKey ? 'bg-muted text-muted-foreground cursor-not-allowed' : 'bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 dark:bg-purple-900/20 dark:text-purple-300 dark:border-purple-800 dark:hover:bg-purple-900/40'}`}
+                                    title={!apiKey ? "Set API Key in Settings to use AI" : "Auto-fill missing fields via AI"}
+                                >
+                                    <Sparkles className="w-5 h-5" /> Fill Missing Fields with A.I.
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        if (window.confirm("Discard all pending flashcards?")) {
+                                            setPendingQuickAddCards([]);
+                                            onViewChange('dashboard');
+                                        }
+                                    }}
+                                    className="px-4 py-2 border border-destructive text-destructive hover:bg-destructive/10 rounded-xl font-bold transition-colors"
+                                >
+                                    Discard All
+                                </button>
+                                <button
+                                    onClick={handleApprovePendingCards}
+                                    disabled={pendingQuickAddCards.length === 0}
+                                    className="px-6 py-2 bg-primary text-primary-foreground shadow-lg hover:shadow-primary/25 hover:scale-[1.02] rounded-xl font-bold transition-all flex items-center gap-2 disabled:opacity-50"
+                                >
+                                    <Check className="w-5 h-5" /> Approve All
+                                </button>
+                            </div>
+                        </div>
+
+                        {pendingQuickAddCards.length === 0 ? (
+                            <div className="text-center py-20 bg-secondary/10 rounded-3xl border border-secondary">
+                                <p className="text-xl font-bold text-muted-foreground">No pending flashcards.</p>
+                            </div>
+                        ) : (
+                            <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
+                                <div className="overflow-x-auto min-h-[300px]">
+                                    <table className="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr className="bg-secondary/50 border-b border-border text-sm text-muted-foreground select-none">
+                                                <th className="py-3 px-4 font-bold whitespace-nowrap">Word / Phrase</th>
+                                                <th className="py-3 px-4 font-bold whitespace-nowrap hidden sm:table-cell">Definition</th>
+                                                <th className="py-3 px-4 font-bold whitespace-nowrap">Category</th>
+                                                <th className="py-3 px-4 font-bold whitespace-nowrap hidden md:table-cell">Example</th>
+                                                <th className="py-3 px-4 font-bold whitespace-nowrap text-right">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="text-sm">
+                                            {pendingQuickAddCards.map((card, index) => (
+                                                <tr key={card.id} className={`border-b border-border hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${index % 2 !== 0 ? 'bg-secondary/20' : ''}`}>
+                                                    <td className="py-3 px-4 font-bold max-w-[200px] text-foreground">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="truncate" title={card.word}>{card.word}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="py-3 px-4 truncate max-w-[200px] hidden sm:table-cell text-muted-foreground" title={card.definition}>
+                                                        {card.definition || '-'}
+                                                    </td>
+                                                    <td className="py-3 px-4">
+                                                        <span className="inline-block px-2 py-0.5 bg-secondary text-secondary-foreground rounded text-xs font-medium">
+                                                            {card.category || 'Uncategorized'}
+                                                        </span>
+                                                    </td>
+                                                    <td className="py-3 px-4 truncate max-w-[200px] hidden md:table-cell text-muted-foreground" title={card.example}>
+                                                        {card.example || '-'}
+                                                    </td>
+                                                    <td className="py-3 px-4 text-right">
+                                                        <div className="flex justify-end gap-2">
+                                                            <button
+                                                                onClick={(e) => { e.stopPropagation(); setEditingPendingCard(card); }}
+                                                                className="p-1.5 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-primary"
+                                                                title="Edit Flashcard"
+                                                            >
+                                                                <Pencil className="w-4 h-4" />
+                                                            </button>
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setPendingQuickAddCards(prev => prev.filter(c => c.id !== card.id));
+                                                                }}
+                                                                className="p-1.5 rounded hover:bg-red-100 transition-colors text-muted-foreground hover:text-red-500"
+                                                                title="Delete Flashcard"
+                                                            >
+                                                                <Trash2 className="w-4 h-4" />
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
             </main>
 
             {/* Global Add Content Modal */}
@@ -1418,6 +1714,7 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                     student={students.find(s => s.id === selectedStudentId)!}
                     onClose={() => setSelectedStudentId(null)}
                     onSave={onUpdateStudent}
+                    onDeleteStudent={onDeleteStudent}
                     decks={decks}
                     onAddCard={onAddCard}
                     onEditCard={onEditCard}
@@ -1432,11 +1729,84 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                     card={editingCard}
                     settings={settings}
                     apiKey={apiKey || ''}
-                    onSave={(updated) => {
+                    onSave={(updated, additionalCards) => {
                         onEditCard(updated);
+                        if (additionalCards && additionalCards.length > 0) {
+                            const currentDeck = decks.find(d => d.cards.some(c => c.id === updated.id));
+                            if (currentDeck) {
+                                additionalCards.forEach(ac => onAddCard(ac, currentDeck.id));
+                            } else if (decks.length > 0) {
+                                additionalCards.forEach(ac => onAddCard(ac, decks[0].id));
+                            }
+                        }
                         setEditingCard(null);
                     }}
                     onCancel={() => setEditingCard(null)}
+                />
+            )}
+
+            {/* Edit Pending Card Modal */}
+            {editingPendingCard && (
+                <EditCardModal
+                    card={editingPendingCard}
+                    settings={settings}
+                    apiKey={apiKey || ''}
+                    onSave={(updated, additionalCards) => {
+                        const committed = [updated];
+                        if (additionalCards && additionalCards.length > 0) {
+                            committed.push(...additionalCards);
+                        }
+                        commitCardsToLibrary(committed, false);
+                        setEditingPendingCard(null);
+                    }}
+                    onCancel={() => setEditingPendingCard(null)}
+                />
+            )}
+
+            {/* Quick Add AI Bulk Resolution Modal */}
+            {quickAddAiQueue.length > 0 && (
+                <EditCardModal
+                    key={`quick-ai-resolve-${quickAddAiQueue[0].id}-${quickAddAiQueue.length}`}
+                    card={quickAddAiQueue[0]}
+                    settings={settings}
+                    apiKey={apiKey || ''}
+                    isAiResolveMode={true}
+                    aiResolveQueueInfo={{ current: quickAddAiTotal - quickAddAiQueue.length + 1, total: quickAddAiTotal }}
+                    onSave={(updated, additionalCards) => {
+                        const committed = [updated];
+                        if (additionalCards && additionalCards.length > 0) {
+                            committed.push(...additionalCards);
+                        }
+                        commitCardsToLibrary(committed, false);
+                        setQuickAddAiQueue(prev => prev.slice(1));
+                    }}
+                    onDecline={() => {
+                        setQuickAddAiQueue(prev => prev.slice(1));
+                    }}
+                    onCancel={() => setQuickAddAiQueue([])}
+                />
+            )}
+
+            {/* AI Bulk Resolution Modal */}
+            {pendingAiResolveCards.length > 0 && (
+                <EditCardModal
+                    key={`ai-resolve-${pendingAiResolveCards[0].id}-${pendingAiResolveCards.length}`}
+                    card={pendingAiResolveCards[0]}
+                    settings={settings}
+                    apiKey={apiKey || ''}
+                    isAiResolveMode={true}
+                    aiResolveQueueInfo={{ current: originalAiResolveTotal - pendingAiResolveCards.length + 1, total: originalAiResolveTotal }}
+                    onSave={(updated, additionalCards) => {
+                        onEditCard(updated);
+                        if (additionalCards && additionalCards.length > 0) {
+                            additionalCards.forEach(ac => onAddCard(ac, pendingAiResolveCards[0].deckId));
+                        }
+                        setPendingAiResolveCards(prev => prev.slice(1));
+                    }}
+                    onDecline={() => {
+                        setPendingAiResolveCards(prev => prev.slice(1));
+                    }}
+                    onCancel={() => setPendingAiResolveCards([])}
                 />
             )}
 

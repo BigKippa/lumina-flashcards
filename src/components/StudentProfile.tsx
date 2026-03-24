@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Student, Deck, AppSettings } from '../types';
-import { X, Save, User, Globe, MapPin, Clock, Phone, Briefcase, Heart, BookOpen, Calendar, Settings, MessageSquare, CheckCircle, Activity, Layout, Mail, Plus, Volume2 } from 'lucide-react';
+import { X, Save, User, Globe, MapPin, Clock, Phone, Briefcase, Heart, BookOpen, Calendar, Settings, MessageSquare, CheckCircle, Activity, Layout, Mail, Plus, Volume2, Archive, Trash2 } from 'lucide-react';
 import { Word } from '../data/vocabulary';
 import { AddContentModal } from './AddContentModal';
 import { EditCardModal } from './EditCardModal';
@@ -9,16 +9,17 @@ interface StudentProfileProps {
     student: Student;
     onClose: () => void;
     onSave: (updatedStudent: Student) => void;
-    decks: Deck[]; // To show active decks
     onAddCard: (card: Word, targetDeckId: string) => void;
     onEditCard: (card: Word) => void;
+    onDeleteStudent?: (id: string) => void;
+    decks: Deck[]; // To show active decks
     apiKey?: string;
     settings: AppSettings;
 }
 
 // ... existing code ...
 
-export const StudentProfile: React.FC<StudentProfileProps> = ({ student, onClose, onSave, decks, onAddCard, onEditCard, apiKey, settings }) => {
+export const StudentProfile: React.FC<StudentProfileProps> = ({ student, onClose, onSave, onDeleteStudent, decks, onAddCard, onEditCard, apiKey, settings }) => {
     const [activeTab, setActiveTab] = useState<'basic' | 'learning' | 'library'>('basic');
     const [editingCard, setEditingCard] = useState<Word | null>(null);
 
@@ -106,7 +107,15 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student, onClose
                                 <Settings className="w-4 h-4" /> Edit Profile
                             </button>
                         )}
-                        <button onClick={onClose} className="p-2 hover:bg-muted rounded-full transition-colors">
+                        <button onClick={() => { onSave({...formData, status: formData.status === 'archived' ? 'active' : 'archived'}); }} className="flex items-center gap-2 px-3 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80 transition-colors" title={formData.status === 'archived' ? "Unarchive Student" : "Archive Student"}>
+                            <Archive className="w-4 h-4" /> <span className="hidden sm:inline">{formData.status === 'archived' ? 'Unarchive' : 'Archive'}</span>
+                        </button>
+                        {onDeleteStudent && (
+                            <button onClick={() => { if(window.confirm(`Are you sure you want to delete ${formData.name}?`)) { onDeleteStudent(formData.id); onClose(); } }} className="flex items-center gap-2 px-3 py-2 border border-border text-foreground rounded-lg hover:bg-secondary transition-colors" title="Delete Student">
+                                <Trash2 className="w-4 h-4" /> <span className="hidden sm:inline">Delete</span>
+                            </button>
+                        )}
+                        <button onClick={onClose} className="p-2 hover:bg-muted rounded-full transition-colors ml-2">
                             <X className="w-6 h-6 text-muted-foreground" />
                         </button>
                     </div>
@@ -386,8 +395,16 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student, onClose
                     card={editingCard}
                     settings={settings}
                     apiKey={apiKey || ''}
-                    onSave={(updated) => {
+                    onSave={(updated, additionalCards) => {
                         onEditCard(updated);
+                        if (additionalCards && additionalCards.length > 0) {
+                            const currentDeck = decks.find(d => d.cards.some(c => c.id === updated.id));
+                            if (currentDeck) {
+                                additionalCards.forEach(ac => onAddCard(ac, currentDeck.id));
+                            } else if (decks.length > 0) {
+                                additionalCards.forEach(ac => onAddCard(ac, decks[0].id));
+                            }
+                        }
                         setEditingCard(null);
                     }}
                     onCancel={() => setEditingCard(null)}

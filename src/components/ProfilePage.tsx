@@ -1391,7 +1391,7 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
                                         onChange={e => setEditForm({ ...editForm, role: e.target.value as 'user' | 'tutor' | 'admin' })}
                                         className="w-full p-2 rounded bg-secondary/50 border border-border focus:border-primary outline-none text-sm"
                                     >
-                                        <option value="user">Learner</option>
+                                        <option value="user">Student</option>
                                         <option value="tutor">Tutor</option>
                                         <option value="admin">Admin</option>
                                     </select>

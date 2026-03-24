@@ -69,6 +69,12 @@ export function PermissionsModal({ onComplete }: PermissionsModalProps) {
         );
     };
 
+    const handleAcceptAll = async () => {
+        await handleRequestCamera();
+        await handleRequestMic();
+        handleRequestLocation();
+    };
+
     const handleComplete = () => {
         onComplete({
             camera: cameraStatus === 'granted',
@@ -143,7 +149,7 @@ export function PermissionsModal({ onComplete }: PermissionsModalProps) {
                     </div>
                 </div>
 
-                <div className="w-full flex gap-3">
+                <div className="w-full flex gap-2 sm:gap-3">
                     <button
                         onClick={() => {
                             setCameraStatus('denied');
@@ -153,16 +159,22 @@ export function PermissionsModal({ onComplete }: PermissionsModalProps) {
                                 onComplete({ camera: false, mic: false, location: false });
                             }, 500);
                         }}
-                        className="flex-1 py-3 px-4 rounded-xl border border-border font-bold text-muted-foreground hover:bg-muted transition-colors"
+                        className="flex-1 py-3 px-2 rounded-xl border border-border font-bold text-sm text-muted-foreground hover:bg-muted transition-colors"
                     >
                         Skip All
                     </button>
                     <button
+                        onClick={handleAcceptAll}
+                        className="flex-1 py-3 px-2 rounded-xl bg-secondary text-secondary-foreground font-bold text-sm hover:bg-secondary/80 transition-colors"
+                    >
+                        Accept All
+                    </button>
+                    <button
                         onClick={handleComplete}
                         disabled={!checkAllComplete()}
-                        className="flex-1 py-3 px-4 rounded-xl bg-primary text-primary-foreground font-bold hover:bg-primary/90 disabled:opacity-50 transition-colors"
+                        className="flex-1 py-3 px-2 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:bg-primary/90 disabled:opacity-50 transition-colors"
                     >
-                        Continue to Profile
+                        Continue
                     </button>
                 </div>
             </div>
