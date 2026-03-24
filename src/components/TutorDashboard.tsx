@@ -120,6 +120,11 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
         return () => document.removeEventListener('click', handleClickOutside);
     }, []);
 
+    // Force scroll to top when changing distinct views (fixes React state preservation scroll traps)
+    React.useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+    }, [view]);
+
     const commitCardsToLibrary = (cardsToCommit: Word[], shouldNavAway: boolean = false) => {
         if (cardsToCommit.length === 0) return;
 
@@ -1263,7 +1268,7 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                         value={flashcardSearchQuery}
                                         onChange={(e) => setFlashcardSearchQuery(e.target.value)}
                                         placeholder="Search words, definitions..."
-                                        className="w-full pl-9 pr-4 py-2 rounded-lg border border-input bg-background focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                                        className="w-full h-10 pl-9 pr-4 py-2 rounded-lg border border-input bg-background text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                                     />
                                 </div>
 
@@ -1273,7 +1278,7 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                     <select
                                         value={filterCategory}
                                         onChange={(e) => setFilterCategory(e.target.value)}
-                                        className="px-3 py-2 rounded-lg border border-input bg-background/50 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                                        className="h-10 px-3 py-2 rounded-lg border border-input bg-background/50 text-sm outline-none focus:ring-2 focus:ring-primary/20"
                                     >
                                         <option value="all">All Categories</option>
                                         {availableCategories.map(cat => (
@@ -1285,7 +1290,7 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                     <select
                                         value={filterStudentId}
                                         onChange={(e) => setFilterStudentId(e.target.value)}
-                                        className="px-3 py-2 rounded-lg border border-input bg-background/50 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                                        className="h-10 px-3 py-2 rounded-lg border border-input bg-background/50 text-sm outline-none focus:ring-2 focus:ring-primary/20"
                                     >
                                         <option value="all">All Students</option>
                                         <option value="unassigned">Unassigned</option>
