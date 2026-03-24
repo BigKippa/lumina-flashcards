@@ -1258,115 +1258,67 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                         )}
 
                         {/* Controls Bar */}
-                        <div className="flex flex-col gap-4 bg-card p-4 rounded-xl border border-border shadow-sm">
-                            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 w-full">
-                                {/* Search */}
-                                <div className="relative w-full lg:w-96 flex-shrink-0">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                                    <input
-                                        type="text"
-                                        value={flashcardSearchQuery}
-                                        onChange={(e) => setFlashcardSearchQuery(e.target.value)}
-                                        placeholder="Search words, definitions..."
-                                        className="w-full h-10 pl-9 pr-4 py-2 rounded-lg border border-input bg-background text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                                    />
-                                </div>
-
-                                {/* Filters and Sort Toggle */}
-                                <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
-                                    {/* Category Filter */}
-                                    <select
-                                        value={filterCategory}
-                                        onChange={(e) => setFilterCategory(e.target.value)}
-                                        className="h-10 px-3 py-2 rounded-lg border border-input bg-background/50 text-sm outline-none focus:ring-2 focus:ring-primary/20"
-                                    >
-                                        <option value="all">All Categories</option>
-                                        {availableCategories.map(cat => (
-                                            <option key={cat} value={cat}>{cat}</option>
-                                        ))}
-                                    </select>
-
-                                    {/* Student Filter */}
-                                    <select
-                                        value={filterStudentId}
-                                        onChange={(e) => setFilterStudentId(e.target.value)}
-                                        className="h-10 px-3 py-2 rounded-lg border border-input bg-background/50 text-sm outline-none focus:ring-2 focus:ring-primary/20"
-                                    >
-                                        <option value="all">All Students</option>
-                                        <option value="unassigned">Unassigned</option>
-                                        {students.map(student => (
-                                            <option key={student.id} value={student.id}>{student.name}</option>
-                                        ))}
-                                    </select>
-
-                                    {/* Visible Sort Toggles */}
-                                    <div className="flex bg-secondary/50 p-1 rounded-lg gap-1 border border-border/50">
-                                        <button
-                                            onClick={() => setSortConfig({ key: 'word', direction: 'asc' })}
-                                            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all whitespace-nowrap flex items-center gap-1 ${sortConfig?.key === 'word' && sortConfig.direction === 'asc' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-                                            title="Sort A to Z"
-                                        >
-                                            A-Z
-                                        </button>
-                                        <button
-                                            onClick={() => setSortConfig({ key: 'word', direction: 'desc' })}
-                                            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all whitespace-nowrap flex items-center gap-1 ${sortConfig?.key === 'word' && sortConfig.direction === 'desc' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-                                            title="Sort Z to A"
-                                        >
-                                            Z-A
-                                        </button>
-                                    </div>
-                                </div>
+                        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full mb-2">
+                            {/* Search */}
+                            <div className="relative w-full sm:max-w-md flex-shrink-0">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground opacity-50" />
+                                <input
+                                    type="text"
+                                    value={flashcardSearchQuery}
+                                    onChange={(e) => setFlashcardSearchQuery(e.target.value)}
+                                    placeholder="Search library..."
+                                    className="w-full h-10 pl-9 pr-4 py-2 rounded-lg border border-input bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-shadow shadow-sm hover:border-input/80"
+                                />
                             </div>
-                            {selectedCardIds.size > 0 && (
-                                <div className="mt-4 bg-primary/5 border border-primary/20 rounded-xl p-3 flex items-center justify-between animate-in fade-in slide-in-from-top-2">
-                                    <div className="flex items-center gap-3">
-                                        <span className="bg-primary text-primary-foreground text-sm font-bold px-2 py-0.5 rounded-md">
-                                            {selectedCardIds.size}
-                                        </span>
-                                        <span className="text-sm font-medium text-foreground">Cards Selected</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <button
-                                            onClick={() => {
-                                                const isArchiving = !Array.from(selectedCardIds).every(id => 
-                                                    allFlashcards.find(c => String(c.id) === id)?.isArchived
-                                                );
-                                                if (window.confirm(`Are you sure you want to ${isArchiving ? 'archive' : 'unarchive'} ${selectedCardIds.size} cards?`)) {
-                                                    onBulkArchiveCards(Array.from(selectedCardIds), isArchiving);
-                                                    setSelectedCardIds(new Set());
-                                                }
-                                            }}
-                                            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-amber-600 bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors border border-amber-200"
-                                        >
-                                            <Archive className="w-4 h-4" />
-                                            Archive
-                                        </button>
-                                        <button
-                                            onClick={() => {
-                                                if (window.confirm(`Are you sure you want to PERMANENTLY delete ${selectedCardIds.size} cards?`)) {
-                                                    onBulkDeleteCards(Array.from(selectedCardIds));
-                                                    setSelectedCardIds(new Set());
-                                                }
-                                            }}
-                                            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors border border-red-200"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                            Delete
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-                            <div className="flex justify-end mt-4">
-                                <button
-                                    onClick={() => setShowArchivedCards(!showArchivedCards)}
-                                    className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors border ${showArchivedCards ? 'bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-200' : 'bg-secondary text-muted-foreground border-transparent hover:bg-secondary/80'}`}
-                                >
-                                    <Archive className="w-4 h-4" />
-                                    {showArchivedCards ? 'Hide Archived' : 'Show Archived'}
-                                </button>
-                            </div>
+
+                            <button
+                                onClick={() => setShowArchivedCards(!showArchivedCards)}
+                                className={`flex items-center gap-2 px-3 py-2 h-10 text-sm font-medium rounded-lg transition-colors border shadow-sm shrink-0 whitespace-nowrap ${showArchivedCards ? 'bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-200' : 'bg-background hover:bg-secondary text-foreground'}`}
+                            >
+                                <Archive className="w-4 h-4" />
+                                {showArchivedCards ? 'Hide Archived' : 'Show Archived'}
+                            </button>
                         </div>
+                        
+                        {selectedCardIds.size > 0 && (
+                            <div className="mb-2 bg-primary/5 border border-primary/20 rounded-xl p-3 flex items-center justify-between animate-in fade-in slide-in-from-top-2">
+                                <div className="flex items-center gap-3">
+                                    <span className="bg-primary text-primary-foreground text-sm font-bold px-2 py-0.5 rounded-md">
+                                        {selectedCardIds.size}
+                                    </span>
+                                    <span className="text-sm font-medium text-foreground">Cards Selected</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => {
+                                            const isArchiving = !Array.from(selectedCardIds).every(id => 
+                                                allFlashcards.find(c => String(c.id) === id)?.isArchived
+                                            );
+                                            if (window.confirm(`Are you sure you want to ${isArchiving ? 'archive' : 'unarchive'} ${selectedCardIds.size} cards?`)) {
+                                                onBulkArchiveCards(Array.from(selectedCardIds), isArchiving);
+                                                setSelectedCardIds(new Set());
+                                            }
+                                        }}
+                                        className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-amber-600 bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors border border-amber-200"
+                                    >
+                                        <Archive className="w-4 h-4" />
+                                        Archive
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            if (window.confirm(`Are you sure you want to PERMANENTLY delete ${selectedCardIds.size} cards?`)) {
+                                                onBulkDeleteCards(Array.from(selectedCardIds));
+                                                setSelectedCardIds(new Set());
+                                            }
+                                        }}
+                                        className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors border border-red-200"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Flashcards List */}
                         <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden pb-4 sm:pb-0">
@@ -1393,9 +1345,15 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                                     Word / Phrase {sortConfig?.key === 'word' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />)}
                                                 </div>
                                                 {renderColumnMenu('word', (
-                                                    <div className="relative">
-                                                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                                                        <input type="text" value={flashcardSearchQuery} onChange={(e) => setFlashcardSearchQuery(e.target.value)} placeholder="Search words..." className="w-full pl-8 pr-3 py-1.5 rounded-md border border-input bg-background text-sm focus:ring-1 focus:ring-primary/20 outline-none" />
+                                                    <div className="flex flex-col gap-2">
+                                                        <div className="flex gap-1 border-b border-border pb-2">
+                                                            <button onClick={() => setSortConfig({ key: 'word', direction: 'asc' })} className={`flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-bold rounded transition-colors ${sortConfig?.key === 'word' && sortConfig.direction === 'asc' ? 'bg-primary text-primary-foreground' : 'bg-secondary hover:bg-secondary/80 text-secondary-foreground'}`}>A-Z</button>
+                                                            <button onClick={() => setSortConfig({ key: 'word', direction: 'desc' })} className={`flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-bold rounded transition-colors ${sortConfig?.key === 'word' && sortConfig.direction === 'desc' ? 'bg-primary text-primary-foreground' : 'bg-secondary hover:bg-secondary/80 text-secondary-foreground'}`}>Z-A</button>
+                                                        </div>
+                                                        <div className="relative">
+                                                            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                                                            <input type="text" value={flashcardSearchQuery} onChange={(e) => setFlashcardSearchQuery(e.target.value)} placeholder="Search words..." className="w-full pl-8 pr-3 py-1.5 rounded-md border border-input bg-background/50 text-sm focus:ring-1 focus:ring-primary/20 outline-none" />
+                                                        </div>
                                                     </div>
                                                 ))}
                                             </th>
@@ -1404,9 +1362,15 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                                     Definition {sortConfig?.key === 'definition' && (sortConfig.direction === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />)}
                                                 </div>
                                                 {renderColumnMenu('definition', (
-                                                    <div className="relative">
-                                                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                                                        <input type="text" value={flashcardSearchQuery} onChange={(e) => setFlashcardSearchQuery(e.target.value)} placeholder="Search definitions..." className="w-full pl-8 pr-3 py-1.5 rounded-md border border-input bg-background text-sm focus:ring-1 focus:ring-primary/20 outline-none" />
+                                                    <div className="flex flex-col gap-2">
+                                                        <div className="flex gap-1 border-b border-border pb-2">
+                                                            <button onClick={() => setSortConfig({ key: 'definition', direction: 'asc' })} className={`flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-bold rounded transition-colors ${sortConfig?.key === 'definition' && sortConfig.direction === 'asc' ? 'bg-primary text-primary-foreground' : 'bg-secondary hover:bg-secondary/80 text-secondary-foreground'}`}>A-Z</button>
+                                                            <button onClick={() => setSortConfig({ key: 'definition', direction: 'desc' })} className={`flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-bold rounded transition-colors ${sortConfig?.key === 'definition' && sortConfig.direction === 'desc' ? 'bg-primary text-primary-foreground' : 'bg-secondary hover:bg-secondary/80 text-secondary-foreground'}`}>Z-A</button>
+                                                        </div>
+                                                        <div className="relative">
+                                                            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                                                            <input type="text" value={flashcardSearchQuery} onChange={(e) => setFlashcardSearchQuery(e.target.value)} placeholder="Search definitions..." className="w-full pl-8 pr-3 py-1.5 rounded-md border border-input bg-background/50 text-sm focus:ring-1 focus:ring-primary/20 outline-none" />
+                                                        </div>
                                                     </div>
                                                 ))}
                                             </th>
