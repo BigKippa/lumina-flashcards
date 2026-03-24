@@ -103,10 +103,10 @@ export function EditCardModal({ card, onSave, onCancel, settings, apiKey, isAiRe
 
         const cleanKey = apiKey.trim();
         const modelsToTry = [
-            "gemini-2.0-flash",
-            "gemini-2.0-flash-exp",
             "gemini-1.5-flash",
-            "gemini-1.5-pro"
+            "gemini-1.5-pro",
+            "gemini-2.0-flash",
+            "gemini-2.0-flash-exp"
         ];
 
         let lastError = null;
@@ -178,6 +178,13 @@ export function EditCardModal({ card, onSave, onCancel, settings, apiKey, isAiRe
                 } catch (e: any) {
                     console.warn(`Model ${modelName} failed:`, e.message);
                     lastError = e;
+                    
+                    // Unmask fatal errors! Only fallback if the model physically doesn't exist (404 / 'not found')
+                    // If it's a 400 (Bad Request), 403 (Forbidden), 429 (Rate Limit), we MUST bubble the true error up!
+                    const msg = e.message?.toLowerCase() || "";
+                    if (!msg.includes("404") && !msg.includes("not found")) {
+                        throw e;
+                    }
                 }
             }
 

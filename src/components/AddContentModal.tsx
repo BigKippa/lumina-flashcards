@@ -164,10 +164,10 @@ export const AddContentModal: React.FC<AddContentModalProps> = ({
         const cleanKey = apiKey.trim();
         // Updated list based on user's available models
         const modelsToTry = [
-            "gemini-2.0-flash",
-            "gemini-2.0-flash-exp",
             "gemini-1.5-flash",
-            "gemini-1.5-pro"
+            "gemini-1.5-pro",
+            "gemini-2.0-flash",
+            "gemini-2.0-flash-exp"
         ];
 
         let lastError = null;
@@ -216,7 +216,11 @@ export const AddContentModal: React.FC<AddContentModalProps> = ({
                 } catch (e: any) {
                     console.warn(`Model ${modelName} failed:`, e.message);
                     lastError = e;
-                    // Continue to next model
+                    
+                    const msg = e.message?.toLowerCase() || "";
+                    if (!msg.includes("404") && !msg.includes("not found")) {
+                        throw e;
+                    }
                 }
             }
 
