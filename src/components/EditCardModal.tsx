@@ -105,7 +105,7 @@ export function EditCardModal({ card, onSave, onCancel, settings, apiKey, isAiRe
 
         try {
             const genAI = new GoogleGenerativeAI(cleanKey);
-            const modelName = "gemini-1.5-flash";
+            const modelName = "gemini-2.0-flash";
 
             try {
                 console.log(`Attempting to generate with model: ${modelName}`);
