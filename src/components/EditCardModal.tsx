@@ -24,6 +24,7 @@ export function EditCardModal({ card, onSave, onCancel, settings, apiKey, isAiRe
     const [isAiPopulated, setIsAiPopulated] = useState(false);
     const [pendingAlternateMeanings, setPendingAlternateMeanings] = useState<any[]>([]);
     const [approvedCardsQueue, setApprovedCardsQueue] = useState<Word[]>([]);
+    const [declinedCardIds, setDeclinedCardIds] = useState<Set<string>>(new Set());
 
     const SPLIT_CARD_COLORS = [
         'bg-color2 border-color3 text-color2-foreground',
@@ -48,42 +49,57 @@ export function EditCardModal({ card, onSave, onCancel, settings, apiKey, isAiRe
 
     const handleSaveEdit = (e: React.FormEvent) => {
         e.preventDefault();
+        
+        // When explicitly saving from the main buttons, filter out explicitly declined cards 
+        // and ensure approved cards are sent in bulk.
+        const validCards = editingCards.filter(c => !declinedCardIds.has(String(c.id)));
+        
         if (approvedCardsQueue.length > 0) {
-            const finalApproved = [...approvedCardsQueue, ...editingCards];
+            const finalApproved = [...approvedCardsQueue];
+            // If they click 'Save Changes' at the bottom when there are still unsaved cards in the track, save everything not declined!
+            validCards.forEach(vc => {
+                if (!finalApproved.some(ac => ac.id === vc.id)) {
+                    finalApproved.push(vc);
+                }
+            });
             onSave(finalApproved[0], finalApproved.slice(1));
         } else {
-            onSave(editingCards[0], editingCards.length > 1 ? editingCards.slice(1) : undefined);
+            onSave(validCards[0], validCards.length > 1 ? validCards.slice(1) : undefined);
         }
     };
 
     const removeCard = (index: number) => {
-        setEditingCards(prev => {
-            const next = [...prev];
-            next.splice(index, 1);
-            if (next.length === 0) {
-                if (approvedCardsQueue.length > 0) {
+        const cardToDecline = editingCards[index];
+        const newDeclined = new Set(declinedCardIds);
+        newDeclined.add(String(cardToDecline.id));
+        setDeclinedCardIds(newDeclined);
+
+        const totalHandled = approvedCardsQueue.length + newDeclined.size;
+        
+        if (totalHandled === editingCards.length) {
+            if (approvedCardsQueue.length > 0) {
+                setTimeout(() => {
                     onSave(approvedCardsQueue[0], approvedCardsQueue.slice(1));
-                } else {
-                    if (isAiResolveMode && onDecline) onDecline();
-                    else onCancel();
-                }
+                }, 600);
+            } else {
+                if (isAiResolveMode && onDecline) onDecline();
+                else onCancel();
             }
-            return next;
-        });
+        }
     };
 
     const approveCard = (index: number) => {
         const approved = editingCards[index];
-        setApprovedCardsQueue(prev => [...prev, approved]);
-        setEditingCards(prev => {
-            const next = [...prev];
-            next.splice(index, 1);
-            if (next.length === 0) {
-                const finalApproved = [...approvedCardsQueue, approved];
-                onSave(finalApproved[0], finalApproved.slice(1));
-            }
-            return next;
-        });
+        const newQueue = [...approvedCardsQueue, approved];
+        setApprovedCardsQueue(newQueue);
+        
+        const totalHandled = newQueue.length + declinedCardIds.size;
+
+        if (totalHandled === editingCards.length) {
+            setTimeout(() => {
+                onSave(newQueue[0], newQueue.slice(1));
+            }, 600);
+        }
     };
 
     const updateCard = (index: number, updater: (prev: Word) => Word) => {
@@ -319,14 +335,27 @@ export function EditCardModal({ card, onSave, onCancel, settings, apiKey, isAiRe
                 )}
                 
                 <form onSubmit={handleSaveEdit} className="flex flex-col flex-1 min-h-0 min-w-0 h-full">
-                    <div className={`flex flex-row overflow-x-auto overflow-y-auto gap-4 snap-x pb-2 flex-1 min-h-0 custom-scrollbar ${!isSplitSession ? 'justify-start' : ''}`}>
+                    <div className={`flex flex-row overflow-x-auto overflow-y-auto gap-4 snap-x pb-2 flex-1 min-h-0 custom-scrollbar mx-auto ${isSplitSession ? 'w-fit max-w-full justify-center lg:justify-start' : 'w-full justify-start'}`}>
                         {editingCards.map((c, index) => {
-                            const absoluteIndex = approvedCardsQueue.length + index;
+                            const isApproved = approvedCardsQueue.some(ac => ac.id === c.id);
+                            const isDeclined = declinedCardIds.has(String(c.id));
+                            const absoluteIndex = index;
+                            
+                            if (isDeclined) return null; // We can hide declined cards aggressively, or leave them. User asked for approved cards to stay.
+
                             return (
-                                <div key={c.id || index} className={`snap-center flex flex-col shrink-0 ${isSplitSession ? `w-[450px] border rounded-xl p-5 relative shadow-sm ${SPLIT_CARD_COLORS[absoluteIndex % 5]}` : 'w-full px-1'}`}>
+                                <div key={c.id || index} className={`snap-center flex flex-col shrink-0 items-stretch h-max ${isSplitSession ? `w-[450px] border rounded-xl p-5 relative shadow-sm ${SPLIT_CARD_COLORS[absoluteIndex % 5]}` : 'w-full px-1'}`}>
                                     {isSplitSession && (
                                         <div className="absolute top-0 right-0 bg-black/10 dark:bg-white/10 text-current text-[10px] uppercase font-bold px-3 py-1 rounded-bl-xl rounded-tr-xl">
                                             Meaning {absoluteIndex + 1}
+                                        </div>
+                                    )}
+                                    {isApproved && (
+                                        <div className="absolute inset-0 z-[60] bg-background/60 backdrop-blur-[2px] rounded-xl flex flex-col items-center justify-center animate-in fade-in duration-300 pointer-events-none">
+                                            <div className="bg-green-500 text-white rounded-full p-3 mb-2 shadow-lg shadow-green-500/20">
+                                                <CheckCircle className="w-8 h-8" />
+                                            </div>
+                                            <span className="font-bold text-lg text-foreground bg-background/80 px-4 py-1 rounded-full shadow-sm">Saved!</span>
                                         </div>
                                     )}
                                 <CardEditor 
@@ -341,7 +370,7 @@ export function EditCardModal({ card, onSave, onCancel, settings, apiKey, isAiRe
                                     error={error}
                                     originalCard={isAiResolveMode ? card : undefined}
                                 />
-                                {isSplitSession && (
+                                {isSplitSession && !isApproved && (
                                     <div className="flex gap-2 mt-6 pt-4 border-t border-black/10 dark:border-white/10 shrink-0">
                                         <button type="button" onClick={() => removeCard(index)} className="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white font-bold rounded-lg text-sm shadow-sm transition-colors">Decline Changes</button>
                                         <button type="button" onClick={() => approveCard(index)} className="flex-1 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg text-sm shadow-sm transition-colors">Save Changes</button>
