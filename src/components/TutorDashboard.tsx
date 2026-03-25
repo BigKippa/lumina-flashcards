@@ -35,7 +35,7 @@ interface TutorDashboardProps {
     onViewChange: (view: 'dashboard' | 'students' | 'flashcards' | 'learning-content' | 'manage-flashcards' | 'review-new-flashcards') => void;
     onAddDeck: (deck: Deck) => void;
     onAddCard: (card: Word, deckId: string) => void;
-    onEditCard: (card: Word) => void;
+    onEditCard: (card: Word, additionalCards?: {card: Word, deckId: string}[]) => void;
     apiKey?: string;
     settings: AppSettings;
     onNavigateToProfile?: (target?: string) => void;
@@ -1783,12 +1783,11 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                         });
 
                         // 2. Attempt explicit global library sync
-                        onEditCard(updated);
-                        if (additionalCards && additionalCards.length > 0) {
-                            const targetDeckId = (updated as any).deckId || (pendingAiResolveCards[0] as any).deckId;
-                            if (targetDeckId) {
-                                additionalCards.forEach(ac => onAddCard(ac, targetDeckId));
-                            }
+                        const targetDeckId = (updated as any).deckId || (pendingAiResolveCards[0] as any).deckId;
+                        if (additionalCards && additionalCards.length > 0 && targetDeckId) {
+                            onEditCard(updated, additionalCards.map(ac => ({ card: ac, deckId: targetDeckId })));
+                        } else {
+                            onEditCard(updated);
                         }
                         
                         setPendingAiResolveCards(prev => prev.slice(1));

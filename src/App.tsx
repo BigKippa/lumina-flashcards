@@ -577,11 +577,22 @@ function App() {
         persistDecks(updatedDecks);
     };
 
-    const handleEditCard = (updatedWord: Word) => {
-        const updatedDecks = decks.map(d => ({
-            ...d,
-            cards: d.cards.map(c => String(c.id) === String(updatedWord.id) ? updatedWord : c)
-        }));
+    const handleEditCard = (updatedWord: Word, additionalCards?: {card: Word, deckId: string}[]) => {
+        const updatedDecks = decks.map(d => {
+            let nextDeck = { ...d };
+            
+            // 1. Update the origin card explicitly mapped to this deck 
+            nextDeck.cards = nextDeck.cards.map(c => String(c.id) === String(updatedWord.id) ? updatedWord : c);
+            
+            // 2. Splice in any newly generated split meanings explicitly bound to this deck
+            if (additionalCards && additionalCards.length > 0) {
+                const destinedCards = additionalCards.filter(ac => ac.deckId === d.id).map(ac => ac.card);
+                if (destinedCards.length > 0) {
+                    nextDeck.cards = [...nextDeck.cards, ...destinedCards];
+                }
+            }
+            return nextDeck;
+        });
         persistDecks(updatedDecks);
     };
 
