@@ -148,10 +148,10 @@ export function EditCardModal({ card, onSave, onCancel, settings, apiKey, isAiRe
                                 {
                                     "definition": "A clear, concise definition.",
                                     "example": "A natural example sentence.",
-                                    "category": "MUST be exactly one of: Nouns, Verbs, Adjectives, Pronouns, Prepositions, Determiners, Conjunctions, Modal Verbs, Phrasal Verbs, Collocations, Idioms & Sayings, Prepositional Phrases"
+                                    "category": "MUST be exactly one of: Nouns, Verbs, Adjectives, Pronouns, Prepositions, Determiners, Conjunctions, Modal Verbs, Phrasal Verbs, Collocations, Idioms & Sayings, Prepositional Phrases",
+                                    "phonetic": "The explicit IPA pronunciation specifically for this exact meaning/category context (e.g. noun 'record' vs verb 'record' differ in stress)."
                                 }
                             ],
-                            "phonetic": "IPA pronunciation",
                             "level": "Assign a TEFL level: A1, A2, B1, B2, C1, or C2"
                         }
                         If the word has multiple distinct common meanings, provide up to 3 of the most common ones in the "meanings" array. Otherwise, just provide 1.
@@ -174,7 +174,7 @@ export function EditCardModal({ card, onSave, onCancel, settings, apiKey, isAiRe
                             ...prev,
                             definition: firstMeaning.definition || prev.definition || '',
                             example: firstMeaning.example || prev.example || '',
-                            phonetic: data.phonetic || prev.phonetic || '',
+                            phonetic: firstMeaning.phonetic || data.phonetic || prev.phonetic || '',
                             category: firstMeaning.category || prev.category || '',
                             level: data.level || prev.level || ''
                         }));
@@ -226,16 +226,19 @@ export function EditCardModal({ card, onSave, onCancel, settings, apiKey, isAiRe
             const newAltDefs = [...(next.alternateDefinitions || [])];
             const newAltExs = [...(next.alternateExamples || [])];
             const newAltCats = [...(next.alternateCategories || [])];
+            const newAltPhons = [...(next.alternatePhonetics || [])];
 
             pendingAlternateMeanings.forEach(m => {
                 if (m.definition) newAltDefs.push(m.definition);
                 if (m.example) newAltExs.push(m.example);
                 if (m.category) newAltCats.push(m.category);
+                if (m.phonetic) newAltPhons.push(m.phonetic);
             });
 
             next.alternateDefinitions = newAltDefs;
             next.alternateExamples = newAltExs;
             next.alternateCategories = newAltCats;
+            next.alternatePhonetics = newAltPhons;
 
             return next;
         });
@@ -249,6 +252,7 @@ export function EditCardModal({ card, onSave, onCancel, settings, apiKey, isAiRe
             definition: m.definition || '',
             example: m.example || '',
             category: m.category || 'Other',
+            phonetic: m.phonetic || '',
             alternateDefinitions: [],
             alternateExamples: [],
             alternateCategories: [],
