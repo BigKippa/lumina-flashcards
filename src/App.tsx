@@ -580,7 +580,7 @@ function App() {
     const handleEditCard = (updatedWord: Word) => {
         const updatedDecks = decks.map(d => ({
             ...d,
-            cards: d.cards.map(c => c.id === updatedWord.id ? updatedWord : c)
+            cards: d.cards.map(c => String(c.id) === String(updatedWord.id) ? updatedWord : c)
         }));
         persistDecks(updatedDecks);
     };
