@@ -3,6 +3,7 @@ import { Deck } from '../types';
 import { Word } from '../data/vocabulary';
 import { X, Search, Plus, Volume2, Book, Sparkles, CheckCircle, Image as ImageIcon, Mic, Trash2, Upload } from 'lucide-react';
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import Papa from 'papaparse';
 
 // ... rest of imports
 
@@ -37,7 +38,7 @@ export const AddContentModal: React.FC<AddContentModalProps> = ({
     onCreateNewDeck,
     apiKey
 }) => {
-    const [actionType, setActionType] = useState<'new-card' | 'new-deck' | 'existing-card' | 'existing-deck'>('new-card');
+    const [actionType, setActionType] = useState<'new-card' | 'new-deck' | 'existing-card' | 'existing-deck' | 'bulk-upload'>('new-card');
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedItems, setSelectedItems] = useState<string[]>([]);
     const [targetDeckId, setTargetDeckId] = useState<string>(activeDeckIds.length > 0 ? activeDeckIds[0] : (availableDecks.length > 0 ? availableDecks[0].id : ''));
@@ -316,6 +317,94 @@ export const AddContentModal: React.FC<AddContentModalProps> = ({
         "Phrasal Verb", "Idiom", "Collocation", "Slang"
     ];
 
+    const handleDownloadCSVTemplate = () => {
+        const headers = "Word,Definition,Example,Phonetic,Category,Notes\n";
+        const exampleRow = "Ephemeral,Lasting for a very short time.,Fashions are ephemeral.,/ɪˈfem.ər.əl/,Adjective,Common in literature.\n";
+        const bodyContent = headers + exampleRow;
+        const blob = new Blob([bodyContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", "lumina_flashcards_template.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const handleCSVUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (targetDeckId === 'NEW_DECK' && !customDeckTitle.trim()) {
+            alert("Please enter a title for the new deck before uploading.");
+            e.target.value = '';
+            return;
+        }
+
+        let finalDeckId = targetDeckId;
+
+        if (targetDeckId === 'NEW_DECK') {
+            const newDeck: Deck = {
+                id: `deck-${Date.now()}`,
+                title: customDeckTitle,
+                description: 'Imported via CSV',
+                cards: [],
+                status: 'private',
+                authorId: 'tutor'
+            };
+            if (onCreateNewDeck) onCreateNewDeck(newDeck);
+            if (mode === 'student' && onAssignDeck) {
+                onAssignDeck(newDeck.id);
+            }
+            finalDeckId = newDeck.id;
+        }
+
+        if (mode === 'student' && onAssignDeck && !activeDeckIds.includes(finalDeckId)) {
+            onAssignDeck(finalDeckId);
+        }
+
+        Papa.parse(file, {
+            header: true,
+            skipEmptyLines: true,
+            transformHeader: (header) => header.trim().toLowerCase(),
+            complete: (results) => {
+                let cardsAdded = 0;
+                results.data.forEach((row: any) => {
+                    const word = typeof row.word === 'string' ? row.word.trim() : '';
+                    if (!word) return;
+
+                    // Normalize category casing (e.g., "verb" -> "Verb", "phrasal verb" -> "Phrasal Verb")
+                    let category = typeof row.category === 'string' ? row.category.trim() : '';
+                    if (category) {
+                        const words = category.split(' ');
+                        category = words.map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+                    }
+
+                    const card: Word = {
+                        id: Date.now() + Math.random(),
+                        word: word,
+                        definition: typeof row.definition === 'string' ? row.definition.trim() : '',
+                        example: typeof row.example === 'string' ? row.example.trim() : '',
+                        phonetic: typeof row.phonetic === 'string' ? row.phonetic.trim() : '',
+                        category: category,
+                        notes: typeof row.notes === 'string' ? row.notes.trim() : '',
+                        status: 'private',
+                        authorId: 'tutor'
+                    };
+
+                    onCreateNewCard(card, finalDeckId, true);
+                    cardsAdded++;
+                });
+                alert(`Successfully imported ${cardsAdded} flashcards!`);
+                onClose();
+            },
+            error: (err: any) => {
+                alert(`Error parsing CSV: ${err.message}`);
+                console.error(err);
+            }
+        });
+    };
+
     return (
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
             <div className="bg-background w-full max-w-2xl max-h-[90vh] rounded-2xl shadow-xl flex flex-col border border-border">
@@ -340,7 +429,7 @@ export const AddContentModal: React.FC<AddContentModalProps> = ({
                 </div>
 
                 {/* Tabs */}
-                <div className="bg-muted/30 p-2 m-6 mb-0 rounded-lg grid grid-cols-2 lg:grid-cols-4 gap-2">
+                <div className={`bg-muted/30 p-2 m-6 mb-0 rounded-lg grid gap-2 ${mode === 'student' ? 'grid-cols-2 lg:grid-cols-5' : 'grid-cols-2 lg:grid-cols-4'}`}>
                     <button
                         onClick={() => setActionType('new-card')}
                         className={`py-2 px-3 text-sm font-medium rounded-md transition-all whitespace-nowrap ${actionType === 'new-card' ? 'bg-background shadow text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
@@ -367,6 +456,12 @@ export const AddContentModal: React.FC<AddContentModalProps> = ({
                             Assign Decks
                         </button>
                     )}
+                    <button
+                        onClick={() => setActionType('bulk-upload')}
+                        className={`py-2 px-3 text-sm font-medium rounded-md transition-all whitespace-nowrap ${actionType === 'bulk-upload' ? 'bg-background shadow text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                    >
+                        Bulk Upload
+                    </button>
                 </div>
 
                 {/* Content Area */}
@@ -824,6 +919,64 @@ export const AddContentModal: React.FC<AddContentModalProps> = ({
                                 >
                                     Assign Selected Decks
                                 </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* === BULK UPLOAD === */}
+                    {actionType === 'bulk-upload' && (
+                        <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
+                            {/* Target Deck Selection */}
+                            <div className="mb-4">
+                                <label className="block text-sm font-bold mb-1">Target Deck</label>
+                                <select
+                                    value={targetDeckId}
+                                    onChange={e => setTargetDeckId(e.target.value)}
+                                    className="w-full p-2 rounded-lg border border-input bg-background"
+                                >
+                                    <option value="" disabled>Select a deck...</option>
+                                    <option value="NEW_DECK">➕ Create New Deck...</option>
+                                    {availableDecks
+                                        .filter(d => mode === 'tutor' || activeDeckIds.includes(d.id))
+                                        .map(d => (
+                                            <option key={d.id} value={d.id}>{d.title}</option>
+                                        ))}
+                                </select>
+                                {targetDeckId === 'NEW_DECK' && (
+                                    <div className="mt-2 animate-in fade-in slide-in-from-top-1">
+                                        <input
+                                            type="text"
+                                            value={customDeckTitle}
+                                            onChange={e => setCustomDeckTitle(e.target.value)}
+                                            className="w-full p-2 rounded-lg border border-primary bg-background focus:ring-1 focus:ring-primary outline-none"
+                                            placeholder="Enter new deck name..."
+                                            autoFocus
+                                        />
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="text-center py-12 border-2 border-dashed border-border rounded-xl">
+                                <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                                <h3 className="text-lg font-bold mb-2">Import Flashcards via CSV</h3>
+                                <p className="text-muted-foreground text-sm max-w-md mx-auto mb-6">
+                                    Upload a CSV file to quickly add multiple flashcards to a deck. The CSV should contain columns for Word, Definition, and optionally Example, Phonetic, Category, and Notes.
+                                </p>
+                                <label 
+                                    className={`inline-block px-6 py-3 font-bold rounded-xl shadow-md transition-all cursor-pointer ${(!targetDeckId || (targetDeckId === 'NEW_DECK' && !customDeckTitle.trim())) ? 'bg-muted text-muted-foreground opacity-50 cursor-not-allowed pointer-events-none' : 'bg-primary text-primary-foreground hover:bg-primary/90'}`}
+                                >
+                                    Select CSV File
+                                    <input 
+                                        type="file" 
+                                        accept=".csv" 
+                                        onChange={handleCSVUpload} 
+                                        className="hidden" 
+                                        disabled={!targetDeckId || (targetDeckId === 'NEW_DECK' && !customDeckTitle.trim())}
+                                    />
+                                </label>
+                                <div onClick={handleDownloadCSVTemplate} className="mt-4 text-sm text-primary hover:underline cursor-pointer">
+                                    Download CSV Template
+                                </div>
                             </div>
                         </div>
                     )}

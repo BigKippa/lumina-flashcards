@@ -187,13 +187,24 @@ export const BulkGeneratorModal: React.FC<BulkGeneratorModalProps> = ({ isOpen, 
         setError(null);
 
         const processRows = (rows: any[]) => {
-            const cards: Word[] = rows.map((row: any) => ({
-                id: Date.now() + Math.random(),
-                word: row.Word || row.word || row[0],
-                definition: row.Definition || row.definition || row[1],
-                example: row.Example || row.example || row[2] || '',
-                phonetic: row.Phonetic || row.phonetic || row[3] || ''
-            })).filter(c => c.word && c.definition);
+            const cards: Word[] = rows.map((row: any) => {
+                const word = typeof row.word === 'string' ? row.word.trim() : (row.Word ? String(row.Word).trim() : (row[0] ? String(row[0]).trim() : ''));
+                
+                let category = typeof row.category === 'string' ? row.category.trim() : (row.Category ? String(row.Category).trim() : (row[4] ? String(row[4]).trim() : ''));
+                if (category) {
+                    const words = category.split(' ');
+                    category = words.map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+                }
+
+                return {
+                    id: Date.now() + Math.random(),
+                    word: word,
+                    definition: typeof row.definition === 'string' ? row.definition.trim() : (row.Definition ? String(row.Definition).trim() : (row[1] ? String(row[1]).trim() : '')),
+                    example: typeof row.example === 'string' ? row.example.trim() : (row.Example ? String(row.Example).trim() : (row[2] ? String(row[2]).trim() : '')),
+                    phonetic: typeof row.phonetic === 'string' ? row.phonetic.trim() : (row.Phonetic ? String(row.Phonetic).trim() : (row[3] ? String(row[3]).trim() : '')),
+                    category: category
+                };
+            }).filter(c => c.word && c.definition);
 
             if (cards.length === 0) {
                 setError("No valid cards found. Ensure headers are Word, Definition, Example.");
@@ -206,6 +217,8 @@ export const BulkGeneratorModal: React.FC<BulkGeneratorModalProps> = ({ isOpen, 
         if (file.name.endsWith('.csv')) {
             Papa.parse(file, {
                 header: true,
+                skipEmptyLines: true,
+                transformHeader: (header) => header.trim().toLowerCase(),
                 complete: (results) => processRows(results.data),
                 error: (err) => {
                     setError("CSV Parse Error: " + err.message);

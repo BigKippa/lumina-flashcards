@@ -1,314 +1,354 @@
 {
-    "welcome": {
-        "greeting": {
-            "morning": "おはようございます",
-            "afternoon": "こんにちは",
-            "evening": "こんばんは"
-        },
-        "subtitle": "今日は何をマスターしたいですか？",
-        "categories": {
-            "random": "ランダムミックス",
-            "vocabulary": "語彙",
-            "idioms": "慣用句・ことわざ",
-            "phrasal_verbs": "句動詞",
-            "collocations": "コロケーション",
-            "prepositions": "前置詞"
-        },
-        "start_session": "セッション開始",
-        "quick_start": "クイックスタート",
-        "resume": "{{deck}} を再開",
-        "favorites": "お気に入り",
-        "favorites_subtitle": "保存されたアイテム",
-        "no_favorites": "まだお気に入りはありません"
+  "welcome": {
+    "greeting": {
+      "morning": "おはようございます",
+      "afternoon": "こんにちは",
+      "evening": "こんばんは"
     },
-    "common": {
-        "language": "言語",
-        "settings": "設定",
-        "profile": "プロフィール",
-        "logout": "Log Out",
-        "home": "Home",
-        "back": "Back",
-        "next": "Next",
-        "cancel": "Cancel",
-        "confirm": "Confirm",
-        "save": "Save",
-        "loading": "Loading...",
-        "error": "Error",
-        "success": "Success",
-        "or": "または"
+    "subtitle": "今日は何をマスターしたいですか？",
+    "categories": {
+      "random": "ランダムミックス",
+      "vocabulary": "語彙",
+      "idioms": "慣用句・ことわざ",
+      "phrasal_verbs": "句動詞",
+      "collocations": "コロケーション",
+      "prepositions": "前置詞"
     },
-    "auth": {
-        "login": "ログイン",
-        "register": "新規登録",
-        "guest": "ゲストとして続行",
-        "choose_language": "言語を選択",
-        "welcome_title": "Luminaへようこそ",
-        "welcome_subtitle": "美しい語彙への旅がここから始まります。",
-        "username": "ユーザー名",
-        "password": "パスワード",
-        "email": "メールアドレス（確認用）",
-        "email_placeholder": "name@example.com",
-        "username_placeholder": "ユーザー名を入力",
-        "password_placeholder": "パスワードを入力",
-        "remember_me": "ログイン状態を保持",
-        "forgot_password": "パスワードをお忘れですか？",
-        "create_account": "アカウント作成",
-        "choose_username": "ユーザー名を選択",
-        "choose_password": "パスワードを設定",
-        "verify_email": "メールアドレスの確認",
-        "verification_code": "確認コード",
-        "verify_create": "確認してアカウント作成",
-        "resend_code": "コードを再送信",
-        "back_to_login": "ログインに戻る",
-        "role_learner": "学習者",
-        "role_tutor": "講師",
-        "i_am_a": "私は...",
-        "or": "または"
+    "start_session": "セッション開始",
+    "quick_start": "クイックスタート",
+    "resume": "{{deck}} を再開",
+    "favorites": "お気に入り",
+    "favorites_subtitle": "保存されたアイテム",
+    "no_favorites": "まだお気に入りはありません"
+  },
+  "common": {
+    "language": "言語",
+    "settings": "設定",
+    "profile": "プロフィール",
+    "logout": "Log Out",
+    "home": "Home",
+    "back": "Back",
+    "next": "Next",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "or": "または"
+  },
+  "auth": {
+    "login": "ログイン",
+    "register": "新規登録",
+    "guest": "ゲストとして続行",
+    "choose_language": "言語を選択",
+    "welcome_title": "Luminaへようこそ",
+    "welcome_subtitle": "美しい語彙への旅がここから始まります。",
+    "username": "ユーザー名",
+    "password": "パスワード",
+    "email": "メールアドレス（確認用）",
+    "email_placeholder": "name@example.com",
+    "username_placeholder": "ユーザー名を入力",
+    "password_placeholder": "パスワードを入力",
+    "remember_me": "ログイン状態を保持",
+    "forgot_password": "パスワードをお忘れですか？",
+    "create_account": "アカウント作成",
+    "choose_username": "ユーザー名を選択",
+    "choose_password": "パスワードを設定",
+    "verify_email": "メールアドレスの確認",
+    "verification_code": "確認コード",
+    "verify_create": "確認してアカウント作成",
+    "resend_code": "コードを再送信",
+    "back_to_login": "ログインに戻る",
+    "role_learner": "学習者",
+    "role_tutor": "講師",
+    "i_am_a": "私は...",
+    "or": "または"
+  },
+  "topics": {
+    "selection": {
+      "title": "語彙グループ",
+      "subtitle": "特定のトピックを探索するためにカテゴリを選択してください",
+      "back_to_home": "ホームに戻る",
+      "back_to_groups": "グループに戻る",
+      "student_library": "学生ライブラリ",
+      "cards_count": "{{count}} 枚のカード",
+      "surprise_me_title": "お任せ（全語彙）",
+      "surprise_me_subtitle": "すべての語彙トピックから単語をシャッフル",
+      "random_mix_title": "{{group}} のランダムミックス",
+      "random_mix_subtitle": "このグループのすべてのトピックから単語をシャッフル"
     },
-    "topics": {
-        "selection": {
-            "title": "語彙グループ",
-            "subtitle": "特定のトピックを探索するためにカテゴリを選択してください",
-            "back_to_home": "ホームに戻る",
-            "back_to_groups": "グループに戻る",
-            "student_library": "学生ライブラリ",
-            "cards_count": "{{count}} 枚のカード",
-            "surprise_me_title": "お任せ（全語彙）",
-            "surprise_me_subtitle": "すべての語彙トピックから単語をシャッフル",
-            "random_mix_title": "{{group}} のランダムミックス",
-            "random_mix_subtitle": "このグループのすべてのトピックから単語をシャッフル"
-        },
-        "daily_life": {
-            "title": "日常生活とサバイバル",
-            "description": "初級から中級学習者のための基礎。",
-            "home": {
-                "label": "家",
-                "desc": "家具、家電、家事。"
-            },
-            "food": {
-                "label": "食べ物と飲み物",
-                "desc": "食料品、調理法、注文。"
-            },
-            "transport": {
-                "label": "交通",
-                "desc": "公共交通機関、運転、空港。"
-            },
-            "health": {
-                "label": "健康とウェルネス",
-                "desc": "一般的な病気、体の部位、運動。"
-            },
-            "shopping": {
-                "label": "買い物",
-                "desc": "衣類、サイズ、価格、返品。"
-            }
-        },
-        "business": {
-            "title": "プロフェッショナル＆ビジネス英語",
-            "description": "キャリアアップのために英語を使用する学習者に不可欠。",
-            "office": {
-                "label": "オフィス",
-                "desc": "文房具、技術、階層。"
-            },
-            "meetings": {
-                "label": "会議とプレゼンテーション",
-                "desc": "慣用句、つなぎ言葉、企業用語。"
-            },
-            "finance": {
-                "label": "交渉と金融",
-                "desc": "契約、銀行、市場トレンド。"
-            },
-            "job": {
-                "label": "就職活動",
-                "desc": "履歴書のキーワード、面接の動詞、ソフトスキル。"
-            }
-        },
-        "communication": {
-            "title": "コミュニケーションと社交",
-            "description": "会話をつなぐ「接着剤」に焦点を当てています。",
-            "phrasal": {
-                "label": "句動詞",
-                "desc": "前置詞や動作でグループ化。"
-            },
-            "idioms": {
-                "label": "一般的な慣用句",
-                "desc": "日常英語での比喩的な表現。"
-            },
-            "social": {
-                "label": "社交",
-                "desc": "挨拶、世間話、丁寧な表現。"
-            },
-            "emotions": {
-                "label": "感情と意見",
-                "desc": "気持ちを説明し、同意を表す。"
-            }
-        },
-        "academic": {
-            "title": "学術と技術",
-            "description": "TOEFLやIELTSなどの試験の準備をしている学生向け。",
-            "science": {
-                "label": "科学と技術",
-                "desc": "生物学、化学、IT用語。"
-            },
-            "env": {
-                "label": "環境と自然",
-                "desc": "気候変動、地理、動物。"
-            },
-            "arts": {
-                "label": "芸術",
-                "desc": "文学、音楽、映画、創造的表現。"
-            },
-            "edu": {
-                "label": "教育",
-                "desc": "大学生活、科目、学習習慣。"
-            }
-        },
-        "grammar": {
-            "title": "文法に基づく語彙",
-            "description": "文法的な役割によって単語を学ぶ。",
-            "temporal": {
-                "label": "時間に関する言葉",
-                "desc": "頻度の副詞と時間マーカー。"
-            },
-            "connectors": {
-                "label": "接続詞とつなぎ言葉",
-                "desc": "複雑な文を作成する。"
-            },
-            "collocations": {
-                "label": "コロケーション",
-                "desc": "自然に一緒に使われる単語。"
-            }
-        }
+    "daily_life": {
+      "title": "日常生活とサバイバル",
+      "description": "初級から中級学習者のための基礎。",
+      "home": {
+        "label": "家",
+        "desc": "家具、家電、家事。"
+      },
+      "food": {
+        "label": "食べ物と飲み物",
+        "desc": "食料品、調理法、注文。"
+      },
+      "transport": {
+        "label": "交通",
+        "desc": "公共交通機関、運転、空港。"
+      },
+      "health": {
+        "label": "健康とウェルネス",
+        "desc": "一般的な病気、体の部位、運動。"
+      },
+      "shopping": {
+        "label": "買い物",
+        "desc": "衣類、サイズ、価格、返品。"
+      }
     },
-    "roles": {
-        "admin": "管理者",
-        "adminTutor": "管理者（講師モード）",
-        "adminLearner": "管理者（学習者モード）"
+    "business": {
+      "title": "プロフェッショナル＆ビジネス英語",
+      "description": "キャリアアップのために英語を使用する学習者に不可欠。",
+      "office": {
+        "label": "オフィス",
+        "desc": "文房具、技術、階層。"
+      },
+      "meetings": {
+        "label": "会議とプレゼンテーション",
+        "desc": "慣用句、つなぎ言葉、企業用語。"
+      },
+      "finance": {
+        "label": "交渉と金融",
+        "desc": "契約、銀行、市場トレンド。"
+      },
+      "job": {
+        "label": "就職活動",
+        "desc": "履歴書のキーワード、面接の動詞、ソフトスキル。"
+      }
     },
-    "mode": {
-        "title": "ユーザーモード",
-        "subtitle": "このセッションの役割を選択してください。",
-        "learner": "学習者",
-        "learner_desc": "インタラクティブなフラッシュカードとクイズで語彙を習得します。",
-        "tutor": "講師",
-        "tutor_desc": "生徒を管理し、デッキを割り当て、進捗状況を追跡します。",
-        "admin": "管理者",
-        "admin_desc": "システム設定を構成し、コンテンツを管理します。"
+    "communication": {
+      "title": "コミュニケーションと社交",
+      "description": "会話をつなぐ「接着剤」に焦点を当てています。",
+      "phrasal": {
+        "label": "句動詞",
+        "desc": "前置詞や動作でグループ化。"
+      },
+      "idioms": {
+        "label": "一般的な慣用句",
+        "desc": "日常英語での比喩的な表現。"
+      },
+      "social": {
+        "label": "社交",
+        "desc": "挨拶、世間話、丁寧な表現。"
+      },
+      "emotions": {
+        "label": "感情と意見",
+        "desc": "気持ちを説明し、同意を表す。"
+      }
     },
-    "admin": {
-        "dashboard_title": "Admin Dashboard",
-        "tabs": {
-            "menu": "Menu",
-            "decks": "Decks",
-            "users": "Users",
-            "tickets": "Tickets"
-        },
-        "data_management": {
-            "title": "Data Management",
-            "subtitle": "Backup and restore your application data.",
-            "export": "Export Backup",
-            "export_desc": "Download all data as JSON",
-            "import": "Import Backup",
-            "import_desc": "Restore from JSON file",
-            "warning_title": "Important Note:",
-            "warning_desc": "Importing data will <strong>overwrite</strong> all current decks, cards, users, and settings. This action cannot be undone."
-        },
-        "users": {
-            "title": "User Database",
-            "subtitle": "Manage access and roles",
-            "merge_btn": "Merge Users",
-            "add_btn": "Add User",
-            "table": {
-                "user": "User",
-                "role": "Role",
-                "progress": "Progress",
-                "actions": "Actions",
-                "empty": "No users found."
-            },
-            "delete_confirm": "Delete User"
-        },
-        "system": {
-            "title": "System Configuration",
-            "api_keys": "Backend API Keys",
-            "gemini_label": "Google Gemini API Key",
-            "gemini_placeholder": "Enter backend API Key",
-            "gemini_hint": "This key is required for all AI generation features. It is stored securely in local storage but only accessible here."
-        }
+    "academic": {
+      "title": "学術と技術",
+      "description": "TOEFLやIELTSなどの試験の準備をしている学生向け。",
+      "science": {
+        "label": "科学と技術",
+        "desc": "生物学、化学、IT用語。"
+      },
+      "env": {
+        "label": "環境と自然",
+        "desc": "気候変動、地理、動物。"
+      },
+      "arts": {
+        "label": "芸術",
+        "desc": "文学、音楽、映画、創造的表現。"
+      },
+      "edu": {
+        "label": "教育",
+        "desc": "大学生活、科目、学習習慣。"
+      }
     },
-    "tutor": {
-        "dashboard_title": "Tutor Dashboard",
-        "tabs": {
-            "overview": "Overview",
-            "students": "Students",
-            "flashcards": "Flashcards"
-        },
-        "stats": {
-            "total_students": "Total Students",
-            "active_students": "Active Students",
-            "archived_students": "Archived Students"
-        },
-        "actions": {
-            "add_student": "Add New Student",
-            "manage_content": "Manage Learning Content"
-        },
-        "toggle": {
-            "active": "Active",
-            "archived": "Archived"
-        }
-    },
-    "studyMode": {
-        "readyToStudy": "Ready to Study?",
-        "cardsInDeck": "{{count}} cards in this deck. Choose your interaction mode.",
-        "manualMode": "Manual Mode",
-        "manualModeDesc": "Self-check, Type, or Multiple Choice.",
-        "voiceMode": "Voice Mode",
-        "voiceModeDesc": "Speak your answers using the microphone.",
-        "answerStyle": "Answer Style",
-        "selfCheck": "Self Check",
-        "selfCheckDesc": "Classic flashcard flip.",
-        "typeAnswer": "Type Answer",
-        "typeAnswerDesc": "Type the word exactly.",
-        "multipleChoice": "Multiple Choice",
-        "multipleChoiceDesc": "Select from 4 options.",
-        "matchWord": "Match Word",
-        "matchWordDesc": "See Definition to Choose Word",
-        "matchDef": "Match Definition",
-        "matchDefDesc": "See Word to Choose Definition",
-        "mixedMode": "Mixed Mode",
-        "mixedModeDesc": "Randomly switch between style.",
-        "sessionComplete": "Session Complete!",
-        "reviewPassed": "Review passed.",
-        "greatJob": "Great study session!",
-        "accuracy": "Accuracy",
-        "time": "Time",
-        "best": "Best",
-        "newBest": "New Best!",
-        "needsImprovement": "Needs Improvement",
-        "missedCount": "You missed {{count}} cards on the first attempt.",
-        "reviewMissed": "Review Missed Items",
-        "returnToDeck": "Return to Deck",
-        "tryAgain": "Try again ({{count}}/3)",
-        "listen": "Listen to the word...",
-        "notQuite": "Not quite. Here is the card.",
-        "correct": "Correct!",
-        "nextCard": "Next Card",
-        "gotIt": "Got it",
-        "skip": "Skip / Keep in Queue",
-        "listening": "Listening...",
-        "nowYouTry": "Now you try..."
-    },
-    "pageTitles": {
-        "adminDashboard": "Admin Dashboard",
-        "tutorDashboard": "Tutor Dashboard",
-        "studyMode": "Study Mode",
-        "quizMode": "Quiz Mode",
-        "timedMode": "Timed Mode",
-        "profile": "User Profile",
-        "deckView": "Deck View",
-        "modeSelection": "Mode Selection",
-        "topicSelection": "Library",
-        "welcome": "Welcome",
-        "login": "Login",
-        "typing": "Typing Mode",
-        "quizResult": "Quiz Results"
+    "grammar": {
+      "title": "文法に基づく語彙",
+      "description": "文法的な役割によって単語を学ぶ。",
+      "temporal": {
+        "label": "時間に関する言葉",
+        "desc": "頻度の副詞と時間マーカー。"
+      },
+      "connectors": {
+        "label": "接続詞とつなぎ言葉",
+        "desc": "複雑な文を作成する。"
+      },
+      "collocations": {
+        "label": "コロケーション",
+        "desc": "自然に一緒に使われる単語。"
+      }
     }
+  },
+  "roles": {
+    "admin": "管理者",
+    "adminTutor": "管理者（講師モード）",
+    "adminLearner": "管理者（学習者モード）"
+  },
+  "mode": {
+    "title": "ユーザーモード",
+    "subtitle": "このセッションの役割を選択してください。",
+    "learner": "学習者",
+    "learner_desc": "インタラクティブなフラッシュカードとクイズで語彙を習得します。",
+    "tutor": "講師",
+    "tutor_desc": "生徒を管理し、デッキを割り当て、進捗状況を追跡します。",
+    "admin": "管理者",
+    "admin_desc": "システム設定を構成し、コンテンツを管理します。"
+  },
+  "admin": {
+    "dashboard_title": "Admin Dashboard",
+    "tabs": {
+      "menu": "Menu",
+      "decks": "Decks",
+      "users": "Users",
+      "tickets": "Tickets"
+    },
+    "data_management": {
+      "title": "Data Management",
+      "subtitle": "Backup and restore your application data.",
+      "export": "Export Backup",
+      "export_desc": "Download all data as JSON",
+      "import": "Import Backup",
+      "import_desc": "Restore from JSON file",
+      "warning_title": "Important Note:",
+      "warning_desc": "Importing data will <strong>overwrite</strong> all current decks, cards, users, and settings. This action cannot be undone."
+    },
+    "users": {
+      "title": "User Database",
+      "subtitle": "Manage access and roles",
+      "merge_btn": "Merge Users",
+      "add_btn": "Add User",
+      "table": {
+        "user": "User",
+        "role": "Role",
+        "progress": "Progress",
+        "actions": "Actions",
+        "empty": "No users found."
+      },
+      "delete_confirm": "Delete User"
+    },
+    "system": {
+      "title": "System Configuration",
+      "api_keys": "Backend API Keys",
+      "gemini_label": "Google Gemini API Key",
+      "gemini_placeholder": "Enter backend API Key",
+      "gemini_hint": "This key is required for all AI generation features. It is stored securely in local storage but only accessible here."
+    }
+  },
+  "tutor": {
+    "dashboard_title": "Tutor Dashboard",
+    "tabs": {
+      "overview": "Overview",
+      "students": "Students",
+      "flashcards": "Flashcards"
+    },
+    "stats": {
+      "total_students": "Total Students",
+      "active_students": "Active Students",
+      "archived_students": "Archived Students"
+    },
+    "actions": {
+      "add_student": "Add New Student",
+      "manage_content": "Manage Learning Content"
+    },
+    "toggle": {
+      "active": "Active",
+      "archived": "Archived"
+    }
+  },
+  "studyMode": {
+    "readyToStudy": "Ready to Study?",
+    "cardsInDeck": "{{count}} cards in this deck. Choose your interaction mode.",
+    "manualMode": "Manual Mode",
+    "manualModeDesc": "Self-check, Type, or Multiple Choice.",
+    "voiceMode": "Voice Mode",
+    "voiceModeDesc": "Speak your answers using the microphone.",
+    "answerStyle": "Answer Style",
+    "selfCheck": "Self Check",
+    "selfCheckDesc": "Classic flashcard flip.",
+    "typeAnswer": "Type Answer",
+    "typeAnswerDesc": "Type the word exactly.",
+    "multipleChoice": "Multiple Choice",
+    "multipleChoiceDesc": "Select from 4 options.",
+    "matchWord": "Match Word",
+    "matchWordDesc": "See Definition to Choose Word",
+    "matchDef": "Match Definition",
+    "matchDefDesc": "See Word to Choose Definition",
+    "mixedMode": "Mixed Mode",
+    "mixedModeDesc": "Randomly switch between style.",
+    "sessionComplete": "Session Complete!",
+    "reviewPassed": "Review passed.",
+    "greatJob": "Great study session!",
+    "accuracy": "Accuracy",
+    "time": "Time",
+    "best": "Best",
+    "newBest": "New Best!",
+    "needsImprovement": "Needs Improvement",
+    "missedCount": "You missed {{count}} cards on the first attempt.",
+    "reviewMissed": "Review Missed Items",
+    "returnToDeck": "Return to Deck",
+    "tryAgain": "Try again ({{count}}/3)",
+    "listen": "Listen to the word...",
+    "notQuite": "Not quite. Here is the card.",
+    "correct": "Correct!",
+    "nextCard": "Next Card",
+    "gotIt": "Got it",
+    "skip": "Skip / Keep in Queue",
+    "listening": "Listening...",
+    "nowYouTry": "Now you try...",
+    "addToFavorites": "Add to Favorites",
+    "removeFromFavorites": "Remove from Favorites",
+    "reportIssue": "Report Issue",
+    "markForReview": "Mark for Review",
+    "unmarkForReview": "Remove from Review Queue",
+    "restartConfirm": "Restart session? Current progress will be saved.",
+    "endSessionConfirm": "End session now? Progress will be saved.",
+    "reportReason": "Please describe the issue with this card:",
+    "reportThanks": "Thank you! The card has been reported for review.",
+    "startOver": "Start Over",
+    "paused": "Paused",
+    "pausedDesc": "Your session is paused.",
+    "pausedWarning": "Session will automatically end if pause expires.",
+    "resume": "Resume",
+    "extendPause": "Extend Pause",
+    "enterMinutes": "Enter minutes to extend:",
+    "customTime": "Custom Time",
+    "disableAutoAdvance": "Disable Auto-Advance",
+    "enableAutoAdvance": "Enable Auto-Advance",
+    "autoAdvanceOn": "Auto-Advance On",
+    "autoAdvanceOff": "Auto-Advance Off",
+    "autoAdvanceDesc": "Cards auto-advance after {{seconds}}s.",
+    "manualAdvanceDesc": "Manual advance mode enabled.",
+    "delaySeconds": "Delay Before Next",
+    "saveDefault": "Save Default",
+    "save": "Save",
+    "tapToSpeak": "Tap mic to speak",
+    "restartSession": "Restart Session",
+    "restart": "Restart",
+    "pauseSession": "Pause Session",
+    "pause": "Pause",
+    "endSession": "End Session",
+    "end": "End",
+    "shuffleRemaining": "Shuffle Remaining",
+    "shuffle": "Shuffle",
+    "sessionProgress": "Session Progress",
+    "mastered": "Mastered",
+    "stats": "Statistics",
+    "streak": "Current Streak",
+    "bestStreak": "Best Streak"
+  },
+  "pageTitles": {
+    "adminDashboard": "Admin Dashboard",
+    "tutorDashboard": "Tutor Dashboard",
+    "studyMode": "Study Mode",
+    "quizMode": "Quiz Mode",
+    "timedMode": "Timed Mode",
+    "profile": "User Profile",
+    "deckView": "Deck View",
+    "modeSelection": "Mode Selection",
+    "topicSelection": "Library",
+    "welcome": "Welcome",
+    "login": "Login",
+    "typing": "Typing Mode",
+    "quizResult": "Quiz Results"
+  }
 }

@@ -17,6 +17,8 @@ export interface Word {
     disableAudio?: boolean;
     customPronunciation?: string;
     isArchived?: boolean;
+    ignoredDuplicateIds?: number[];
+    markedForReview?: boolean;
 
     // Alternate fields for edge cases and multiple usages
     alternateDefinitions?: string[];

@@ -1,314 +1,354 @@
 {
-    "welcome": {
-        "greeting": {
-            "morning": "सुप्रभात",
-            "afternoon": "शुभ दोपहर",
-            "evening": "शुभ संध्या"
-        },
-        "subtitle": "आज आप क्या सीखना चाहेंगे?",
-        "categories": {
-            "random": "यादृच्छिक मिश्रण",
-            "vocabulary": "शब्दावली",
-            "idioms": "मुहावरे और कहावतें",
-            "phrasal_verbs": "वाक्यांश क्रियाएं",
-            "collocations": "वाक्यांश और संयोजन",
-            "prepositions": "पूर्वसर्ग"
-        },
-        "start_session": "सत्र शुरू करें",
-        "quick_start": "त्वरित आरंभ",
-        "resume": "फिर से शुरू करें {{deck}}",
-        "favorites": "पसंदीदा",
-        "favorites_subtitle": "आपकी सुरक्षित वस्तुएं",
-        "no_favorites": "अभी तक कोई पसंदीदा नहीं"
+  "welcome": {
+    "greeting": {
+      "morning": "सुप्रभात",
+      "afternoon": "शुभ दोपहर",
+      "evening": "शुभ संध्या"
     },
-    "common": {
-        "language": "भाषा",
-        "settings": "सेटिंग्स",
-        "profile": "प्रोफ़ाइल",
-        "logout": "Log Out",
-        "home": "Home",
-        "back": "Back",
-        "next": "Next",
-        "cancel": "Cancel",
-        "confirm": "Confirm",
-        "save": "Save",
-        "loading": "Loading...",
-        "error": "Error",
-        "success": "Success",
-        "or": "या"
+    "subtitle": "आज आप क्या सीखना चाहेंगे?",
+    "categories": {
+      "random": "यादृच्छिक मिश्रण",
+      "vocabulary": "शब्दावली",
+      "idioms": "मुहावरे और कहावतें",
+      "phrasal_verbs": "वाक्यांश क्रियाएं",
+      "collocations": "वाक्यांश और संयोजन",
+      "prepositions": "पूर्वसर्ग"
     },
-    "auth": {
-        "login": "लॉग इन करें",
-        "register": "नया उपयोगकर्ता",
-        "guest": "अतिथि के रूप में जारी रखें",
-        "choose_language": "अपनी भाषा चुनें",
-        "welcome_title": "Lumina में आपका स्वागत है",
-        "welcome_subtitle": "सुंदर शब्दावली की आपकी यात्रा यहाँ से शुरू होती है।",
-        "username": "उपयोगकर्ता नाम",
-        "password": "पासवर्ड",
-        "email": "ईमेल (सत्यापन के लिए)",
-        "email_placeholder": "name@example.com",
-        "username_placeholder": "उपयोगकर्ता नाम दर्ज करें",
-        "password_placeholder": "पासवर्ड दर्ज करें",
-        "remember_me": "मुझे याद रखें",
-        "forgot_password": "पासवर्ड भूल गए?",
-        "create_account": "खाता बनाएं",
-        "choose_username": "उपयोगकर्ता नाम चुनें",
-        "choose_password": "पासवर्ड चुनें",
-        "verify_email": "ईमेल सत्यापित करें",
-        "verification_code": "सत्यापन कोड",
-        "verify_create": "सत्यापित करें और खाता बनाएं",
-        "resend_code": "कोड पुनः भेजें",
-        "back_to_login": "लॉगिन पर वापस जाएं",
-        "role_learner": "शिक्षार्थी",
-        "role_tutor": "शिक्षक",
-        "i_am_a": "मैं एक...",
-        "or": "या"
+    "start_session": "सत्र शुरू करें",
+    "quick_start": "त्वरित आरंभ",
+    "resume": "फिर से शुरू करें {{deck}}",
+    "favorites": "पसंदीदा",
+    "favorites_subtitle": "आपकी सुरक्षित वस्तुएं",
+    "no_favorites": "अभी तक कोई पसंदीदा नहीं"
+  },
+  "common": {
+    "language": "भाषा",
+    "settings": "सेटिंग्स",
+    "profile": "प्रोफ़ाइल",
+    "logout": "Log Out",
+    "home": "Home",
+    "back": "Back",
+    "next": "Next",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "or": "या"
+  },
+  "auth": {
+    "login": "लॉग इन करें",
+    "register": "नया उपयोगकर्ता",
+    "guest": "अतिथि के रूप में जारी रखें",
+    "choose_language": "अपनी भाषा चुनें",
+    "welcome_title": "Lumina में आपका स्वागत है",
+    "welcome_subtitle": "सुंदर शब्दावली की आपकी यात्रा यहाँ से शुरू होती है।",
+    "username": "उपयोगकर्ता नाम",
+    "password": "पासवर्ड",
+    "email": "ईमेल (सत्यापन के लिए)",
+    "email_placeholder": "name@example.com",
+    "username_placeholder": "उपयोगकर्ता नाम दर्ज करें",
+    "password_placeholder": "पासवर्ड दर्ज करें",
+    "remember_me": "मुझे याद रखें",
+    "forgot_password": "पासवर्ड भूल गए?",
+    "create_account": "खाता बनाएं",
+    "choose_username": "उपयोगकर्ता नाम चुनें",
+    "choose_password": "पासवर्ड चुनें",
+    "verify_email": "ईमेल सत्यापित करें",
+    "verification_code": "सत्यापन कोड",
+    "verify_create": "सत्यापित करें और खाता बनाएं",
+    "resend_code": "कोड पुनः भेजें",
+    "back_to_login": "लॉगिन पर वापस जाएं",
+    "role_learner": "शिक्षार्थी",
+    "role_tutor": "शिक्षक",
+    "i_am_a": "मैं एक...",
+    "or": "या"
+  },
+  "topics": {
+    "selection": {
+      "title": "शब्दावली समूह",
+      "subtitle": "विशिष्ट विषयों का पता लगाने के लिए एक श्रेणी चुनें",
+      "back_to_home": "घर वापस",
+      "back_to_groups": "समूहों पर वापस",
+      "student_library": "छात्र पुस्तकालय",
+      "cards_count": "{{count}} कार्ड",
+      "surprise_me_title": "मुझे आश्चर्यचकित करो (सभी शब्दावली)",
+      "surprise_me_subtitle": "हर एक शब्दावली विषय से शब्दों को मिलाएं",
+      "random_mix_title": "{{group}} का यादृच्छिक मिश्रण",
+      "random_mix_subtitle": "इस समूह के सभी विषयों से शब्दों को मिलाएं"
     },
-    "topics": {
-        "selection": {
-            "title": "शब्दावली समूह",
-            "subtitle": "विशिष्ट विषयों का पता लगाने के लिए एक श्रेणी चुनें",
-            "back_to_home": "घर वापस",
-            "back_to_groups": "समूहों पर वापस",
-            "student_library": "छात्र पुस्तकालय",
-            "cards_count": "{{count}} कार्ड",
-            "surprise_me_title": "मुझे आश्चर्यचकित करो (सभी शब्दावली)",
-            "surprise_me_subtitle": "हर एक शब्दावली विषय से शब्दों को मिलाएं",
-            "random_mix_title": "{{group}} का यादृच्छिक मिश्रण",
-            "random_mix_subtitle": "इस समूह के सभी विषयों से शब्दों को मिलाएं"
-        },
-        "daily_life": {
-            "title": "दैनिक जीवन और अस्तित्व",
-            "description": "किसी भी शुरुआती से मध्यवर्ती शिक्षार्थी के लिए निर्माण खंड।",
-            "home": {
-                "label": "घर",
-                "desc": "फर्नीचर, उपकरण और घरेलू काम।"
-            },
-            "food": {
-                "label": "खाना और पीना",
-                "desc": "किराना, खाना पकाने के तरीके और ऑर्डर करना।"
-            },
-            "transport": {
-                "label": "परिवहन",
-                "desc": "सार्वजनिक परिवहन, ड्राइविंग और हवाई अड्डों को नेविगेट करना।"
-            },
-            "health": {
-                "label": "स्वास्थ्य और कल्याण",
-                "desc": "आम बीमारियां, शरीर के अंग और व्यायाम।"
-            },
-            "shopping": {
-                "label": "खरीदारी",
-                "desc": "कपड़े, आकार, कीमतें और रिटर्न।"
-            }
-        },
-        "business": {
-            "title": "पेशेवर और व्यावसायिक अंग्रेजी",
-            "description": "करियर की प्रगति के लिए अंग्रेजी का उपयोग करने वाले शिक्षार्थियों के लिए आवश्यक।",
-            "office": {
-                "label": "कार्यालय",
-                "desc": "स्टेशनरी, तकनीक और पदानुक्रम।"
-            },
-            "meetings": {
-                "label": "बैठकें और प्रस्तुतियाँ",
-                "desc": "मुहावरे, संक्रमण वाक्यांश और कॉर्पोरेट भाषा।"
-            },
-            "finance": {
-                "label": "बातचीत और वित्त",
-                "desc": "अनुबंध, बैंकिंग और बाजार के रुझान।"
-            },
-            "job": {
-                "label": "नौकरी की तलाश",
-                "desc": "रिज्यूमे कीवर्ड, साक्षात्कार क्रियाएं और सॉफ्ट स्किल्स।"
-            }
-        },
-        "communication": {
-            "title": "संचार और समाजीकरण",
-            "description": "'गोंद' पर ध्यान केंद्रित करता है जो बातचीत को एक साथ रखता है।",
-            "phrasal": {
-                "label": "वाक्यांश क्रियाएं",
-                "desc": "कण या क्रिया द्वारा समूहीकृत।"
-            },
-            "idioms": {
-                "label": "आम मुहावरे",
-                "desc": "रोजमर्रा की अंग्रेजी में आलंकारिक भाषा।"
-            },
-            "social": {
-                "label": "समाजीकरण",
-                "desc": "अभिवादन, छोटी बात और विनम्र अभिव्यक्ति।"
-            },
-            "emotions": {
-                "label": "भावनाएं और राय",
-                "desc": "भावनाओं का वर्णन करना और सहमति व्यक्त करना।"
-            }
-        },
-        "academic": {
-            "title": "शैक्षणिक और तकनीकी",
-            "description": "TOEFL या IELTS जैसी परीक्षाओं की तैयारी करने वाले छात्रों के लिए।",
-            "science": {
-                "label": "विज्ञान और प्रौद्योगिकी",
-                "desc": "जीव विज्ञान, रसायन विज्ञान और आईटी शब्दावली।"
-            },
-            "env": {
-                "label": "पर्यावरण और प्रकृति",
-                "desc": "जलवायु परिवर्तन, भूगोल और जानवर।"
-            },
-            "arts": {
-                "label": "कला",
-                "desc": "साहित्य, संगीत, फिल्म और रचनात्मक अभिव्यक्ति।"
-            },
-            "edu": {
-                "label": "शिक्षा",
-                "desc": "विश्वविद्यालय जीवन, विषय और अध्ययन की आदतें।"
-            }
-        },
-        "grammar": {
-            "title": "व्याकरण आधारित शब्दावली",
-            "description": "उनकी व्याकरणिक भूमिका द्वारा शब्द सीखना।",
-            "temporal": {
-                "label": "समय शब्द",
-                "desc": "आवृत्ति और समय मार्करों के क्रिया विशेषण।"
-            },
-            "connectors": {
-                "label": "कनेक्टर्स और संयोजक",
-                "desc": "जटिल वाक्य बनाना।"
-            },
-            "collocations": {
-                "label": "कोलोकेशन्स",
-                "desc": "ऐसे शब्द जो स्वाभाविक रूप से एक साथ चलते हैं।"
-            }
-        }
+    "daily_life": {
+      "title": "दैनिक जीवन और अस्तित्व",
+      "description": "किसी भी शुरुआती से मध्यवर्ती शिक्षार्थी के लिए निर्माण खंड।",
+      "home": {
+        "label": "घर",
+        "desc": "फर्नीचर, उपकरण और घरेलू काम।"
+      },
+      "food": {
+        "label": "खाना और पीना",
+        "desc": "किराना, खाना पकाने के तरीके और ऑर्डर करना।"
+      },
+      "transport": {
+        "label": "परिवहन",
+        "desc": "सार्वजनिक परिवहन, ड्राइविंग और हवाई अड्डों को नेविगेट करना।"
+      },
+      "health": {
+        "label": "स्वास्थ्य और कल्याण",
+        "desc": "आम बीमारियां, शरीर के अंग और व्यायाम।"
+      },
+      "shopping": {
+        "label": "खरीदारी",
+        "desc": "कपड़े, आकार, कीमतें और रिटर्न।"
+      }
     },
-    "roles": {
-        "admin": "प्रशासक",
-        "adminTutor": "एडमिन (शिक्षक मोड)",
-        "adminLearner": "एडमिन (छात्र मोड)"
+    "business": {
+      "title": "पेशेवर और व्यावसायिक अंग्रेजी",
+      "description": "करियर की प्रगति के लिए अंग्रेजी का उपयोग करने वाले शिक्षार्थियों के लिए आवश्यक।",
+      "office": {
+        "label": "कार्यालय",
+        "desc": "स्टेशनरी, तकनीक और पदानुक्रम।"
+      },
+      "meetings": {
+        "label": "बैठकें और प्रस्तुतियाँ",
+        "desc": "मुहावरे, संक्रमण वाक्यांश और कॉर्पोरेट भाषा।"
+      },
+      "finance": {
+        "label": "बातचीत और वित्त",
+        "desc": "अनुबंध, बैंकिंग और बाजार के रुझान।"
+      },
+      "job": {
+        "label": "नौकरी की तलाश",
+        "desc": "रिज्यूमे कीवर्ड, साक्षात्कार क्रियाएं और सॉफ्ट स्किल्स।"
+      }
     },
-    "mode": {
-        "title": "उपयोगकर्ता मोड",
-        "subtitle": "इस सत्र के लिए अपनी भूमिका चुनें।",
-        "learner": "छात्र",
-        "learner_desc": "इंटरैक्टिव फ्लैशकार्ड और क्विज़ के साथ शब्दावली में महारत हासिल करें।",
-        "tutor": "शिक्षक",
-        "tutor_desc": "छात्रों को प्रबंधित करें, डेक असाइन करें और प्रगति ट्रैक करें।",
-        "admin": "एडमिन",
-        "admin_desc": "सिस्टम सेटिंग्स कॉन्फ़िगर करें और सामग्री प्रबंधित करें।"
+    "communication": {
+      "title": "संचार और समाजीकरण",
+      "description": "'गोंद' पर ध्यान केंद्रित करता है जो बातचीत को एक साथ रखता है।",
+      "phrasal": {
+        "label": "वाक्यांश क्रियाएं",
+        "desc": "कण या क्रिया द्वारा समूहीकृत।"
+      },
+      "idioms": {
+        "label": "आम मुहावरे",
+        "desc": "रोजमर्रा की अंग्रेजी में आलंकारिक भाषा।"
+      },
+      "social": {
+        "label": "समाजीकरण",
+        "desc": "अभिवादन, छोटी बात और विनम्र अभिव्यक्ति।"
+      },
+      "emotions": {
+        "label": "भावनाएं और राय",
+        "desc": "भावनाओं का वर्णन करना और सहमति व्यक्त करना।"
+      }
     },
-    "admin": {
-        "dashboard_title": "Admin Dashboard",
-        "tabs": {
-            "menu": "Menu",
-            "decks": "Decks",
-            "users": "Users",
-            "tickets": "Tickets"
-        },
-        "data_management": {
-            "title": "Data Management",
-            "subtitle": "Backup and restore your application data.",
-            "export": "Export Backup",
-            "export_desc": "Download all data as JSON",
-            "import": "Import Backup",
-            "import_desc": "Restore from JSON file",
-            "warning_title": "Important Note:",
-            "warning_desc": "Importing data will <strong>overwrite</strong> all current decks, cards, users, and settings. This action cannot be undone."
-        },
-        "users": {
-            "title": "User Database",
-            "subtitle": "Manage access and roles",
-            "merge_btn": "Merge Users",
-            "add_btn": "Add User",
-            "table": {
-                "user": "User",
-                "role": "Role",
-                "progress": "Progress",
-                "actions": "Actions",
-                "empty": "No users found."
-            },
-            "delete_confirm": "Delete User"
-        },
-        "system": {
-            "title": "System Configuration",
-            "api_keys": "Backend API Keys",
-            "gemini_label": "Google Gemini API Key",
-            "gemini_placeholder": "Enter backend API Key",
-            "gemini_hint": "This key is required for all AI generation features. It is stored securely in local storage but only accessible here."
-        }
+    "academic": {
+      "title": "शैक्षणिक और तकनीकी",
+      "description": "TOEFL या IELTS जैसी परीक्षाओं की तैयारी करने वाले छात्रों के लिए।",
+      "science": {
+        "label": "विज्ञान और प्रौद्योगिकी",
+        "desc": "जीव विज्ञान, रसायन विज्ञान और आईटी शब्दावली।"
+      },
+      "env": {
+        "label": "पर्यावरण और प्रकृति",
+        "desc": "जलवायु परिवर्तन, भूगोल और जानवर।"
+      },
+      "arts": {
+        "label": "कला",
+        "desc": "साहित्य, संगीत, फिल्म और रचनात्मक अभिव्यक्ति।"
+      },
+      "edu": {
+        "label": "शिक्षा",
+        "desc": "विश्वविद्यालय जीवन, विषय और अध्ययन की आदतें।"
+      }
     },
-    "tutor": {
-        "dashboard_title": "Tutor Dashboard",
-        "tabs": {
-            "overview": "Overview",
-            "students": "Students",
-            "flashcards": "Flashcards"
-        },
-        "stats": {
-            "total_students": "Total Students",
-            "active_students": "Active Students",
-            "archived_students": "Archived Students"
-        },
-        "actions": {
-            "add_student": "Add New Student",
-            "manage_content": "Manage Learning Content"
-        },
-        "toggle": {
-            "active": "Active",
-            "archived": "Archived"
-        }
-    },
-    "studyMode": {
-        "readyToStudy": "Ready to Study?",
-        "cardsInDeck": "{{count}} cards in this deck. Choose your interaction mode.",
-        "manualMode": "Manual Mode",
-        "manualModeDesc": "Self-check, Type, or Multiple Choice.",
-        "voiceMode": "Voice Mode",
-        "voiceModeDesc": "Speak your answers using the microphone.",
-        "answerStyle": "Answer Style",
-        "selfCheck": "Self Check",
-        "selfCheckDesc": "Classic flashcard flip.",
-        "typeAnswer": "Type Answer",
-        "typeAnswerDesc": "Type the word exactly.",
-        "multipleChoice": "Multiple Choice",
-        "multipleChoiceDesc": "Select from 4 options.",
-        "matchWord": "Match Word",
-        "matchWordDesc": "See Definition to Choose Word",
-        "matchDef": "Match Definition",
-        "matchDefDesc": "See Word to Choose Definition",
-        "mixedMode": "Mixed Mode",
-        "mixedModeDesc": "Randomly switch between style.",
-        "sessionComplete": "Session Complete!",
-        "reviewPassed": "Review passed.",
-        "greatJob": "Great study session!",
-        "accuracy": "Accuracy",
-        "time": "Time",
-        "best": "Best",
-        "newBest": "New Best!",
-        "needsImprovement": "Needs Improvement",
-        "missedCount": "You missed {{count}} cards on the first attempt.",
-        "reviewMissed": "Review Missed Items",
-        "returnToDeck": "Return to Deck",
-        "tryAgain": "Try again ({{count}}/3)",
-        "listen": "Listen to the word...",
-        "notQuite": "Not quite. Here is the card.",
-        "correct": "Correct!",
-        "nextCard": "Next Card",
-        "gotIt": "Got it",
-        "skip": "Skip / Keep in Queue",
-        "listening": "Listening...",
-        "nowYouTry": "Now you try..."
-    },
-    "pageTitles": {
-        "adminDashboard": "Admin Dashboard",
-        "tutorDashboard": "Tutor Dashboard",
-        "studyMode": "Study Mode",
-        "quizMode": "Quiz Mode",
-        "timedMode": "Timed Mode",
-        "profile": "User Profile",
-        "deckView": "Deck View",
-        "modeSelection": "Mode Selection",
-        "topicSelection": "Library",
-        "welcome": "Welcome",
-        "login": "Login",
-        "typing": "Typing Mode",
-        "quizResult": "Quiz Results"
+    "grammar": {
+      "title": "व्याकरण आधारित शब्दावली",
+      "description": "उनकी व्याकरणिक भूमिका द्वारा शब्द सीखना।",
+      "temporal": {
+        "label": "समय शब्द",
+        "desc": "आवृत्ति और समय मार्करों के क्रिया विशेषण।"
+      },
+      "connectors": {
+        "label": "कनेक्टर्स और संयोजक",
+        "desc": "जटिल वाक्य बनाना।"
+      },
+      "collocations": {
+        "label": "कोलोकेशन्स",
+        "desc": "ऐसे शब्द जो स्वाभाविक रूप से एक साथ चलते हैं।"
+      }
     }
+  },
+  "roles": {
+    "admin": "प्रशासक",
+    "adminTutor": "एडमिन (शिक्षक मोड)",
+    "adminLearner": "एडमिन (छात्र मोड)"
+  },
+  "mode": {
+    "title": "उपयोगकर्ता मोड",
+    "subtitle": "इस सत्र के लिए अपनी भूमिका चुनें।",
+    "learner": "छात्र",
+    "learner_desc": "इंटरैक्टिव फ्लैशकार्ड और क्विज़ के साथ शब्दावली में महारत हासिल करें।",
+    "tutor": "शिक्षक",
+    "tutor_desc": "छात्रों को प्रबंधित करें, डेक असाइन करें और प्रगति ट्रैक करें।",
+    "admin": "एडमिन",
+    "admin_desc": "सिस्टम सेटिंग्स कॉन्फ़िगर करें और सामग्री प्रबंधित करें।"
+  },
+  "admin": {
+    "dashboard_title": "Admin Dashboard",
+    "tabs": {
+      "menu": "Menu",
+      "decks": "Decks",
+      "users": "Users",
+      "tickets": "Tickets"
+    },
+    "data_management": {
+      "title": "Data Management",
+      "subtitle": "Backup and restore your application data.",
+      "export": "Export Backup",
+      "export_desc": "Download all data as JSON",
+      "import": "Import Backup",
+      "import_desc": "Restore from JSON file",
+      "warning_title": "Important Note:",
+      "warning_desc": "Importing data will <strong>overwrite</strong> all current decks, cards, users, and settings. This action cannot be undone."
+    },
+    "users": {
+      "title": "User Database",
+      "subtitle": "Manage access and roles",
+      "merge_btn": "Merge Users",
+      "add_btn": "Add User",
+      "table": {
+        "user": "User",
+        "role": "Role",
+        "progress": "Progress",
+        "actions": "Actions",
+        "empty": "No users found."
+      },
+      "delete_confirm": "Delete User"
+    },
+    "system": {
+      "title": "System Configuration",
+      "api_keys": "Backend API Keys",
+      "gemini_label": "Google Gemini API Key",
+      "gemini_placeholder": "Enter backend API Key",
+      "gemini_hint": "This key is required for all AI generation features. It is stored securely in local storage but only accessible here."
+    }
+  },
+  "tutor": {
+    "dashboard_title": "Tutor Dashboard",
+    "tabs": {
+      "overview": "Overview",
+      "students": "Students",
+      "flashcards": "Flashcards"
+    },
+    "stats": {
+      "total_students": "Total Students",
+      "active_students": "Active Students",
+      "archived_students": "Archived Students"
+    },
+    "actions": {
+      "add_student": "Add New Student",
+      "manage_content": "Manage Learning Content"
+    },
+    "toggle": {
+      "active": "Active",
+      "archived": "Archived"
+    }
+  },
+  "studyMode": {
+    "readyToStudy": "Ready to Study?",
+    "cardsInDeck": "{{count}} cards in this deck. Choose your interaction mode.",
+    "manualMode": "Manual Mode",
+    "manualModeDesc": "Self-check, Type, or Multiple Choice.",
+    "voiceMode": "Voice Mode",
+    "voiceModeDesc": "Speak your answers using the microphone.",
+    "answerStyle": "Answer Style",
+    "selfCheck": "Self Check",
+    "selfCheckDesc": "Classic flashcard flip.",
+    "typeAnswer": "Type Answer",
+    "typeAnswerDesc": "Type the word exactly.",
+    "multipleChoice": "Multiple Choice",
+    "multipleChoiceDesc": "Select from 4 options.",
+    "matchWord": "Match Word",
+    "matchWordDesc": "See Definition to Choose Word",
+    "matchDef": "Match Definition",
+    "matchDefDesc": "See Word to Choose Definition",
+    "mixedMode": "Mixed Mode",
+    "mixedModeDesc": "Randomly switch between style.",
+    "sessionComplete": "Session Complete!",
+    "reviewPassed": "Review passed.",
+    "greatJob": "Great study session!",
+    "accuracy": "Accuracy",
+    "time": "Time",
+    "best": "Best",
+    "newBest": "New Best!",
+    "needsImprovement": "Needs Improvement",
+    "missedCount": "You missed {{count}} cards on the first attempt.",
+    "reviewMissed": "Review Missed Items",
+    "returnToDeck": "Return to Deck",
+    "tryAgain": "Try again ({{count}}/3)",
+    "listen": "Listen to the word...",
+    "notQuite": "Not quite. Here is the card.",
+    "correct": "Correct!",
+    "nextCard": "Next Card",
+    "gotIt": "Got it",
+    "skip": "Skip / Keep in Queue",
+    "listening": "Listening...",
+    "nowYouTry": "Now you try...",
+    "addToFavorites": "Add to Favorites",
+    "removeFromFavorites": "Remove from Favorites",
+    "reportIssue": "Report Issue",
+    "markForReview": "Mark for Review",
+    "unmarkForReview": "Remove from Review Queue",
+    "restartConfirm": "Restart session? Current progress will be saved.",
+    "endSessionConfirm": "End session now? Progress will be saved.",
+    "reportReason": "Please describe the issue with this card:",
+    "reportThanks": "Thank you! The card has been reported for review.",
+    "startOver": "Start Over",
+    "paused": "Paused",
+    "pausedDesc": "Your session is paused.",
+    "pausedWarning": "Session will automatically end if pause expires.",
+    "resume": "Resume",
+    "extendPause": "Extend Pause",
+    "enterMinutes": "Enter minutes to extend:",
+    "customTime": "Custom Time",
+    "disableAutoAdvance": "Disable Auto-Advance",
+    "enableAutoAdvance": "Enable Auto-Advance",
+    "autoAdvanceOn": "Auto-Advance On",
+    "autoAdvanceOff": "Auto-Advance Off",
+    "autoAdvanceDesc": "Cards auto-advance after {{seconds}}s.",
+    "manualAdvanceDesc": "Manual advance mode enabled.",
+    "delaySeconds": "Delay Before Next",
+    "saveDefault": "Save Default",
+    "save": "Save",
+    "tapToSpeak": "Tap mic to speak",
+    "restartSession": "Restart Session",
+    "restart": "Restart",
+    "pauseSession": "Pause Session",
+    "pause": "Pause",
+    "endSession": "End Session",
+    "end": "End",
+    "shuffleRemaining": "Shuffle Remaining",
+    "shuffle": "Shuffle",
+    "sessionProgress": "Session Progress",
+    "mastered": "Mastered",
+    "stats": "Statistics",
+    "streak": "Current Streak",
+    "bestStreak": "Best Streak"
+  },
+  "pageTitles": {
+    "adminDashboard": "Admin Dashboard",
+    "tutorDashboard": "Tutor Dashboard",
+    "studyMode": "Study Mode",
+    "quizMode": "Quiz Mode",
+    "timedMode": "Timed Mode",
+    "profile": "User Profile",
+    "deckView": "Deck View",
+    "modeSelection": "Mode Selection",
+    "topicSelection": "Library",
+    "welcome": "Welcome",
+    "login": "Login",
+    "typing": "Typing Mode",
+    "quizResult": "Quiz Results"
+  }
 }

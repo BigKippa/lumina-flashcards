@@ -1,314 +1,354 @@
 {
-    "welcome": {
-        "greeting": {
-            "morning": "Доброго ранку",
-            "afternoon": "Доброго дня",
-            "evening": "Доброго вечора"
-        },
-        "subtitle": "Що ви хочете вивчити сьогодні?",
-        "categories": {
-            "random": "Випадковий мікс",
-            "vocabulary": "Словниковий запас",
-            "idioms": "Ідіоми та вирази",
-            "phrasal_verbs": "Фразові дієслова",
-            "collocations": "Фрази та словосполучення",
-            "prepositions": "Прийменники"
-        },
-        "start_session": "Почати сесію",
-        "quick_start": "Швидкий старт",
-        "resume": "Продовжити {{deck}}",
-        "favorites": "Вибране",
-        "favorites_subtitle": "Ваші збережені елементи",
-        "no_favorites": "Ще немає вибраного"
+  "welcome": {
+    "greeting": {
+      "morning": "Доброго ранку",
+      "afternoon": "Доброго дня",
+      "evening": "Доброго вечора"
     },
-    "common": {
-        "language": "Мова",
-        "settings": "Налаштування",
-        "profile": "Профіль",
-        "logout": "Log Out",
-        "home": "Home",
-        "back": "Back",
-        "next": "Next",
-        "cancel": "Cancel",
-        "confirm": "Confirm",
-        "save": "Save",
-        "loading": "Loading...",
-        "error": "Error",
-        "success": "Success",
-        "or": "Або"
+    "subtitle": "Що ви хочете вивчити сьогодні?",
+    "categories": {
+      "random": "Випадковий мікс",
+      "vocabulary": "Словниковий запас",
+      "idioms": "Ідіоми та вирази",
+      "phrasal_verbs": "Фразові дієслова",
+      "collocations": "Фрази та словосполучення",
+      "prepositions": "Прийменники"
     },
-    "auth": {
-        "login": "Увійти",
-        "register": "Новий користувач",
-        "guest": "Продовжити як гість",
-        "choose_language": "Оберіть мову",
-        "welcome_title": "Ласкаво просимо до Lumina",
-        "welcome_subtitle": "Ваша подорож до чудового словникового запасу починається тут.",
-        "username": "Ім'я користувача",
-        "password": "Пароль",
-        "email": "Email (для перевірки)",
-        "email_placeholder": "name@example.com",
-        "username_placeholder": "Введіть ім'я користувача",
-        "password_placeholder": "Введіть пароль",
-        "remember_me": "Запам'ятати мене",
-        "forgot_password": "Забули пароль?",
-        "create_account": "Створити акаунт",
-        "choose_username": "Оберіть ім'я користувача",
-        "choose_password": "Оберіть пароль",
-        "verify_email": "Перевірити Email",
-        "verification_code": "Код перевірки",
-        "verify_create": "Перевірити та створити акаунт",
-        "resend_code": "Надіслати код повторно",
-        "back_to_login": "Назад до входу",
-        "role_learner": "Учень",
-        "role_tutor": "Викладач",
-        "i_am_a": "Я...",
-        "or": "Або"
+    "start_session": "Почати сесію",
+    "quick_start": "Швидкий старт",
+    "resume": "Продовжити {{deck}}",
+    "favorites": "Вибране",
+    "favorites_subtitle": "Ваші збережені елементи",
+    "no_favorites": "Ще немає вибраного"
+  },
+  "common": {
+    "language": "Мова",
+    "settings": "Налаштування",
+    "profile": "Профіль",
+    "logout": "Log Out",
+    "home": "Home",
+    "back": "Back",
+    "next": "Next",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "or": "Або"
+  },
+  "auth": {
+    "login": "Увійти",
+    "register": "Новий користувач",
+    "guest": "Продовжити як гість",
+    "choose_language": "Оберіть мову",
+    "welcome_title": "Ласкаво просимо до Lumina",
+    "welcome_subtitle": "Ваша подорож до чудового словникового запасу починається тут.",
+    "username": "Ім'я користувача",
+    "password": "Пароль",
+    "email": "Email (для перевірки)",
+    "email_placeholder": "name@example.com",
+    "username_placeholder": "Введіть ім'я користувача",
+    "password_placeholder": "Введіть пароль",
+    "remember_me": "Запам'ятати мене",
+    "forgot_password": "Забули пароль?",
+    "create_account": "Створити акаунт",
+    "choose_username": "Оберіть ім'я користувача",
+    "choose_password": "Оберіть пароль",
+    "verify_email": "Перевірити Email",
+    "verification_code": "Код перевірки",
+    "verify_create": "Перевірити та створити акаунт",
+    "resend_code": "Надіслати код повторно",
+    "back_to_login": "Назад до входу",
+    "role_learner": "Учень",
+    "role_tutor": "Викладач",
+    "i_am_a": "Я...",
+    "or": "Або"
+  },
+  "topics": {
+    "selection": {
+      "title": "Групи Словарь",
+      "subtitle": "Виберіть категорію для вивчення конкретних тем",
+      "back_to_home": "Назад на Головну",
+      "back_to_groups": "Назад до Grup",
+      "student_library": "Бібліотека Студента",
+      "cards_count": "{{count}} Карток",
+      "surprise_me_title": "Здивуй Мене (Весь Словник)",
+      "surprise_me_subtitle": "Перемішати слова з усіх тем словника",
+      "random_mix_title": "Випадковий Мікс {{group}}",
+      "random_mix_subtitle": "Перемішати слова з усіх тем у цій групі"
     },
-    "topics": {
-        "selection": {
-            "title": "Групи Словарь",
-            "subtitle": "Виберіть категорію для вивчення конкретних тем",
-            "back_to_home": "Назад на Головну",
-            "back_to_groups": "Назад до Grup",
-            "student_library": "Бібліотека Студента",
-            "cards_count": "{{count}} Карток",
-            "surprise_me_title": "Здивуй Мене (Весь Словник)",
-            "surprise_me_subtitle": "Перемішати слова з усіх тем словника",
-            "random_mix_title": "Випадковий Мікс {{group}}",
-            "random_mix_subtitle": "Перемішати слова з усіх тем у цій групі"
-        },
-        "daily_life": {
-            "title": "Повсякденне Життя",
-            "description": "Основи для будь-якого початківця та середнього рівня.",
-            "home": {
-                "label": "Дім",
-                "desc": "Меблі, побутова техніка та домашні справи."
-            },
-            "food": {
-                "label": "Їжа та Напої",
-                "desc": "Продукти, приготування їжі та замовлення."
-            },
-            "transport": {
-                "label": "Транспорт",
-                "desc": "Громадський транспорт, водіння та аеропорти."
-            },
-            "health": {
-                "label": "Здоров'я та Велнес",
-                "desc": "Поширені хвороби, частини тіла та вправи."
-            },
-            "shopping": {
-                "label": "Покупки",
-                "desc": "Одяг, розміри, ціни та повернення."
-            }
-        },
-        "business": {
-            "title": "Професійна та Ділова Англійська",
-            "description": "Необхідно для кар'єрного зростання.",
-            "office": {
-                "label": "Офіс",
-                "desc": "Канцелярія, технології та ієрархія."
-            },
-            "meetings": {
-                "label": "Зустрічі та Презентації",
-                "desc": "Ідіоми, фрази переходу та корпоративна мова."
-            },
-            "finance": {
-                "label": "Переговори та Фінанси",
-                "desc": "Контракти, банківська справа та ринкові тенденції."
-            },
-            "job": {
-                "label": "Пошук Роботи",
-                "desc": "Ключові слова резюме, дієслова інтерв'ю та м'які навички."
-            }
-        },
-        "communication": {
-            "title": "Спілкування та Соціалізація",
-            "description": "Фокусується на 'клеї', який тримає розмови разом.",
-            "phrasal": {
-                "label": "Фразові Дієслова",
-                "desc": "Згруповані за часткою або дією."
-            },
-            "idioms": {
-                "label": "Поширені Ідіоми",
-                "desc": "Образна мова в повсякденній англійській."
-            },
-            "social": {
-                "label": "Соціалізація",
-                "desc": "Привітання, світська бесіда та ввічливі вирази."
-            },
-            "emotions": {
-                "label": "Емоції та Думки",
-                "desc": "Опис почуттів та вираження згоди."
-            }
-        },
-        "academic": {
-            "title": "Академічна та Технічна",
-            "description": "Для студентів, що готуються до іспитів TOEFL або IELTS.",
-            "science": {
-                "label": "Наука та Технології",
-                "desc": "Біологія, хімія та IT термінологія."
-            },
-            "env": {
-                "label": "Довкілля та Природа",
-                "desc": "Зміна клімату, географія та тварини."
-            },
-            "arts": {
-                "label": "Мистецтво",
-                "desc": "Література, музика, кіно та творчість."
-            },
-            "edu": {
-                "label": "Освіта",
-                "desc": "Університетське життя, предмети та звички навчання."
-            }
-        },
-        "grammar": {
-            "title": "Граматичний Словник",
-            "description": "Вивчення слів за їх граматичною роллю.",
-            "temporal": {
-                "label": "Часові Слова",
-                "desc": "Прислівники частоти та маркери часу."
-            },
-            "connectors": {
-                "label": "Конектори та Сполучники",
-                "desc": "Побудова складних речень."
-            },
-            "collocations": {
-                "label": "Колокації",
-                "desc": "Слова, які природно поєднуються."
-            }
-        }
+    "daily_life": {
+      "title": "Повсякденне Життя",
+      "description": "Основи для будь-якого початківця та середнього рівня.",
+      "home": {
+        "label": "Дім",
+        "desc": "Меблі, побутова техніка та домашні справи."
+      },
+      "food": {
+        "label": "Їжа та Напої",
+        "desc": "Продукти, приготування їжі та замовлення."
+      },
+      "transport": {
+        "label": "Транспорт",
+        "desc": "Громадський транспорт, водіння та аеропорти."
+      },
+      "health": {
+        "label": "Здоров'я та Велнес",
+        "desc": "Поширені хвороби, частини тіла та вправи."
+      },
+      "shopping": {
+        "label": "Покупки",
+        "desc": "Одяг, розміри, ціни та повернення."
+      }
     },
-    "roles": {
-        "admin": "Адміністратор",
-        "adminTutor": "Адмін (Режим викладача)",
-        "adminLearner": "Адмін (Режим учня)"
+    "business": {
+      "title": "Професійна та Ділова Англійська",
+      "description": "Необхідно для кар'єрного зростання.",
+      "office": {
+        "label": "Офіс",
+        "desc": "Канцелярія, технології та ієрархія."
+      },
+      "meetings": {
+        "label": "Зустрічі та Презентації",
+        "desc": "Ідіоми, фрази переходу та корпоративна мова."
+      },
+      "finance": {
+        "label": "Переговори та Фінанси",
+        "desc": "Контракти, банківська справа та ринкові тенденції."
+      },
+      "job": {
+        "label": "Пошук Роботи",
+        "desc": "Ключові слова резюме, дієслова інтерв'ю та м'які навички."
+      }
     },
-    "mode": {
-        "title": "Режим Користувача",
-        "subtitle": "Виберіть свою активну роль для цього сеансу.",
-        "learner": "Учень",
-        "learner_desc": "Опановуйте лексику за допомогою інтерактивних карток та вікторин.",
-        "tutor": "Викладач",
-        "tutor_desc": "Керуйте учнями, призначайте колоди та відстежуйте прогрес.",
-        "admin": "Адмін",
-        "admin_desc": "Налаштовуйте систему та керуйте вмістом."
+    "communication": {
+      "title": "Спілкування та Соціалізація",
+      "description": "Фокусується на 'клеї', який тримає розмови разом.",
+      "phrasal": {
+        "label": "Фразові Дієслова",
+        "desc": "Згруповані за часткою або дією."
+      },
+      "idioms": {
+        "label": "Поширені Ідіоми",
+        "desc": "Образна мова в повсякденній англійській."
+      },
+      "social": {
+        "label": "Соціалізація",
+        "desc": "Привітання, світська бесіда та ввічливі вирази."
+      },
+      "emotions": {
+        "label": "Емоції та Думки",
+        "desc": "Опис почуттів та вираження згоди."
+      }
     },
-    "admin": {
-        "dashboard_title": "Admin Dashboard",
-        "tabs": {
-            "menu": "Menu",
-            "decks": "Decks",
-            "users": "Users",
-            "tickets": "Tickets"
-        },
-        "data_management": {
-            "title": "Data Management",
-            "subtitle": "Backup and restore your application data.",
-            "export": "Export Backup",
-            "export_desc": "Download all data as JSON",
-            "import": "Import Backup",
-            "import_desc": "Restore from JSON file",
-            "warning_title": "Important Note:",
-            "warning_desc": "Importing data will <strong>overwrite</strong> all current decks, cards, users, and settings. This action cannot be undone."
-        },
-        "users": {
-            "title": "User Database",
-            "subtitle": "Manage access and roles",
-            "merge_btn": "Merge Users",
-            "add_btn": "Add User",
-            "table": {
-                "user": "User",
-                "role": "Role",
-                "progress": "Progress",
-                "actions": "Actions",
-                "empty": "No users found."
-            },
-            "delete_confirm": "Delete User"
-        },
-        "system": {
-            "title": "System Configuration",
-            "api_keys": "Backend API Keys",
-            "gemini_label": "Google Gemini API Key",
-            "gemini_placeholder": "Enter backend API Key",
-            "gemini_hint": "This key is required for all AI generation features. It is stored securely in local storage but only accessible here."
-        }
+    "academic": {
+      "title": "Академічна та Технічна",
+      "description": "Для студентів, що готуються до іспитів TOEFL або IELTS.",
+      "science": {
+        "label": "Наука та Технології",
+        "desc": "Біологія, хімія та IT термінологія."
+      },
+      "env": {
+        "label": "Довкілля та Природа",
+        "desc": "Зміна клімату, географія та тварини."
+      },
+      "arts": {
+        "label": "Мистецтво",
+        "desc": "Література, музика, кіно та творчість."
+      },
+      "edu": {
+        "label": "Освіта",
+        "desc": "Університетське життя, предмети та звички навчання."
+      }
     },
-    "tutor": {
-        "dashboard_title": "Tutor Dashboard",
-        "tabs": {
-            "overview": "Overview",
-            "students": "Students",
-            "flashcards": "Flashcards"
-        },
-        "stats": {
-            "total_students": "Total Students",
-            "active_students": "Active Students",
-            "archived_students": "Archived Students"
-        },
-        "actions": {
-            "add_student": "Add New Student",
-            "manage_content": "Manage Learning Content"
-        },
-        "toggle": {
-            "active": "Active",
-            "archived": "Archived"
-        }
-    },
-    "studyMode": {
-        "readyToStudy": "Ready to Study?",
-        "cardsInDeck": "{{count}} cards in this deck. Choose your interaction mode.",
-        "manualMode": "Manual Mode",
-        "manualModeDesc": "Self-check, Type, or Multiple Choice.",
-        "voiceMode": "Voice Mode",
-        "voiceModeDesc": "Speak your answers using the microphone.",
-        "answerStyle": "Answer Style",
-        "selfCheck": "Self Check",
-        "selfCheckDesc": "Classic flashcard flip.",
-        "typeAnswer": "Type Answer",
-        "typeAnswerDesc": "Type the word exactly.",
-        "multipleChoice": "Multiple Choice",
-        "multipleChoiceDesc": "Select from 4 options.",
-        "matchWord": "Match Word",
-        "matchWordDesc": "See Definition to Choose Word",
-        "matchDef": "Match Definition",
-        "matchDefDesc": "See Word to Choose Definition",
-        "mixedMode": "Mixed Mode",
-        "mixedModeDesc": "Randomly switch between style.",
-        "sessionComplete": "Session Complete!",
-        "reviewPassed": "Review passed.",
-        "greatJob": "Great study session!",
-        "accuracy": "Accuracy",
-        "time": "Time",
-        "best": "Best",
-        "newBest": "New Best!",
-        "needsImprovement": "Needs Improvement",
-        "missedCount": "You missed {{count}} cards on the first attempt.",
-        "reviewMissed": "Review Missed Items",
-        "returnToDeck": "Return to Deck",
-        "tryAgain": "Try again ({{count}}/3)",
-        "listen": "Listen to the word...",
-        "notQuite": "Not quite. Here is the card.",
-        "correct": "Correct!",
-        "nextCard": "Next Card",
-        "gotIt": "Got it",
-        "skip": "Skip / Keep in Queue",
-        "listening": "Listening...",
-        "nowYouTry": "Now you try..."
-    },
-    "pageTitles": {
-        "adminDashboard": "Admin Dashboard",
-        "tutorDashboard": "Tutor Dashboard",
-        "studyMode": "Study Mode",
-        "quizMode": "Quiz Mode",
-        "timedMode": "Timed Mode",
-        "profile": "User Profile",
-        "deckView": "Deck View",
-        "modeSelection": "Mode Selection",
-        "topicSelection": "Library",
-        "welcome": "Welcome",
-        "login": "Login",
-        "typing": "Typing Mode",
-        "quizResult": "Quiz Results"
+    "grammar": {
+      "title": "Граматичний Словник",
+      "description": "Вивчення слів за їх граматичною роллю.",
+      "temporal": {
+        "label": "Часові Слова",
+        "desc": "Прислівники частоти та маркери часу."
+      },
+      "connectors": {
+        "label": "Конектори та Сполучники",
+        "desc": "Побудова складних речень."
+      },
+      "collocations": {
+        "label": "Колокації",
+        "desc": "Слова, які природно поєднуються."
+      }
     }
+  },
+  "roles": {
+    "admin": "Адміністратор",
+    "adminTutor": "Адмін (Режим викладача)",
+    "adminLearner": "Адмін (Режим учня)"
+  },
+  "mode": {
+    "title": "Режим Користувача",
+    "subtitle": "Виберіть свою активну роль для цього сеансу.",
+    "learner": "Учень",
+    "learner_desc": "Опановуйте лексику за допомогою інтерактивних карток та вікторин.",
+    "tutor": "Викладач",
+    "tutor_desc": "Керуйте учнями, призначайте колоди та відстежуйте прогрес.",
+    "admin": "Адмін",
+    "admin_desc": "Налаштовуйте систему та керуйте вмістом."
+  },
+  "admin": {
+    "dashboard_title": "Admin Dashboard",
+    "tabs": {
+      "menu": "Menu",
+      "decks": "Decks",
+      "users": "Users",
+      "tickets": "Tickets"
+    },
+    "data_management": {
+      "title": "Data Management",
+      "subtitle": "Backup and restore your application data.",
+      "export": "Export Backup",
+      "export_desc": "Download all data as JSON",
+      "import": "Import Backup",
+      "import_desc": "Restore from JSON file",
+      "warning_title": "Important Note:",
+      "warning_desc": "Importing data will <strong>overwrite</strong> all current decks, cards, users, and settings. This action cannot be undone."
+    },
+    "users": {
+      "title": "User Database",
+      "subtitle": "Manage access and roles",
+      "merge_btn": "Merge Users",
+      "add_btn": "Add User",
+      "table": {
+        "user": "User",
+        "role": "Role",
+        "progress": "Progress",
+        "actions": "Actions",
+        "empty": "No users found."
+      },
+      "delete_confirm": "Delete User"
+    },
+    "system": {
+      "title": "System Configuration",
+      "api_keys": "Backend API Keys",
+      "gemini_label": "Google Gemini API Key",
+      "gemini_placeholder": "Enter backend API Key",
+      "gemini_hint": "This key is required for all AI generation features. It is stored securely in local storage but only accessible here."
+    }
+  },
+  "tutor": {
+    "dashboard_title": "Tutor Dashboard",
+    "tabs": {
+      "overview": "Overview",
+      "students": "Students",
+      "flashcards": "Flashcards"
+    },
+    "stats": {
+      "total_students": "Total Students",
+      "active_students": "Active Students",
+      "archived_students": "Archived Students"
+    },
+    "actions": {
+      "add_student": "Add New Student",
+      "manage_content": "Manage Learning Content"
+    },
+    "toggle": {
+      "active": "Active",
+      "archived": "Archived"
+    }
+  },
+  "studyMode": {
+    "readyToStudy": "Ready to Study?",
+    "cardsInDeck": "{{count}} cards in this deck. Choose your interaction mode.",
+    "manualMode": "Manual Mode",
+    "manualModeDesc": "Self-check, Type, or Multiple Choice.",
+    "voiceMode": "Voice Mode",
+    "voiceModeDesc": "Speak your answers using the microphone.",
+    "answerStyle": "Answer Style",
+    "selfCheck": "Self Check",
+    "selfCheckDesc": "Classic flashcard flip.",
+    "typeAnswer": "Type Answer",
+    "typeAnswerDesc": "Type the word exactly.",
+    "multipleChoice": "Multiple Choice",
+    "multipleChoiceDesc": "Select from 4 options.",
+    "matchWord": "Match Word",
+    "matchWordDesc": "See Definition to Choose Word",
+    "matchDef": "Match Definition",
+    "matchDefDesc": "See Word to Choose Definition",
+    "mixedMode": "Mixed Mode",
+    "mixedModeDesc": "Randomly switch between style.",
+    "sessionComplete": "Session Complete!",
+    "reviewPassed": "Review passed.",
+    "greatJob": "Great study session!",
+    "accuracy": "Accuracy",
+    "time": "Time",
+    "best": "Best",
+    "newBest": "New Best!",
+    "needsImprovement": "Needs Improvement",
+    "missedCount": "You missed {{count}} cards on the first attempt.",
+    "reviewMissed": "Review Missed Items",
+    "returnToDeck": "Return to Deck",
+    "tryAgain": "Try again ({{count}}/3)",
+    "listen": "Listen to the word...",
+    "notQuite": "Not quite. Here is the card.",
+    "correct": "Correct!",
+    "nextCard": "Next Card",
+    "gotIt": "Got it",
+    "skip": "Skip / Keep in Queue",
+    "listening": "Listening...",
+    "nowYouTry": "Now you try...",
+    "addToFavorites": "Add to Favorites",
+    "removeFromFavorites": "Remove from Favorites",
+    "reportIssue": "Report Issue",
+    "markForReview": "Mark for Review",
+    "unmarkForReview": "Remove from Review Queue",
+    "restartConfirm": "Restart session? Current progress will be saved.",
+    "endSessionConfirm": "End session now? Progress will be saved.",
+    "reportReason": "Please describe the issue with this card:",
+    "reportThanks": "Thank you! The card has been reported for review.",
+    "startOver": "Start Over",
+    "paused": "Paused",
+    "pausedDesc": "Your session is paused.",
+    "pausedWarning": "Session will automatically end if pause expires.",
+    "resume": "Resume",
+    "extendPause": "Extend Pause",
+    "enterMinutes": "Enter minutes to extend:",
+    "customTime": "Custom Time",
+    "disableAutoAdvance": "Disable Auto-Advance",
+    "enableAutoAdvance": "Enable Auto-Advance",
+    "autoAdvanceOn": "Auto-Advance On",
+    "autoAdvanceOff": "Auto-Advance Off",
+    "autoAdvanceDesc": "Cards auto-advance after {{seconds}}s.",
+    "manualAdvanceDesc": "Manual advance mode enabled.",
+    "delaySeconds": "Delay Before Next",
+    "saveDefault": "Save Default",
+    "save": "Save",
+    "tapToSpeak": "Tap mic to speak",
+    "restartSession": "Restart Session",
+    "restart": "Restart",
+    "pauseSession": "Pause Session",
+    "pause": "Pause",
+    "endSession": "End Session",
+    "end": "End",
+    "shuffleRemaining": "Shuffle Remaining",
+    "shuffle": "Shuffle",
+    "sessionProgress": "Session Progress",
+    "mastered": "Mastered",
+    "stats": "Statistics",
+    "streak": "Current Streak",
+    "bestStreak": "Best Streak"
+  },
+  "pageTitles": {
+    "adminDashboard": "Admin Dashboard",
+    "tutorDashboard": "Tutor Dashboard",
+    "studyMode": "Study Mode",
+    "quizMode": "Quiz Mode",
+    "timedMode": "Timed Mode",
+    "profile": "User Profile",
+    "deckView": "Deck View",
+    "modeSelection": "Mode Selection",
+    "topicSelection": "Library",
+    "welcome": "Welcome",
+    "login": "Login",
+    "typing": "Typing Mode",
+    "quizResult": "Quiz Results"
+  }
 }

@@ -7,6 +7,8 @@ import { AddContentModal } from './AddContentModal';
 import { EditCardModal } from './EditCardModal';
 import { QuickAddFlashcardsModal } from './QuickAddFlashcardsModal';
 import Flashcard from './Flashcard';
+import { LibraryDiagnosticsModal } from './LibraryDiagnosticsModal';
+import { DuplicateResolverModal } from './DuplicateResolverModal';
 import {
     DndContext,
     closestCenter,
@@ -44,6 +46,7 @@ interface TutorDashboardProps {
     onBulkDeleteCards: (ids: string[]) => void;
     onBulkArchiveCards: (ids: string[], isArchiving: boolean) => void;
     onDeleteStudent: (id: string) => void;
+    onSelectDeck?: (deckId: string) => void;
 }
 
 const DEFAULT_TILES = [
@@ -93,9 +96,11 @@ function SortableDashboardTile({ id, children, isCustomizeMode }: { id: string, 
     );
 }
 
-export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, decks, onUpdateStudent, onAddStudent, onDeleteStudent, view, onViewChange, onAddDeck, onAddCard, onEditCard, apiKey, settings, onNavigateToProfile, onUpdateProfile, onDeleteCard, onBulkDeleteCards, onBulkArchiveCards }) => {
+export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, decks, onUpdateStudent, onAddStudent, onDeleteStudent, view, onViewChange, onAddDeck, onAddCard, onEditCard, apiKey, settings, onNavigateToProfile, onUpdateProfile, onDeleteCard, onBulkDeleteCards, onBulkArchiveCards, onSelectDeck }) => {
     const [currentTime, setCurrentTime] = useState(new Date());
     const [isCustomizeMode, setIsCustomizeMode] = useState(false);
+    const [isDiagnosticsModalOpen, setIsDiagnosticsModalOpen] = useState(false);
+    const [resolvingDuplicates, setResolvingDuplicates] = useState<(Word & { deckId: string })[] | null>(null);
     const [tileOrder, setTileOrder] = useState<string[]>([]);
     const [studentMenuOpenId, setStudentMenuOpenId] = useState<string | null>(null);
     
@@ -737,7 +742,7 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                                             <Library className="w-6 h-6" />
                                                         </div>
                                                         <div className="relative z-10 font-medium flex-1">
-                                                            <h2 className="text-xl font-bold mb-1">All Content</h2>
+                                                            <h2 className="text-xl font-bold mb-1">Get New Material</h2>
                                                             <p className="text-sm text-muted-foreground line-clamp-2">Browse the complete library of global flashcards and decks.</p>
                                                         </div>
                                                     </div>
@@ -846,18 +851,26 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                 {view === 'learning-content' && (
                     <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-2">
                         {/* Go Back Header */}
-                        <div className="flex items-center gap-4 border-b border-border pb-4">
-                            <button
-                                onClick={() => onViewChange('dashboard')}
-                                className="p-2 rounded-full hover:bg-secondary text-muted-foreground transition-all"
-                                title="Back to Dashboard"
-                            >
-                                <ArrowLeft className="w-5 h-5" />
-                            </button>
-                            <div>
-                                <h2 className="text-2xl font-bold">Manage Learning Content</h2>
-                                <p className="text-muted-foreground">Create, organize, and explore flashcard decks.</p>
+                        <div className="flex items-center justify-between border-b border-border pb-4">
+                            <div className="flex items-center gap-4">
+                                <button
+                                    onClick={() => onViewChange('dashboard')}
+                                    className="p-2 rounded-full hover:bg-secondary text-muted-foreground transition-all"
+                                    title="Back to Dashboard"
+                                >
+                                    <ArrowLeft className="w-5 h-5" />
+                                </button>
+                                <div>
+                                    <h2 className="text-2xl font-bold">Manage Learning Content</h2>
+                                    <p className="text-muted-foreground">Create, organize, and explore flashcard decks.</p>
+                                </div>
                             </div>
+                            <button
+                                onClick={() => setIsDiagnosticsModalOpen(true)}
+                                className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 dark:bg-indigo-900/20 dark:text-indigo-300 dark:border-indigo-800 rounded-lg text-sm font-bold shadow-sm transition-colors"
+                            >
+                                <Search className="w-4 h-4" /> Library Diagnostics
+                            </button>
                         </div>
 
                         {/* Content Action Grid */}
@@ -1175,7 +1188,11 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                 const color = colors[index % colors.length];
 
                                 return (
-                                    <div key={deck.id} className={`${color.bg} ${color.border} ${color.hoverBg} ${color.hoverBorder} border rounded-xl p-6 hover:shadow-md transition-all group relative backdrop-blur-sm`}>
+                                    <div 
+                                        key={deck.id} 
+                                        onClick={() => onSelectDeck?.(deck.id)}
+                                        className={`${color.bg} ${color.border} ${color.hoverBg} ${color.hoverBorder} border rounded-xl p-6 hover:shadow-md transition-all group relative backdrop-blur-sm cursor-pointer`}
+                                    >
                                         <div className="flex justify-between items-start mb-4">
                                             <div className={`p-3 ${color.iconBg} rounded-lg ${color.iconText}`}>
                                                 <Layout className="w-6 h-6" />
@@ -1840,6 +1857,59 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                     </div>
                 </div>
             )}
+
+            <LibraryDiagnosticsModal
+                isOpen={isDiagnosticsModalOpen}
+                onClose={() => setIsDiagnosticsModalOpen(false)}
+                decks={decks}
+                onResolveMissing={(card) => {
+                    setIsDiagnosticsModalOpen(false);
+                    onViewChange('manage-flashcards'); // Switch view so user can see it being edited in context?
+                    setTimeout(() => setEditingCard({ ...card, deckId: card.deckId }), 100);
+                }}
+                onResolveDuplicates={(duplicates) => {
+                    setIsDiagnosticsModalOpen(false);
+                    setResolvingDuplicates(duplicates);
+                }}
+            />
+
+            <DuplicateResolverModal
+                isOpen={resolvingDuplicates !== null}
+                onClose={() => setResolvingDuplicates(null)}
+                settings={settings}
+                duplicates={resolvingDuplicates || []}
+                onResolve={(keptCards) => {
+                    if (resolvingDuplicates) {
+                        const originalIds = resolvingDuplicates.map(c => String(c.id));
+                        const keepIds = keptCards.map(c => String(c.id));
+                        
+                        // The ones that were not selected for keeping should be deleted
+                        const idsToDelete = originalIds.filter(id => !keepIds.includes(id));
+                        
+                        keptCards.forEach(kept => {
+                            if (kept.id !== -1) {
+                                let updatedCard = kept;
+                                if (keptCards.length > 1) {
+                                    const otherKeptIds = keepIds
+                                        .filter(id => id !== String(kept.id))
+                                        .map(id => parseInt(id, 10));
+                                    
+                                    const currentIgnored = kept.ignoredDuplicateIds || [];
+                                    const newIgnored = Array.from(new Set([...currentIgnored, ...otherKeptIds]));
+                                    updatedCard = { ...kept, ignoredDuplicateIds: newIgnored };
+                                }
+                                onEditCard(updatedCard);
+                            }
+                        });
+
+                        // Delete the others
+                        if (idsToDelete.length > 0) {
+                            onBulkDeleteCards(idsToDelete);
+                        }
+                    }
+                    setResolvingDuplicates(null);
+                }}
+            />
         </div>
     );
 };

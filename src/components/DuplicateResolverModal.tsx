@@ -6,21 +6,19 @@ interface DuplicateResolverModalProps {
     isOpen: boolean;
     onClose: () => void;
     duplicates: Word[]; // 2 or more cards
-    onResolve: (decision: 'keep', data: Word) => void;
+    onResolve: (keptCards: Word[]) => void;
     settings: any; // for category list
 }
 
 export const DuplicateResolverModal: React.FC<DuplicateResolverModalProps> = ({ isOpen, onClose, duplicates, onResolve, settings }) => {
-    const [selectedId, setSelectedId] = useState<number | null>(null);
+    const [selectedIds, setSelectedIds] = useState<(string | number)[]>([]);
     const [isMerging, setIsMerging] = useState(false);
     const [mergedCard, setMergedCard] = useState<Word>(duplicates[0]);
 
     if (!isOpen) return null;
 
-    const handleKeep = (card: Word) => {
-        if (window.confirm(`Keep "${card.word}" (ID: ${card.id}) and delete the others?`)) {
-            onResolve('keep', card);
-        }
+    const toggleSelection = (id: string | number) => {
+        setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
     };
 
     const handleStartMerge = () => {
@@ -36,7 +34,7 @@ export const DuplicateResolverModal: React.FC<DuplicateResolverModalProps> = ({ 
         // Let's keep the ID of the first duplicate for stability, or ask.
         // Simpler: Keep the ID of the first duplicate.
         const finalCard = { ...mergedCard, id: duplicates[0].id };
-        onResolve('keep', finalCard);
+        onResolve([finalCard]);
     };
 
     if (isMerging) {
@@ -113,12 +111,12 @@ export const DuplicateResolverModal: React.FC<DuplicateResolverModalProps> = ({ 
                         {duplicates.map((card) => (
                             <div key={card.id} className={`
                                 relative p-4 rounded-xl border-2 transition-all cursor-pointer flex flex-col
-                                ${selectedId === card.id ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}
+                                ${selectedIds.includes(card.id) ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}
                             `}
-                                onClick={() => setSelectedId(card.id)}
+                                onClick={() => toggleSelection(card.id)}
                             >
                                 <div className="absolute top-3 right-3">
-                                    {selectedId === card.id && <div className="bg-primary text-primary-foreground p-1 rounded-full"><Check className="w-4 h-4" /></div>}
+                                    {selectedIds.includes(card.id) && <div className="bg-primary text-primary-foreground p-1 rounded-full"><Check className="w-4 h-4" /></div>}
                                 </div>
                                 <div className="mb-4">
                                     <h3 className="font-bold text-lg">{card.word}</h3>
@@ -134,10 +132,10 @@ export const DuplicateResolverModal: React.FC<DuplicateResolverModalProps> = ({ 
                                 </div>
 
                                 <button
-                                    onClick={(e) => { e.stopPropagation(); handleKeep(card); }}
-                                    className="w-full mt-auto py-2 bg-secondary hover:bg-primary hover:text-primary-foreground font-bold rounded-lg transition-colors"
+                                    onClick={(e) => { e.stopPropagation(); toggleSelection(card.id); }}
+                                    className={`w-full mt-auto py-2 font-bold rounded-lg transition-colors ${selectedIds.includes(card.id) ? 'bg-primary text-primary-foreground' : 'bg-secondary hover:bg-secondary/80 text-foreground'}`}
                                 >
-                                    Keep This Version
+                                    {selectedIds.includes(card.id) ? 'Selected' : 'Select'}
                                 </button>
                             </div>
                         ))}
@@ -146,15 +144,28 @@ export const DuplicateResolverModal: React.FC<DuplicateResolverModalProps> = ({ 
 
                 <div className="p-6 border-t border-border bg-secondary/10 flex flex-col sm:flex-row justify-between items-center gap-4">
                     <p className="text-muted-foreground text-sm">
-                        Select a version to keep, or merge them into a new card.
+                        Select versions to keep, or merge them into a new card.
                     </p>
                     <div className="flex gap-3">
                         <button
                             onClick={handleStartMerge}
-                            className="flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-colors shadow-lg shadow-indigo-500/20"
+                            className="flex items-center gap-2 px-6 py-3 bg-secondary hover:bg-secondary/80 text-foreground font-bold rounded-xl transition-colors shadow-sm"
                         >
                             <Merge className="w-5 h-5" />
                             Merge All
+                        </button>
+                        <button
+                            onClick={() => {
+                                const kept = duplicates.filter(d => selectedIds.includes(d.id));
+                                if (kept.length > 0) {
+                                    onResolve(kept);
+                                }
+                            }}
+                            disabled={selectedIds.length === 0}
+                            className={`flex items-center gap-2 px-6 py-3 font-bold rounded-xl transition-colors shadow-lg ${selectedIds.length > 0 ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-500/20' : 'bg-secondary/50 text-muted-foreground cursor-not-allowed'}`}
+                        >
+                            <Check className="w-5 h-5" />
+                            Keep Selected ({selectedIds.length})
                         </button>
                     </div>
                 </div>

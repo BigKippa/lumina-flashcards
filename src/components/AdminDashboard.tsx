@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Word, Deck } from '../data/vocabulary';
-import { Search, Trash2, Edit2, ArrowLeft, Plus, Image as ImageIcon, Video, Volume2, FolderPlus, Library, Lock, Key, Users, UserPlus, GraduationCap, Sparkles, Shield, User, X, Check, AlertTriangle, Merge, Archive, RotateCcw, Settings, Upload, Download, Beaker, Eye, Save } from 'lucide-react';
+import { Search, Trash2, Edit2, ArrowLeft, Plus, Image as ImageIcon, Video, Volume2, FolderPlus, Library, Lock, Key, Users, UserPlus, GraduationCap, Sparkles, Shield, User, X, Check, AlertTriangle, Merge, Archive, RotateCcw, Settings, Upload, Download, Beaker, Eye, Save, Bookmark } from 'lucide-react';
 import { CategoryManager } from './CategoryManager';
 import { EditCardModal } from './EditCardModal';
 import { BulkGeneratorModal } from './BulkGeneratorModal';
@@ -21,6 +21,7 @@ interface AdminDashboardProps {
     onBulkDeleteCards: (ids: string[]) => void;
     onBulkArchiveCards: (ids: string[], isArchiving: boolean) => void;
     onArchiveDeck: (id: string) => void;
+    onDeleteDeck?: (id: string) => void; // Added for deck deletion
     onUnarchiveDeck: (id: string) => void;
     onEdit: (updatedWord: Word) => void;
     onSelectDeck: (deckId: string | null) => void;
@@ -33,7 +34,7 @@ interface AdminDashboardProps {
     onBrowsePublic?: () => void;
 }
 
-export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabChange, onBack, onDeleteCard, onBulkDeleteCards, onBulkArchiveCards, onEdit, onSelectDeck, onCreateDeck, onBulkAdd, onMoveCard, settings, onSaveSettings, onArchiveDeck, onUnarchiveDeck, userRole, onBrowsePublic }: AdminDashboardProps) {
+export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabChange, onBack, onDeleteCard, onBulkDeleteCards, onBulkArchiveCards, onEdit, onSelectDeck, onCreateDeck, onBulkAdd, onMoveCard, settings, onSaveSettings, onArchiveDeck, onDeleteDeck, onUnarchiveDeck, userRole, onBrowsePublic }: AdminDashboardProps) {
     void onMoveCard; // Bypass unused variable compiler error
     const { t } = useTranslation();
     const [searchTerm, setSearchTerm] = useState('');
@@ -429,19 +430,17 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
         return Object.values(groups).filter(group => group.length > 1);
     }, [cards]);
 
-    const handleResolveDuplicate = (_decision: 'keep', data: Word) => {
-        if (!resolvingDuplicateGroup) return;
+    const handleResolveDuplicate = (keptCards: Word[]) => {
+        if (!resolvingDuplicateGroup || keptCards.length === 0) return;
 
         // Data is the card we want to keep (possibly merged/edited).
         // Logic: Update the 'kept' card (if needed) and delete others in the group.
 
-        const idsToDelete = resolvingDuplicateGroup.map(c => c.id).filter(id => id !== data.id && String(id) !== '-1'); // -1 is temp ID for merge
+        const keptIds = keptCards.map(c => c.id);
+        const idsToDelete = resolvingDuplicateGroup.map(c => c.id).filter(id => !keptIds.includes(id) && String(id) !== '-1'); // -1 is temp ID for merge
 
-        // 1. Update the kept card (if it's one of the originals, we might be updating it with new data from merge)
-        // If data.id is -1, it means we are creating a fresh card? No, my modal logic said "Keep ID of first duplicate".
-        // So data.id should be valid.
-
-        onEdit(data); // Save the kept version
+        // 1. Update the kept card(s)
+        keptCards.forEach(card => onEdit(card)); // Save the kept versions
 
         // 2. Delete others
         idsToDelete.forEach(id => onDeleteCard(String(id)));
@@ -459,7 +458,8 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                 card.definition.toLowerCase().includes(searchTerm.toLowerCase());
             const matchesCategory = filterCategory === 'all' || card.category === filterCategory;
             const matchesMissing = showMissingOnly ? isMissingFields(card) : true;
-            return matchesSearch && matchesCategory && matchesMissing;
+            const matchesReviewQueue = activeTab === 'review-queue' ? card.markedForReview === true : true;
+            return matchesSearch && matchesCategory && matchesMissing && matchesReviewQueue;
         })
         .sort((a, b) => {
             if (sortBy === 'az') return a.word.localeCompare(b.word);
@@ -579,7 +579,8 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                         activeTab === 'archived' ? 'Archived Decks' :
                                             activeTab === 'tickets' ? 'Support Tickets' :
                                                 activeTab === 'testMode' ? 'Test Mode' :
-                                                    'Settings'}
+                                                    activeTab === 'review-queue' ? 'Cards Marked for Review' :
+                                                        'Settings'}
                     </h1>
                 </div>
 
@@ -636,6 +637,19 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                             <h3 className="text-xl font-bold mb-2">Support Tickets</h3>
                             <p className="opacity-80 text-center text-sm">
                                 View feedback and issues from users.
+                            </p>
+                        </button>
+
+                        <button
+                            onClick={() => onTabChange('review-queue')}
+                            className="flex flex-col items-center p-8 rounded-2xl bg-color3 text-color3-foreground border border-color5/20 transition-all group hover:scale-105 shadow-md hover:bg-color3/80"
+                        >
+                            <div className="w-16 h-16 rounded-full bg-black/10 flex items-center justify-center mb-6 group-hover:bg-black/20 transition-colors">
+                                <Bookmark className="w-8 h-8 opacity-90" />
+                            </div>
+                            <h3 className="text-xl font-bold mb-2">Review Queue</h3>
+                            <p className="opacity-80 text-center text-sm">
+                                Flashcards marked for review or correction.
                             </p>
                         </button>
 
@@ -908,6 +922,18 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                                                     >
                                                                         <Archive className="w-5 h-5" />
                                                                     </button>
+                                                                    {onDeleteDeck && (
+                                                                        <button
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                onDeleteDeck(deck.id);
+                                                                            }}
+                                                                            className="p-2 rounded-lg text-inherit opacity-70 hover:opacity-100 hover:bg-red-500/10 hover:text-red-500 transition-colors"
+                                                                            title="Delete Deck"
+                                                                        >
+                                                                            <Trash2 className="w-5 h-5" />
+                                                                        </button>
+                                                                    )}
                                                                 </div>
                                                                 <div className="flex justify-between items-start mb-4">
                                                                     <div className="w-12 h-12 rounded-xl bg-black/10 shadow-sm flex items-center justify-center">
@@ -972,6 +998,18 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                                                     >
                                                                         <Archive className="w-4 h-4" />
                                                                     </button>
+                                                                    {onDeleteDeck && (
+                                                                        <button
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                onDeleteDeck(deck.id);
+                                                                            }}
+                                                                            className="p-1 rounded-lg text-inherit opacity-70 hover:opacity-100 hover:bg-red-500/10 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                            title="Delete Deck"
+                                                                        >
+                                                                            <Trash2 className="w-4 h-4" />
+                                                                        </button>
+                                                                    )}
                                                                 </div>
                                                                 <div className="flex justify-between items-start mb-4">
                                                                     <div className="w-12 h-12 rounded-xl bg-black/10 shadow-sm flex items-center justify-center">
@@ -1611,10 +1649,10 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                 }
 
                 {
-                    activeTab === 'cards' && (
+                    (activeTab === 'cards' || activeTab === 'review-queue') && (
                         <div className="space-y-6">
                             {/* Alert Notification Bar */}
-                            {missingDataCount > 0 && (
+                            {missingDataCount > 0 && activeTab === 'cards' && (
                                 <div className={`mb-6 border rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm transition-colors ${showMissingOnly ? 'bg-amber-100 border-amber-300 dark:bg-amber-900/40 dark:border-amber-700' : 'bg-amber-50 border-amber-200 dark:bg-amber-900/10 dark:border-amber-800/30 hover:bg-amber-100 dark:hover:bg-amber-900/20'}`}>
                                     <div className="flex items-center gap-3">
                                         <div className={`p-2 rounded-lg shrink-0 ${showMissingOnly ? 'bg-amber-300 text-amber-900 dark:bg-amber-700 dark:text-amber-100' : 'bg-amber-200 text-amber-800 dark:bg-amber-800 dark:text-amber-200'}`}>
@@ -1653,8 +1691,8 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
 
                             <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center bg-card p-6 rounded-2xl border border-border shadow-sm">
                                 <div>
-                                    <h2 className="text-xl font-bold text-foreground">Manage Flashcards</h2>
-                                    <p className="text-muted-foreground text-sm">View and edit all cards across decks</p>
+                                    <h2 className="text-xl font-bold text-foreground">{activeTab === 'review-queue' ? 'Cards Marked for Review' : 'Manage Flashcards'}</h2>
+                                    <p className="text-muted-foreground text-sm">{activeTab === 'review-queue' ? 'The queue of cards users have flagged for review' : 'View and edit all cards across decks'}</p>
                                 </div>
                                 <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                                     <div className="relative flex-1 sm:w-64">
@@ -2099,8 +2137,18 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                         </p>
                     </div>
                 </div>
-                <div className="text-muted-foreground bg-secondary/30 px-4 py-2 rounded-full font-mono">
-                    {cards.filter(c => decks.find(d => d.id === activeDeckId)?.cards.some(dc => dc.id === c.id)).length} Cards
+                <div className="flex items-center gap-3">
+                    <div className="text-muted-foreground bg-secondary/30 px-4 py-2 rounded-full font-mono text-sm">
+                        {cards.filter(c => decks.find(d => d.id === activeDeckId)?.cards.some(dc => dc.id === c.id)).length} Cards
+                    </div>
+                    {onDeleteDeck && (
+                        <button
+                            onClick={() => onDeleteDeck(activeDeckId)}
+                            className="flex items-center gap-2 px-4 py-2 text-red-600 bg-red-500/10 hover:bg-red-600 hover:text-white rounded-full font-bold transition-all text-sm"
+                        >
+                            <Trash2 className="w-4 h-4" /> Delete Deck
+                        </button>
+                    )}
                 </div>
             </div>
 

@@ -535,18 +535,24 @@ function App() {
 
 
     const handleAddCardToDeck = (newWord: Word, deckId: string) => {
-        const updatedDecks = decks.map(d => {
-            if (d.id === deckId) {
-                return { ...d, cards: [...d.cards, newWord] };
-            }
-            return d;
+        setDecks(prevDecks => {
+            const updatedDecks = prevDecks.map(d => {
+                if (d.id === deckId) {
+                    return { ...d, cards: [...d.cards, newWord] };
+                }
+                return d;
+            });
+            localStorage.setItem('decks', JSON.stringify(updatedDecks));
+            return updatedDecks;
         });
-        persistDecks(updatedDecks);
     };
 
     const handleAddDeckGlobal = (newDeck: Deck) => {
-        const updatedDecks = [...decks, newDeck];
-        persistDecks(updatedDecks);
+        setDecks(prevDecks => {
+            const updatedDecks = [...prevDecks, newDeck];
+            localStorage.setItem('decks', JSON.stringify(updatedDecks));
+            return updatedDecks;
+        });
     };
 
 
@@ -578,22 +584,40 @@ function App() {
     };
 
     const handleEditCard = (updatedWord: Word, additionalCards?: {card: Word, deckId: string}[]) => {
-        const updatedDecks = decks.map(d => {
-            let nextDeck = { ...d };
-            
-            // 1. Update the origin card explicitly mapped to this deck 
-            nextDeck.cards = nextDeck.cards.map(c => String(c.id) === String(updatedWord.id) ? updatedWord : c);
-            
-            // 2. Splice in any newly generated split meanings explicitly bound to this deck
-            if (additionalCards && additionalCards.length > 0) {
-                const destinedCards = additionalCards.filter(ac => ac.deckId === d.id).map(ac => ac.card);
-                if (destinedCards.length > 0) {
-                    nextDeck.cards = [...nextDeck.cards, ...destinedCards];
+        setDecks(prevDecks => {
+            const updatedDecks = prevDecks.map(d => {
+                let nextDeck = { ...d };
+                
+                // 1. Update the origin card explicitly mapped to this deck 
+                nextDeck.cards = nextDeck.cards.map(c => String(c.id) === String(updatedWord.id) ? updatedWord : c);
+                
+                // 2. Splice in any newly generated split meanings explicitly bound to this deck
+                if (additionalCards && additionalCards.length > 0) {
+                    const destinedCards = additionalCards.filter(ac => ac.deckId === d.id).map(ac => ac.card);
+                    if (destinedCards.length > 0) {
+                        nextDeck.cards = [...nextDeck.cards, ...destinedCards];
+                    }
                 }
-            }
-            return nextDeck;
+                return nextDeck;
+            });
+            localStorage.setItem('decks', JSON.stringify(updatedDecks));
+            return updatedDecks;
         });
-        persistDecks(updatedDecks);
+    };
+
+    const handleMarkForReview = (cardId: string) => {
+        setDecks(prevDecks => {
+            const updatedDecks = prevDecks.map(d => ({
+                ...d,
+                cards: d.cards.map(c => 
+                    String(c.id) === String(cardId) 
+                        ? { ...c, markedForReview: !c.markedForReview } 
+                        : c
+                )
+            }));
+            localStorage.setItem('decks', JSON.stringify(updatedDecks));
+            return updatedDecks;
+        });
     };
 
     const handleMoveCard = (cardId: string, newDeckId: string) => {
@@ -1042,6 +1066,20 @@ function App() {
         setDecks(prev => prev.map(d => d.id === deckId ? { ...d, isArchived: false } : d));
     };
 
+    const handleDeleteDeck = (deckId: string) => {
+        if (window.confirm("Are you sure you want to permanently delete this deck and all its flashcards? This cannot be undone.")) {
+            setDecks(prev => {
+                const updated = prev.filter(d => d.id !== deckId);
+                localStorage.setItem('decks', JSON.stringify(updated));
+                return updated;
+            });
+            if (activeDeckId === deckId) {
+                setActiveDeckId(null);
+                if (mode === 'deck') goBack();
+            }
+        }
+    };
+
     const handleUpdateStudent = (updatedStudent: Student) => {
         const newStudents = students.map(s => s.id === updatedStudent.id ? updatedStudent : s);
         setStudents(newStudents);
@@ -1335,6 +1373,7 @@ function App() {
                                     learningHistory={user.learningHistory || []}
                                     onSessionUpdate={handleSessionUpdate}
                                     onInputModeChange={setStudyInputMode}
+                                    onMarkForReview={handleMarkForReview}
                                 />
                             )}
 
@@ -1380,13 +1419,14 @@ function App() {
                                     onDeleteCard={handleDeleteCard}
                                     onBulkDeleteCards={handleBulkDeleteCards}
                                     onBulkArchiveCards={handleBulkArchiveCards}
+                                    onSelectDeck={(deckId) => navigate('admin', deckId, 'cards')}
                                 />
                             )}
 
                             {mode === 'admin' && user && (() => {
                                 // For non-admins, ONLY show decks they have authored. This prevents them from modifying global public cards
-                                // and correctly triggers the empty state when they have no cards of their own.
-                                const viewableDecks = user.role === 'admin' ? decks : decks.filter(d => d.authorId === user.id);
+                                // and correctly triggers the empty state when they have no cards of their own. (Allow viewing if explicitly navigated to).
+                                const viewableDecks = user.role === 'admin' ? decks : decks.filter(d => d.authorId === user.id || d.id === activeDeckId);
                                 const totalCards = adminActiveTab === 'cards' && !activeDeckId ? viewableDecks.flatMap(d => d.cards) : (activeCards.length > 0 ? activeCards : viewableDecks.find(d => d.id === activeDeckId)?.cards || []);
                                 
                                 return (
@@ -1410,6 +1450,7 @@ function App() {
                                     settings={settings}
                                     onSaveSettings={handleSaveSettings}
                                     onArchiveDeck={handleArchiveDeck}
+                                    onDeleteDeck={handleDeleteDeck}
                                     onUnarchiveDeck={handleUnarchiveDeck}
                                         onBrowsePublic={() => navigate('topic-selection', null)}
                                     />

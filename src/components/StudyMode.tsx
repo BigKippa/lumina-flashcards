@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Word } from '../data/vocabulary';
 import Flashcard from './Flashcard';
-import { ChevronRight, ChevronLeft, ChevronUp, ChevronDown, Check, Mic, Shuffle, RotateCcw, Flame, Trophy, Target, Type, List, MonitorPlay, Heart, Timer, Pause, XCircle, Play, Flag } from 'lucide-react';
+import { ChevronRight, ChevronLeft, ChevronUp, ChevronDown, Check, Mic, Shuffle, RotateCcw, Flame, Trophy, Target, Type, List, MonitorPlay, Heart, Timer, Pause, XCircle, Play, Flag, Bookmark } from 'lucide-react';
 import { AppSettings, SessionActivity } from '../types';
 
 interface StudyModeProps {
@@ -19,6 +19,7 @@ interface StudyModeProps {
     learningHistory: import('../types').LearningSession[];
     onSessionUpdate: (activity: SessionActivity) => void;
     onInputModeChange?: (mode: string) => void;
+    onMarkForReview: (cardId: string) => void;
 }
 
 type StudyPhase = 'setup' | 'manual_setup' | 'choice_setup' | 'learning' | 'finished';
@@ -26,7 +27,7 @@ type InputMode = 'manual_self' | 'manual_type' | 'manual_choice' | 'voice';
 
 // const ENCOURAGEMENTS = ["Great Job!", "Keep it Up!", "You're doing great!", "Fantastic!", "Spot on!", "Excellent!", "Awesome!"];
 
-const StudyMode: React.FC<StudyModeProps> = ({ cards, onExit, settings, onSaveSettings, onMarkKnown, isFavorite, onToggleFavorite, onReport, deckId, learningHistory, onSessionUpdate, onInputModeChange }) => {
+const StudyMode: React.FC<StudyModeProps> = ({ cards, onExit, settings, onSaveSettings, onMarkKnown, isFavorite, onToggleFavorite, onReport, deckId, learningHistory, onSessionUpdate, onInputModeChange, onMarkForReview }) => {
     const { t } = useTranslation();
 
     // Session State
@@ -1035,9 +1036,19 @@ const StudyMode: React.FC<StudyModeProps> = ({ cards, onExit, settings, onSaveSe
                                             <Heart className={`w-4 h-4 ${isFavorite ? "fill-current" : ""}`} />
                                         </button>
 
+                                        {currentCard && (
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); onMarkForReview(currentCard.id.toString()); }}
+                                                className={`p-2 rounded-full backdrop-blur-md transition-all ${currentCard.markedForReview ? 'bg-amber-500/80 text-white hover:bg-amber-600' : 'bg-black/20 text-white/70 hover:bg-black/30 hover:text-white'}`}
+                                                title={currentCard.markedForReview ? t('studyMode.unmarkForReview') : t('studyMode.markForReview')}
+                                            >
+                                                <Bookmark className={`w-4 h-4 ${currentCard.markedForReview ? "fill-current" : ""}`} />
+                                            </button>
+                                        )}
+
                                         <button
                                             onClick={(e) => { e.stopPropagation(); handleReport(); }}
-                                            className="p-2 rounded-full bg-black/20 backdrop-blur-md text-white/70 hover:hover:text-amber-400 hover:bg-black/30 transition-all"
+                                            className="p-2 rounded-full bg-black/20 backdrop-blur-md text-white/70 hover:text-amber-400 hover:bg-black/30 transition-all"
                                             title={t('studyMode.reportIssue')}
                                         >
                                             <Flag className="w-4 h-4" />
