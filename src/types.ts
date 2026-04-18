@@ -37,6 +37,13 @@ export interface Deck {
     authorId?: string;
     reports?: { reason: string; timestamp: number; userId: string; }[];
     isArchived?: boolean;
+
+    // Metadata Tracking
+    creatorUsername?: string;
+    createdAt?: number; // timestamp
+    viewCount?: number;
+    downloadCount?: number;
+    languageCategory?: string;
 }
 
 

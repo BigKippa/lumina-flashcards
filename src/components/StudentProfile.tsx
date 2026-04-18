@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Student, Deck, AppSettings } from '../types';
 import { X, Save, User, Globe, MapPin, Clock, Phone, Briefcase, Heart, BookOpen, Calendar, Settings, MessageSquare, CheckCircle, Activity, Layout, Mail, Plus, Volume2, Archive, Trash2 } from 'lucide-react';
 import { Word } from '../data/vocabulary';
 import { AddContentModal } from './AddContentModal';
 import { EditCardModal } from './EditCardModal';
+import { AvatarCropperModal } from './AvatarCropperModal';
 
 interface StudentProfileProps {
     student: Student;
@@ -41,12 +42,18 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student, onClose
 
     const [isEditing, setIsEditing] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [avatarFile, setAvatarFile] = useState<File | null>(null);
 
     const handleChange = (field: keyof Student, value: any) => {
         setFormData(prev => ({ ...prev, [field]: value }));
     };
 
     const handleSave = () => {
+        onSave(formData);
+    };
+
+    const handleDoneEditing = () => {
         onSave(formData);
         setIsEditing(false);
     };
@@ -80,12 +87,33 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student, onClose
                 {/* Header */}
                 <div className="p-6 border-b border-border flex justify-between items-start bg-card/50">
                     <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+                        <div 
+                            className={`w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary border border-primary/20 relative ${isEditing ? 'cursor-pointer hover:bg-primary/20 transition-colors group' : ''}`}
+                            onClick={() => isEditing && fileInputRef.current?.click()}
+                            title={isEditing ? 'Change Profile Picture' : ''}
+                        >
                             {formData.avatarUrl ? (
                                 <img src={formData.avatarUrl} alt={formData.name} className="w-full h-full object-cover rounded-full" />
                             ) : (
                                 <User className="w-8 h-8" />
                             )}
+                            {isEditing && (
+                                <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <span className="text-[9px] text-white font-bold uppercase tracking-wider text-center">Edit</span>
+                                </div>
+                            )}
+                            <input 
+                                type="file" 
+                                ref={fileInputRef}
+                                className="hidden" 
+                                accept="image/png, image/jpeg, image/webp"
+                                onChange={(e) => {
+                                    if (e.target.files && e.target.files.length > 0) {
+                                        setAvatarFile(e.target.files[0]);
+                                    }
+                                    e.target.value = ''; // Reset
+                                }}
+                            />
                         </div>
                         <div>
                             <h2 className="text-2xl font-bold flex items-center gap-2">
@@ -99,8 +127,8 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student, onClose
                     </div>
                     <div className="flex items-center gap-2">
                         {isEditing ? (
-                            <button onClick={handleSave} className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                                <Save className="w-4 h-4" /> Save
+                            <button onClick={handleDoneEditing} className="flex items-center gap-2 px-4 py-2 bg-color5 text-color1 rounded-lg hover:bg-color5/90 transition-colors shadow-sm font-bold">
+                                <CheckCircle className="w-4 h-4" /> Done Editing
                             </button>
                         ) : (
                             <button onClick={() => setIsEditing(true)} className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
@@ -134,7 +162,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student, onClose
                     {/* BASIC INFO TAB */}
                     {activeTab === 'basic' && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-2">
-                            <SectionCard title="Personal Details" icon={User}>
+                            <SectionCard title="Personal Details" icon={User} isEditing={isEditing} onSaveRegion={handleSave}>
                                 <Field label="Full Name" value={formData.name} isEditing={isEditing} onChange={v => handleChange('name', v)} />
                                 <div className="space-y-1">
                                     <label className="text-xs font-bold text-muted-foreground uppercase">Native Language</label>
@@ -156,7 +184,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student, onClose
                                 </div>
                             </SectionCard>
 
-                            <SectionCard title="Origin & Location" icon={MapPin}>
+                            <SectionCard title="Origin & Location" icon={MapPin} isEditing={isEditing} onSaveRegion={handleSave}>
                                 <div className="grid grid-cols-2 gap-4">
                                     <Field label="Origin City" value={formData.originCity} isEditing={isEditing} onChange={v => handleChange('originCity', v)} />
                                     <Field label="Origin Country" value={formData.originCountry} isEditing={isEditing} onChange={v => handleChange('originCountry', v)} list="countries" />
@@ -173,13 +201,13 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student, onClose
                                 </datalist>
                             </SectionCard>
 
-                            <SectionCard title="Contact & Work" icon={Briefcase}>
+                            <SectionCard title="Contact & Work" icon={Briefcase} isEditing={isEditing} onSaveRegion={handleSave}>
                                 <Field label="Email" value={formData.email} isEditing={isEditing} onChange={v => handleChange('email', v)} icon={Mail} />
                                 <Field label="Phone" value={formData.phone} isEditing={isEditing} onChange={v => handleChange('phone', v)} icon={Phone} />
                                 <Field label="Profession" value={formData.profession} isEditing={isEditing} onChange={v => handleChange('profession', v)} icon={Briefcase} />
                             </SectionCard>
 
-                            <SectionCard title="Interests & Notes" icon={Heart}>
+                            <SectionCard title="Interests & Notes" icon={Heart} isEditing={isEditing} onSaveRegion={handleSave}>
                                 <Field label="Interests / Hobbies" value={formData.interests} isEditing={isEditing} onChange={v => handleChange('interests', v)} />
                                 <TextArea label="Private Notes" value={formData.basicNotes} isEditing={isEditing} onChange={v => handleChange('basicNotes', v)} />
                             </SectionCard>
@@ -189,17 +217,17 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student, onClose
                     {/* LEARNING NEEDS TAB */}
                     {activeTab === 'learning' && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-2">
-                            <SectionCard title="Level & Goals" icon={Activity}>
+                            <SectionCard title="Level & Goals" icon={Activity} isEditing={isEditing} onSaveRegion={handleSave}>
                                 <Field label="English Level" value={formData.englishLevel} isEditing={isEditing} onChange={v => handleChange('englishLevel', v)} />
                                 <TextArea label="Goals" value={formData.goals} isEditing={isEditing} onChange={v => handleChange('goals', v)} />
                             </SectionCard>
 
-                            <SectionCard title="Background" icon={BookOpen}>
+                            <SectionCard title="Background" icon={BookOpen} isEditing={isEditing} onSaveRegion={handleSave}>
                                 <TextArea label="Learning History" value={formData.learningHistory} isEditing={isEditing} onChange={v => handleChange('learningHistory', v)} placeholder="Previous schools, tutors..." />
                                 <TextArea label="English Environment" value={formData.englishEnvironment} isEditing={isEditing} onChange={v => handleChange('englishEnvironment', v)} placeholder="Uses English at work, home..." />
                             </SectionCard>
 
-                            <SectionCard title="Schedule & Logistics" icon={Calendar}>
+                            <SectionCard title="Schedule & Logistics" icon={Calendar} isEditing={isEditing} onSaveRegion={handleSave}>
                                 <Field label="Lesson Schedule" value={formData.schedule} isEditing={isEditing} onChange={v => handleChange('schedule', v)} placeholder="e.g. Mon/Wed 5pm" />
                                 <div className="flex items-center gap-2 mt-4">
                                     <input
@@ -213,7 +241,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student, onClose
                                 </div>
                             </SectionCard>
 
-                            <SectionCard title="Preferences" icon={Settings}>
+                            <SectionCard title="Preferences" icon={Settings} isEditing={isEditing} onSaveRegion={handleSave}>
                                 <TextArea label="Student Preferences" value={formData.preferences} isEditing={isEditing} onChange={v => handleChange('preferences', v)} />
                             </SectionCard>
                         </div>
@@ -410,6 +438,19 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student, onClose
                     onCancel={() => setEditingCard(null)}
                 />
             )}
+
+            {avatarFile && (
+                <AvatarCropperModal
+                    imageFile={avatarFile}
+                    onClose={() => setAvatarFile(null)}
+                    onSave={(croppedUrl) => {
+                        const updated = { ...formData, avatarUrl: croppedUrl };
+                        handleChange('avatarUrl', croppedUrl);
+                        onSave(updated); // auto persist image
+                        setAvatarFile(null);
+                    }}
+                />
+            )}
         </div>
     );
 };
@@ -431,11 +472,22 @@ const COUNTRIES = [
 
 // Helper Components
 
-const SectionCard = ({ title, icon: Icon, children }: { title: string, icon: any, children: React.ReactNode }) => (
-    <div className="bg-card p-6 rounded-xl border border-border shadow-sm">
-        <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-foreground">
-            <Icon className="w-5 h-5 text-primary" /> {title}
-        </h3>
+const SectionCard = ({ title, icon: Icon, children, isEditing, onSaveRegion }: { title: string, icon: any, children: React.ReactNode, isEditing?: boolean, onSaveRegion?: () => void }) => (
+    <div className="bg-card p-6 rounded-xl border border-border shadow-sm relative group transition-colors">
+        <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold flex items-center gap-2 text-foreground">
+                <Icon className="w-5 h-5 text-primary" /> {title}
+            </h3>
+            {isEditing && onSaveRegion && (
+                <button
+                    onClick={onSaveRegion}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-color4/20 text-color4 rounded-md hover:bg-color4 hover:text-color1 transition-colors text-xs font-bold border border-color4/30"
+                    title="Save fields in this tile"
+                >
+                    <Save className="w-3 h-3" /> Save Box
+                </button>
+            )}
+        </div>
         <div className="space-y-4">
             {children}
         </div>

@@ -20,6 +20,13 @@ export interface Word {
     ignoredDuplicateIds?: number[];
     markedForReview?: boolean;
 
+    // Metadata Tracking
+    creatorUsername?: string;
+    createdAt?: number; // timestamp
+    viewCount?: number;
+    downloadCount?: number;
+    languageCategory?: string;
+
     // Alternate fields for edge cases and multiple usages
     alternateDefinitions?: string[];
     alternateExamples?: string[];
@@ -42,6 +49,13 @@ export interface Deck {
     authorId?: string;
     reports?: { reason: string; timestamp: number; userId: string; }[];
     isArchived?: boolean;
+
+    // Metadata Tracking
+    creatorUsername?: string;
+    createdAt?: number; // timestamp
+    viewCount?: number;
+    downloadCount?: number;
+    languageCategory?: string;
 }
 
 export const vocabulary: Word[] = [

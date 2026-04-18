@@ -12,25 +12,35 @@
        Sand: 37 28% -> 22%
     */
 
-    --color-1: 10 2% 86%;   /* Light Gray/Off-white */
-    --color-2: 38 8% 72%;   /* Taupe */
-    --color-3: 32 33% 66%;  /* Sand */
-    --color-4: 202 23% 67%; /* Slate Blue */
-    --color-5: 195 10% 32%; /* Charcoal */
+    --color-1: 180 3% 86%;  /* Very Light Cool Gray */
+    --color-2: 30 11% 68%;  /* Taupe / Warm Grey */
+    --color-3: 35 34% 65%;  /* Ochre / Sand */
+    --color-4: 205 24% 65%; /* Slate Blue */
+    --color-5: 205 13% 28%; /* Charcoal Blue */
+    --color-6: 204 21% 48%; /* Steel / Denim Blue */
+    --color-7: 172 12% 51%; /* Slate / Teal Green */
+    --color-8: 108 17% 66%; /* Sage Green */
+    --color-9: 71 24% 77%;  /* Pale Olive / Khaki */
+    --color-10: 34 63% 72%; /* Sandy Wheat */
 
     --color-1-foreground: var(--color-5);
     --color-2-foreground: var(--color-5);
     --color-3-foreground: var(--color-5);
     --color-4-foreground: var(--color-5);
     --color-5-foreground: var(--color-1);
+    --color-6-foreground: var(--color-1);
+    --color-7-foreground: var(--color-1);
+    --color-8-foreground: var(--color-5);
+    --color-9-foreground: var(--color-5);
+    --color-10-foreground: var(--color-5);
 
     --background: var(--color-1);
     --foreground: var(--color-5);
 
-    --card: var(--color-1);
+    --card: var(--color-2);
     --card-foreground: var(--color-5);
 
-    --popover: var(--color-1);
+    --popover: var(--color-2);
     --popover-foreground: var(--color-5);
 
     --primary: var(--color-5);
@@ -45,7 +55,7 @@
     --accent: var(--color-4);
     --accent-foreground: var(--color-5);
 
-    --destructive: 0 84% 60%;
+    --destructive: var(--color-5);
     --destructive-foreground: var(--color-1);
 
     --border: var(--color-2);

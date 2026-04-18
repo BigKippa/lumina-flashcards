@@ -299,11 +299,11 @@ export function EditCardModal({ card, onSave, onCancel, settings, apiKey, isAiRe
                 </h2>
 
                 {!isGenerating && (isAiPopulated || isAiResolveMode) && (
-                    <div className="bg-blue-50 border border-blue-200 p-4 rounded-xl mb-4 shrink-0 flex items-start gap-3 dark:bg-blue-900/20 dark:border-blue-800">
-                        <Sparkles className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+                    <div className="bg-primary/10 border border-primary/20 p-4 rounded-xl mb-4 shrink-0 flex items-start gap-3">
+                        <Sparkles className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                         <div>
-                            <h3 className="font-bold text-blue-900 dark:text-blue-300 leading-none mb-1">A.I. Suggestions Ready</h3>
-                            <p className="text-sm text-blue-800 dark:text-blue-200">
+                            <h3 className="font-bold text-foreground leading-none mb-1">A.I. Suggestions Ready</h3>
+                            <p className="text-sm text-muted-foreground mt-1">
                                 A.I. has finished resolving issues. Please review the suggestions carefully before approving them, because A.I. can make mistakes.
                             </p>
                         </div>

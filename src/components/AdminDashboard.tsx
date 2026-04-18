@@ -6,6 +6,7 @@ import { CategoryManager } from './CategoryManager';
 import { EditCardModal } from './EditCardModal';
 import { BulkGeneratorModal } from './BulkGeneratorModal';
 import { DuplicateResolverModal } from './DuplicateResolverModal';
+import { LibraryDiagnosticsModal } from './LibraryDiagnosticsModal';
 import Flashcard from './Flashcard';
 import { AppSettings, UserProfile, UserRole, Ticket } from '../types';
 
@@ -44,10 +45,12 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
     const [isCreatingDeck, setIsCreatingDeck] = useState(false);
     const [newDeckTitle, setNewDeckTitle] = useState('');
     const [newDeckDesc, setNewDeckDesc] = useState('');
+    const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
+    const [isDiagnosticsOpen, setIsDiagnosticsOpen] = useState(false);
+    const [recentlyImportedIds, setRecentlyImportedIds] = useState<Set<number>>(new Set());
     const [newDeckIsPublic, setNewDeckIsPublic] = useState(false);
     const [sortBy, setSortBy] = useState<'az' | 'za'>('az');
     const [filterCategory, setFilterCategory] = useState<string>('all');
-    const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
     const [showArchivedCards, setShowArchivedCards] = useState(false);
     const [selectedCardIds, setSelectedCardIds] = useState<Set<string>>(new Set());
     const [showMissingOnly, setShowMissingOnly] = useState(false);
@@ -454,6 +457,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
 
     const filteredCards = cards
         .filter(card => {
+            if (activeTab === 'library' && recentlyImportedIds.size > 0 && !recentlyImportedIds.has(card.id)) return false;
             const matchesSearch = card.word.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 card.definition.toLowerCase().includes(searchTerm.toLowerCase());
             const matchesCategory = filterCategory === 'all' || card.category === filterCategory;
@@ -571,7 +575,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                             <ArrowLeft className="w-4 h-4" /> {activeTab === 'menu' ? 'Back to Selection' : 'Back to Admin Menu'}
                         </button>
                     </div>
-                    <h1 className="text-3xl font-bold text-foreground text-center">
+                    <h1 data-dev-id="admin-dashboard-title" className="text-3xl font-bold text-foreground text-center">
                         {activeTab === 'menu' ? 'Admin Dashboard' :
                             activeTab === 'decks' ? 'Manage Decks' :
                                 activeTab === 'cards' ? 'Manage Flashcards' :
@@ -585,9 +589,10 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                 </div>
 
                 {activeTab === 'menu' && (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div data-dev-id="admin-tiles-grid" className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {userRole === 'admin' && (
                             <button
+                                data-dev-id="admin-tile-users"
                                 onClick={() => onTabChange('users')}
                                 className="flex flex-col items-center p-8 rounded-2xl bg-color1 text-color1-foreground border border-color5/20 transition-all group hover:scale-105 shadow-md hover:bg-color1/80"
                             >
@@ -602,6 +607,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                         )}
 
                         <button
+                            data-dev-id="admin-tile-decks"
                             onClick={() => onTabChange('decks')}
                             className="flex flex-col items-center p-8 rounded-2xl bg-color2 text-color2-foreground border border-color5/20 transition-all group hover:scale-105 shadow-md hover:bg-color2/80"
                         >
@@ -615,6 +621,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                         </button>
 
                         <button
+                            data-dev-id="admin-tile-cards"
                             onClick={() => onTabChange('cards')}
                             className="flex flex-col items-center p-8 rounded-2xl bg-color3 text-color3-foreground border border-color5/20 transition-all group hover:scale-105 shadow-md hover:bg-color3/80"
                         >
@@ -628,6 +635,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                         </button>
 
                         <button
+                            data-dev-id="admin-tile-tickets"
                             onClick={() => onTabChange('tickets')}
                             className="flex flex-col items-center p-8 rounded-2xl bg-color4 text-color4-foreground border border-color5/20 transition-all group hover:scale-105 shadow-md hover:bg-color4/80"
                         >
@@ -641,6 +649,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                         </button>
 
                         <button
+                            data-dev-id="admin-tile-review"
                             onClick={() => onTabChange('review-queue')}
                             className="flex flex-col items-center p-8 rounded-2xl bg-color3 text-color3-foreground border border-color5/20 transition-all group hover:scale-105 shadow-md hover:bg-color3/80"
                         >
@@ -654,6 +663,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                         </button>
 
                         <button
+                            data-dev-id="admin-tile-archived"
                             onClick={() => onTabChange('archived')}
                             className="flex flex-col items-center p-8 rounded-2xl bg-color5 text-color5-foreground border border-color1/20 transition-all group hover:scale-105 shadow-md hover:bg-color5/80"
                         >
@@ -667,6 +677,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                         </button>
 
                         <button
+                            data-dev-id="admin-tile-settings"
                             onClick={() => onTabChange('settings')}
                             className="flex flex-col items-center p-8 rounded-2xl bg-color1 text-color1-foreground border border-color5/20 transition-all group hover:scale-105 shadow-md hover:bg-color1/80"
                         >
@@ -679,6 +690,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                             </p>
                         </button>
                         <button
+                            data-dev-id="admin-tile-testmode"
                             onClick={() => onTabChange('testMode')}
                             className="flex flex-col items-center p-8 rounded-2xl bg-color2 text-color2-foreground border border-color5/20 transition-all group hover:scale-105 shadow-md hover:bg-color2/80"
                         >
@@ -700,7 +712,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                             <div className="flex justify-between items-center bg-card p-6 rounded-2xl border border-border shadow-sm">
                                 <div>
                                     <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-                                        <Beaker className="w-6 h-6 text-teal-500" />
+                                        <Beaker className="w-6 h-6 text-color2" />
                                         Test Mode Commands
                                     </h2>
                                     <p className="text-muted-foreground text-sm">Execute simulated actions to test system behavior. Test profiles will have "Test" prepended to their names.</p>
@@ -708,8 +720,8 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="bg-card p-8 rounded-2xl border border-border shadow-sm flex flex-col items-center text-center group transition-all hover:border-blue-500/50">
-                                    <div className="w-16 h-16 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                <div className="bg-card p-8 rounded-2xl border border-border shadow-sm flex flex-col items-center text-center group transition-all hover:border-color4/50">
+                                    <div className="w-16 h-16 rounded-full bg-color4 text-color4 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                                         <UserPlus className="w-8 h-8" />
                                     </div>
                                     <h3 className="text-xl font-bold text-foreground mb-2">Receive Student Invite</h3>
@@ -718,14 +730,14 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                     </p>
                                     <button
                                         onClick={handleTestReceiveStudentInvite}
-                                        className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors"
+                                        className="w-full py-3 bg-color4 hover:bg-color4 text-color1 font-bold rounded-xl transition-colors"
                                     >
                                         Start Simulator
                                     </button>
                                 </div>
 
-                                <div className="bg-card p-8 rounded-2xl border border-border shadow-sm flex flex-col items-center text-center group transition-all hover:border-purple-500/50">
-                                    <div className="w-16 h-16 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                <div className="bg-card p-8 rounded-2xl border border-border shadow-sm flex flex-col items-center text-center group transition-all hover:border-color4/50">
+                                    <div className="w-16 h-16 rounded-full bg-color4 text-color4 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                                         <GraduationCap className="w-8 h-8" />
                                     </div>
                                     <h3 className="text-xl font-bold text-foreground mb-2">Send Student Invite</h3>
@@ -734,7 +746,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                     </p>
                                     <button
                                         onClick={() => setIsTestAddStudentModalOpen(true)}
-                                        className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl transition-colors"
+                                        className="w-full py-3 bg-color4 hover:bg-color4 text-color1 font-bold rounded-xl transition-colors"
                                     >
                                         Start Simulator
                                     </button>
@@ -756,7 +768,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                             ) : (
                                 <div className="grid grid-cols-1 gap-4">
                                     {tickets.map((ticket, index) => (
-                                        <div key={ticket.id} className={`p-6 rounded-2xl transition-all ${ticket.status === 'resolved' ? 'opacity-60 bg-color5/10 border border-color5/20' : (index % 2 === 0 ? 'bg-color4 text-color4-foreground' : 'bg-color4/20 text-foreground')}`}>
+                                        <div key={ticket.id} className={`p-6 rounded-2xl transition-all ${ticket.status === 'resolved' ? 'opacity-60 bg-color1 border border-color5/20' : (index % 2 === 0 ? 'bg-color4 text-color4-foreground' : 'bg-color4 text-foreground')}`}>
                                             <div className="flex justify-between items-start gap-4">
                                                 <div className="flex-1">
                                                     <div className="flex items-center gap-2 mb-2">
@@ -783,7 +795,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                                 <div className="flex flex-col gap-2 shrink-0">
                                                     <button
                                                         onClick={() => handleResolveTicket(ticket.id, ticket.status)}
-                                                        className={`p-2 rounded-lg transition-colors flex items-center gap-2 text-sm font-bold ${ticket.status === 'open' ? 'text-green-600 hover:bg-green-50' : 'text-orange-600 hover:bg-orange-50'}`}
+                                                        className={`p-2 rounded-lg transition-colors flex items-center gap-2 text-sm font-bold ${ticket.status === 'open' ? 'text-color2 hover:bg-green-50' : 'text-color3 hover:bg-orange-50'}`}
                                                     >
                                                         {ticket.status === 'open' ? <><Check className="w-4 h-4" /> Mark Resolved</> : <><Sparkles className="w-4 h-4" /> Re-open</>}
                                                     </button>
@@ -890,7 +902,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                                         onClick={() => setIsBulkModalOpen(true)}
                                                         className="group flex flex-col items-center justify-center p-8 rounded-2xl bg-secondary/20 border-2 border-dashed border-border hover:border-primary/50 hover:bg-secondary/40 transition-all min-h-[200px]"
                                                     >
-                                                        <div className="w-16 h-16 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-500 mb-4 group-hover:scale-110 transition-transform">
+                                                        <div className="w-16 h-16 rounded-full bg-color1 flex items-center justify-center text-color4 mb-4 group-hover:scale-110 transition-transform">
                                                             <FolderPlus className="w-8 h-8" />
                                                         </div>
                                                         <h3 className="text-xl font-bold text-foreground">Bulk Upload</h3>
@@ -928,7 +940,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                                                                 e.stopPropagation();
                                                                                 onDeleteDeck(deck.id);
                                                                             }}
-                                                                            className="p-2 rounded-lg text-inherit opacity-70 hover:opacity-100 hover:bg-red-500/10 hover:text-red-500 transition-colors"
+                                                                            className="p-2 rounded-lg text-inherit opacity-70 hover:opacity-100 hover:bg-color1 hover:text-color5 transition-colors"
                                                                             title="Delete Deck"
                                                                         >
                                                                             <Trash2 className="w-5 h-5" />
@@ -1004,7 +1016,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                                                                 e.stopPropagation();
                                                                                 onDeleteDeck(deck.id);
                                                                             }}
-                                                                            className="p-1 rounded-lg text-inherit opacity-70 hover:opacity-100 hover:bg-red-500/10 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                            className="p-1 rounded-lg text-inherit opacity-70 hover:opacity-100 hover:bg-color1 hover:text-color5 transition-colors opacity-0 group-hover:opacity-100 transition-opacity"
                                                                             title="Delete Deck"
                                                                         >
                                                                             <Trash2 className="w-4 h-4" />
@@ -1039,17 +1051,17 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                 {decks.some(d => d.status === 'pending') && (
                                     <div>
                                         <h3 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-                                            <Sparkles className="w-5 h-5 text-amber-500" />
+                                            <Sparkles className="w-5 h-5 text-color3" />
                                             Pending Approval
                                         </h3>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                                             {decks.filter(d => d.status === 'pending').map(deck => (
                                                 <div
                                                     key={deck.id}
-                                                    className="relative p-8 rounded-2xl bg-amber-500/5 border border-amber-500/20 cursor-not-allowed opacity-75"
+                                                    className="relative p-8 rounded-2xl bg-color3/5 border border-color3/20 cursor-not-allowed opacity-75"
                                                 >
                                                     <div className="absolute top-4 right-4">
-                                                        <span className="bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full">Pending</span>
+                                                        <span className="bg-color3 text-color1 text-xs font-bold px-2 py-1 rounded-full">Pending</span>
                                                     </div>
                                                     <h3 className="text-xl font-bold text-foreground mb-2">{deck.title}</h3>
                                                     <p className="text-muted-foreground text-sm line-clamp-2">{deck.description}</p>
@@ -1198,7 +1210,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                 <div className="flex gap-3">
                                     <button
                                         onClick={() => setShowArchivedUsers(!showArchivedUsers)}
-                                        className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold transition-colors border ${showArchivedUsers ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-secondary text-secondary-foreground border-border hover:bg-secondary/80'}`}
+                                        className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold transition-all border-2 ${showArchivedUsers ? 'bg-color4 text-color1 border-color4 hover:bg-color4/90' : 'bg-color2/30 text-color5 border-color2 hover:bg-color2/50'}`}
                                     >
                                         <Archive className="w-5 h-5" />
                                         {showArchivedUsers ? 'View Active Users' : 'View Archived Users'}
@@ -1236,7 +1248,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                     <div className="flex gap-2">
                                         <button
                                             onClick={() => handleBulkArchive(!showArchivedUsers)}
-                                            className={`px-4 py-2 rounded-lg font-bold transition-colors text-sm ${showArchivedUsers ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-amber-100 text-amber-700 hover:bg-amber-200'}`}
+                                            className={`px-4 py-2 rounded-lg font-bold transition-all border-2 text-sm shadow-sm ${showArchivedUsers ? 'bg-color4 text-color1 border-color4 hover:bg-color4/90' : 'bg-color2/30 text-color5 border-color2 hover:bg-color2/50'}`}
                                         >
                                             {showArchivedUsers ? 'Restore Selected' : 'Archive Selected'}
                                         </button>
@@ -1271,7 +1283,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                         </thead>
                                         <tbody className="divide-y divide-border">
                                             {users.filter(u => showArchivedUsers ? u.isArchived : !u.isArchived).map((user, index) => (
-                                                <tr key={user.id} className={`transition-colors text-sm ${index % 2 === 0 ? 'bg-color4 text-color4-foreground' : 'bg-color4/20 text-foreground'} hover:brightness-95 ${selectedUserIds.has(user.id) ? 'ring-2 ring-inset ring-color5' : ''}`}>
+                                                <tr key={user.id} className={`transition-colors text-sm ${index % 2 === 0 ? 'bg-color4 text-color4-foreground' : 'bg-color4 text-foreground'} hover:brightness-95 ${selectedUserIds.has(user.id) ? 'ring-2 ring-inset ring-color5' : ''}`}>
                                                     <td className="p-4">
                                                         {user.id !== 'admin' && (
                                                             <input
@@ -1294,9 +1306,9 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                                         </div>
                                                     </td>
                                                     <td className="p-4">
-                                                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${user.role === 'admin' ? 'bg-purple-100 text-purple-700 border-purple-200' :
-                                                            user.role === 'tutor' ? 'bg-blue-100 text-blue-700 border-blue-200' :
-                                                                'bg-green-100 text-green-700 border-green-200'
+                                                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${user.role === 'admin' ? 'bg-color4 text-color4 border-color4' :
+                                                            user.role === 'tutor' ? 'bg-color4 text-color4 border-color4' :
+                                                                'bg-color2 text-color2 border-color2'
                                                             }`}>
                                                             {user.role === 'admin' && <Shield className="w-3 h-3" />}
                                                             {user.role === 'tutor' && <GraduationCap className="w-3 h-3" />}
@@ -1314,7 +1326,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                                             <div className="flex justify-end gap-2">
                                                                 <button
                                                                     onClick={() => handleArchiveUser(user.id, !user.isArchived)}
-                                                                    className={`p-2 rounded-lg transition-colors ${user.isArchived ? 'text-green-600 hover:bg-green-100' : 'text-amber-600 hover:bg-amber-100'}`}
+                                                                    className={`p-2 rounded-lg transition-colors ${user.isArchived ? 'text-color2 hover:bg-color2' : 'text-color3 hover:bg-color3'}`}
                                                                     title={user.isArchived ? "Restore User" : "Archive User"}
                                                                 >
                                                                     <Archive className="w-5 h-5" />
@@ -1427,7 +1439,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
 
                                         {mergeStep === 1 ? (
                                             <div className="space-y-6">
-                                                <div className="p-4 bg-blue-50 text-blue-800 rounded-xl text-sm border border-blue-100 flex gap-3">
+                                                <div className="p-4 bg-blue-50 text-color4 rounded-xl text-sm border border-color4 flex gap-3">
                                                     <div className="shrink-0"><Shield className="w-5 h-5" /></div>
                                                     <div>
                                                         <p className="font-bold">How Merging Works</p>
@@ -1476,10 +1488,10 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                             </div>
                                         ) : (
                                             <div className="space-y-6">
-                                                <div className="p-4 bg-red-50 text-red-900 rounded-xl text-sm border border-red-100 flex gap-3">
-                                                    <div className="shrink-0"><AlertTriangle className="w-5 h-5 text-red-600" /></div>
+                                                <div className="p-4 bg-red-50 text-color5 rounded-xl text-sm border border-color5 flex gap-3">
+                                                    <div className="shrink-0"><AlertTriangle className="w-5 h-5 text-color5" /></div>
                                                     <div>
-                                                        <p className="font-bold text-red-700">Warning: Irreversible Action</p>
+                                                        <p className="font-bold text-color5">Warning: Irreversible Action</p>
                                                         <p>
                                                             You are about to merge <strong>{users.find(u => u.id === mergeSourceId)?.username}</strong> INTO <strong>{users.find(u => u.id === mergeTargetId)?.username}</strong>.
                                                         </p>
@@ -1525,7 +1537,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
 
                                         {mergeStep === 1 ? (
                                             <div className="space-y-6">
-                                                <div className="p-4 bg-blue-50 text-blue-800 rounded-xl text-sm border border-blue-100 flex gap-3">
+                                                <div className="p-4 bg-blue-50 text-color4 rounded-xl text-sm border border-color4 flex gap-3">
                                                     <div className="shrink-0"><Shield className="w-5 h-5" /></div>
                                                     <div>
                                                         <p className="font-bold">How Merging Works</p>
@@ -1574,10 +1586,10 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                             </div>
                                         ) : (
                                             <div className="space-y-6">
-                                                <div className="p-4 bg-red-50 text-red-900 rounded-xl text-sm border border-red-100 flex gap-3">
-                                                    <div className="shrink-0"><AlertTriangle className="w-5 h-5 text-red-600" /></div>
+                                                <div className="p-4 bg-red-50 text-color5 rounded-xl text-sm border border-color5 flex gap-3">
+                                                    <div className="shrink-0"><AlertTriangle className="w-5 h-5 text-color5" /></div>
                                                     <div>
-                                                        <p className="font-bold text-red-700">Warning: Irreversible Action</p>
+                                                        <p className="font-bold text-color5">Warning: Irreversible Action</p>
                                                         <p>
                                                             You are about to merge <strong>{users.find(u => u.id === mergeSourceId)?.username}</strong> INTO <strong>{users.find(u => u.id === mergeTargetId)?.username}</strong>.
                                                         </p>
@@ -1612,7 +1624,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                 <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
                                     <div className="w-full max-w-md bg-card border border-border rounded-2xl p-8 shadow-2xl animate-in zoom-in-95">
                                         <div className="text-center mb-6">
-                                            <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <div className="w-16 h-16 bg-color2 text-color2 rounded-full flex items-center justify-center mx-auto mb-4">
                                                 <Check className="w-8 h-8" />
                                             </div>
                                             <h2 className="text-2xl font-bold text-foreground">User Created!</h2>
@@ -1630,7 +1642,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                             </div>
                                         </div>
 
-                                        <div className="bg-blue-50 text-blue-800 p-4 rounded-xl text-sm mb-6 flex gap-3 items-start">
+                                        <div className="bg-blue-50 text-color4 p-4 rounded-xl text-sm mb-6 flex gap-3 items-start">
                                             <Shield className="w-5 h-5 flex-shrink-0" />
                                             <p>The user will be required to change their username and password immediately upon their first login.</p>
                                         </div>
@@ -1653,22 +1665,22 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                         <div className="space-y-6">
                             {/* Alert Notification Bar */}
                             {missingDataCount > 0 && activeTab === 'cards' && (
-                                <div className={`mb-6 border rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm transition-colors ${showMissingOnly ? 'bg-amber-100 border-amber-300 dark:bg-amber-900/40 dark:border-amber-700' : 'bg-amber-50 border-amber-200 dark:bg-amber-900/10 dark:border-amber-800/30 hover:bg-amber-100 dark:hover:bg-amber-900/20'}`}>
-                                    <div className="flex items-center gap-3">
-                                        <div className={`p-2 rounded-lg shrink-0 ${showMissingOnly ? 'bg-amber-300 text-amber-900 dark:bg-amber-700 dark:text-amber-100' : 'bg-amber-200 text-amber-800 dark:bg-amber-800 dark:text-amber-200'}`}>
-                                            <Sparkles className="w-6 h-6" />
+                                <div className={`mb-6 border rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm transition-colors ${showMissingOnly ? 'bg-color2 border-color2 text-color5' : 'bg-color2/10 border-color2/50 text-color5 hover:bg-color2/20'}`}>
+                                    <div className="flex items-center gap-4">
+                                        <div className={`p-2 rounded-lg shrink-0 ${showMissingOnly ? 'bg-color5 text-color1' : 'bg-color2 text-color5'}`}>
+                                            <AlertTriangle className="w-5 h-5" />
                                         </div>
                                         <div>
-                                            <h3 className="font-bold text-amber-900 dark:text-amber-100">AI Auto-Fill Suggestion</h3>
-                                            <p className="text-sm font-medium text-amber-800/80 dark:text-amber-100/80 mt-1">
-                                                You have {missingDataCount} flashcard{missingDataCount === 1 ? '' : 's'} missing essential fields (Word, IPA, Definition, Example, Category, or Level). Consider using AI to automatically fill these in!
+                                            <h4 className="font-bold">Missing Data Detected</h4>
+                                            <p className="text-sm opacity-90">
+                                                {missingDataCount} cards are missing audio, category, or example sentences.
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="flex gap-2 w-full sm:w-auto shrink-0">
+                                    <div className="flex gap-2 shrink-0">
                                         <button
                                             onClick={() => setShowMissingOnly(!showMissingOnly)}
-                                            className={`px-4 py-2 text-sm font-bold rounded-xl transition-colors whitespace-nowrap flex-1 sm:flex-none ${showMissingOnly ? 'bg-amber-800 text-amber-50 hover:bg-amber-900 dark:bg-amber-200 dark:text-amber-900' : 'bg-white text-amber-900 border border-amber-300 shadow-sm hover:bg-amber-50 dark:bg-amber-900/50 dark:border-amber-700 dark:text-amber-100 dark:hover:bg-amber-800/50'}`}
+                                            className={`px-4 py-2 text-sm font-bold rounded-xl transition-all whitespace-nowrap flex-1 sm:flex-none border-2 ${showMissingOnly ? 'bg-color5 text-color1 border-color5 hover:bg-color5/90' : 'bg-color1 text-color5 border-color2 hover:bg-color1/90 shadow-sm'}`}
                                         >
                                             {showMissingOnly ? 'Show All Cards' : 'View Missing'}
                                         </button>
@@ -1680,7 +1692,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                                 setShowMissingOnly(true);
                                                 alert("Select the missing cards and click 'Edit' or open them individually to use the AI Fill feature. Bulk AI fill is coming soon!");
                                             }}
-                                            className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl text-sm transition-colors shadow-sm flex items-center justify-center gap-2 flex-1 sm:flex-none"
+                                            className="px-4 py-2 bg-color3 hover:bg-color3 text-color1 font-bold rounded-xl text-sm transition-colors shadow-sm flex items-center justify-center gap-2 flex-1 sm:flex-none"
                                         >
                                             <Sparkles className="w-4 h-4" />
                                             Auto-Fill using A.I.
@@ -1702,7 +1714,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                             placeholder="Search cards..."
                                             value={searchTerm}
                                             onChange={(e) => setSearchTerm(e.target.value)}
-                                            className="w-full pl-9 pr-4 py-2 rounded-xl bg-secondary/50 border-transparent focus:bg-input focus:border-primary outline-none transition-all"
+                                            className="w-full pl-9 pr-4 py-2 rounded-xl bg-color1 border-2 border-color2 focus:bg-white focus:border-color4 outline-none transition-all text-color5 font-medium placeholder-color5/50 shadow-sm"
                                         />
                                     </div>
                                     <select
@@ -1735,7 +1747,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                         onClick={() => duplicates.length > 0 && setResolvingDuplicateGroup(duplicates[0])}
                                         disabled={duplicates.length === 0}
                                         className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold transition-colors shadow-lg shrink-0 ${duplicates.length > 0
-                                            ? 'bg-amber-500 text-white hover:bg-amber-600 shadow-amber-500/20'
+                                            ? 'bg-color3 text-color1 hover:bg-color3 shadow-amber-500/20'
                                             : 'bg-secondary text-muted-foreground opacity-50 cursor-not-allowed shadow-none'
                                             }`}
                                     >
@@ -1763,11 +1775,11 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
 
                             {/* Duplicate Alert */}
                             {duplicates.length > 0 && (
-                                <div className="bg-amber-500/10 border border-amber-500/30 p-4 rounded-2xl flex items-center justify-between animate-in slide-in-from-top-2">
+                                <div className="bg-color1 border border-color3/30 p-4 rounded-2xl flex items-center justify-between animate-in slide-in-from-top-2">
                                     <div className="flex items-center gap-3">
-                                        <AlertTriangle className="w-6 h-6 text-amber-500" />
+                                        <AlertTriangle className="w-6 h-6 text-color3" />
                                         <div>
-                                            <h3 className="font-bold text-amber-500">Duplicate Cards Detected</h3>
+                                            <h3 className="font-bold text-color3">Duplicate Cards Detected</h3>
                                             <p className="text-sm text-muted-foreground">
                                                 Found {duplicates.length} groups of potential duplicate cards that are public.
                                             </p>
@@ -1775,7 +1787,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                     </div>
                                     <button
                                         onClick={() => setResolvingDuplicateGroup(duplicates[0])}
-                                        className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl text-sm transition-colors"
+                                        className="px-4 py-2 bg-color3 hover:bg-color3 text-color1 font-bold rounded-xl text-sm transition-colors"
                                     >
                                         Resolve Issues
                                     </button>
@@ -1831,7 +1843,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                                         setSelectedCardIds(new Set());
                                                     }
                                                 }}
-                                                className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-amber-600 bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors border border-amber-200"
+                                                className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-color3 bg-amber-50 hover:bg-color3 rounded-lg transition-colors border border-color3"
                                             >
                                                 <Archive className="w-4 h-4" />
                                                 Archive
@@ -1843,7 +1855,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                                         setSelectedCardIds(new Set());
                                                     }
                                                 }}
-                                                className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors border border-red-200"
+                                                className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-color5 bg-red-50 hover:bg-color5 rounded-lg transition-colors border border-color5"
                                             >
                                                 <Trash2 className="w-4 h-4" />
                                                 Delete
@@ -1852,10 +1864,25 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                     </div>
                                 )}
                                 
-                                <div className="flex justify-end mb-2">
+                                <div className="flex justify-between items-center mb-4">
+                                    {recentlyImportedIds.size > 0 ? (
+                                        <div className="flex items-center gap-3 bg-color4/10 px-4 py-2 rounded-xl border border-color4/30">
+                                            <span className="text-sm font-bold text-color4">Showing {recentlyImportedIds.size} newly imported cards.</span>
+                                            <button onClick={() => setRecentlyImportedIds(new Set())} className="text-xs bg-color4 text-color1 px-3 py-1 rounded-lg hover:bg-color4/80 font-bold shadow-sm">
+                                                View Library
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <button 
+                                            onClick={() => setIsDiagnosticsOpen(true)}
+                                            className="flex items-center gap-2 px-4 py-2 bg-color3 text-color5 font-bold rounded-xl shadow-sm hover:bg-color3/80 transition-all text-sm"
+                                        >
+                                            <AlertTriangle className="w-4 h-4" /> Scan Library for Problems
+                                        </button>
+                                    )}
                                     <button
                                         onClick={() => setShowArchivedCards(!showArchivedCards)}
-                                        className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors border ${showArchivedCards ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-secondary text-muted-foreground border-transparent hover:bg-secondary/80'}`}
+                                        className={`flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl shadow-sm transition-all border-2 ${showArchivedCards ? 'bg-color4 text-color1 border-color4' : 'bg-color2/30 text-color5 border-color2 hover:bg-color2/50'}`}
                                     >
                                         <Archive className="w-4 h-4" />
                                         {showArchivedCards ? 'Hide Archived' : 'Show Archived'}
@@ -1912,7 +1939,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                                         <td className="p-4 font-medium text-foreground max-w-[200px] truncate" title={card.word}>
                                                             <div className="flex items-center gap-2">
                                                                 {card.word}
-                                                                {card.isArchived && <span className="text-[10px] uppercase font-bold bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded">Archived</span>}
+                                                                {card.isArchived && <span className="text-[10px] uppercase font-bold bg-color2 text-color5 px-1.5 py-0.5 rounded shadow-sm opacity-70">Archived</span>}
                                                             </div>
                                                         </td>
                                                         <td className="p-4">
@@ -2059,7 +2086,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                         </div>
                                         <p className="text-sm text-muted-foreground mt-2">
                                             Export your decks, cards, and users to a JSON file. Import to restore a backup.
-                                            <span className="block text-amber-500 font-bold mt-1">Warning: Import will overwrite all current data.</span>
+                                            <span className="block text-color3 font-bold mt-1">Warning: Import will overwrite all current data.</span>
                                         </p>
                                     </div>
                                 </div>
@@ -2073,9 +2100,24 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                     onClose={() => setIsBulkModalOpen(false)}
                     onSave={(newCards) => {
                         onBulkAdd(newCards);
+                        setRecentlyImportedIds(new Set(newCards.map(c => c.id)));
                         setIsBulkModalOpen(false);
                     }}
                     apiKey={settings.geminiApiKey}
+                />
+
+                <LibraryDiagnosticsModal
+                    isOpen={isDiagnosticsOpen}
+                    onClose={() => setIsDiagnosticsOpen(false)}
+                    decks={decks}
+                    onResolveMissing={(card) => {
+                        setIsDiagnosticsOpen(false);
+                        setEditingCard({ ...card, category: card.category || 'Vocabulary' } as Word);
+                    }}
+                    onResolveDuplicates={(duplicatesList) => {
+                        setIsDiagnosticsOpen(false);
+                        setResolvingDuplicateGroup(duplicatesList);
+                    }}
                 />
 
                 {/* View as Flashcard Preview Modal */}
@@ -2144,7 +2186,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                     {onDeleteDeck && (
                         <button
                             onClick={() => onDeleteDeck(activeDeckId)}
-                            className="flex items-center gap-2 px-4 py-2 text-red-600 bg-red-500/10 hover:bg-red-600 hover:text-white rounded-full font-bold transition-all text-sm"
+                            className="flex items-center gap-2 px-4 py-2 text-color5 bg-color1 hover:bg-color5 hover:text-color1 rounded-full font-bold transition-all text-sm"
                         >
                             <Trash2 className="w-4 h-4" /> Delete Deck
                         </button>
@@ -2211,7 +2253,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                         setSelectedCardIds(new Set());
                                     }
                                 }}
-                                className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-amber-600 bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors border border-amber-200"
+                                className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-color3 bg-amber-50 hover:bg-color3 rounded-lg transition-colors border border-color3"
                             >
                                 <Archive className="w-4 h-4" />
                                 Archive
@@ -2223,7 +2265,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                                         setSelectedCardIds(new Set());
                                     }
                                 }}
-                                className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors border border-red-200"
+                                className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-color5 bg-red-50 hover:bg-color5 rounded-lg transition-colors border border-color5"
                             >
                                 <Trash2 className="w-4 h-4" />
                                 Delete
@@ -2254,7 +2296,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                     </div>
                     <button
                         onClick={() => setShowArchivedCards(!showArchivedCards)}
-                        className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors border ${showArchivedCards ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-secondary text-muted-foreground border-transparent hover:bg-secondary/80'}`}
+                        className={`flex items-center gap-2 px-3 py-1.5 text-sm font-bold rounded-lg transition-all border-2 ${showArchivedCards ? 'bg-color4 text-color1 border-color4 hover:bg-color4/90' : 'bg-color2/30 text-color5 border-color2 hover:bg-color2/50'}`}
                     >
                         <Archive className="w-4 h-4" />
                         {showArchivedCards ? 'Hide Archived' : 'Show Archived'}
@@ -2294,7 +2336,7 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                             <div>
                                 <div className="flex items-center gap-3 mb-1">
                                     <h3 className="text-xl font-bold text-foreground truncate">{card.word}</h3>
-                                    {card.isArchived && <span className="text-[10px] uppercase font-bold bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded">Archived</span>}
+                                    {card.isArchived && <span className="text-[10px] uppercase font-bold bg-color2 text-color5 px-1.5 py-0.5 rounded shadow-sm opacity-70">Archived</span>}
                                     {card.level && (
                                         <span className="px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground text-xs font-bold border border-border">
                                             {card.level}

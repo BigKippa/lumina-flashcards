@@ -22,6 +22,7 @@ import { TicketModal } from './components/TicketModal';
 import { UserModeSelectionScreen } from './components/UserModeSelectionScreen';
 import { LanguageSelector } from './components/LanguageSelector';
 import PageIdentifier from './components/PageIdentifier';
+import { DevModeProvider } from './components/DevModeProvider';
 import './i18n';
 
 
@@ -294,6 +295,14 @@ function App() {
     const [toast, setToast] = useState<Omit<ToastProps, 'onClose'> | null>(null);
 
     const profileMenuRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (user) {
+            document.body.setAttribute('data-user-role', user.role);
+        } else {
+            document.body.removeAttribute('data-user-role');
+        }
+    }, [user?.role]);
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
@@ -1131,7 +1140,8 @@ function App() {
 
 
     return (
-        <div className="min-h-screen bg-background flex">
+        <DevModeProvider isAdmin={user?.role === 'admin'}>
+            <div data-dev-id="app-root" className="min-h-screen bg-background flex">
             {/* Sidebar / Spacer - Fixed width to shift content right */}
             {/* Using fixed width (w-64/w-72) instead of % to prevent extreme shifts on wide screens */}
             {/* Sidebar / Spacer - Fixed width to shift content right */}
@@ -1139,10 +1149,10 @@ function App() {
             {user && <div className="hidden lg:block w-36 flex-shrink-0" />}
 
             {/* Main Content Column - Alignment Context */}
-            <div className="flex-1 flex flex-col min-w-0 relative">
+            <div data-dev-id="app-main-column" className="flex-1 flex flex-col min-w-0 relative">
 
                 {/* Global Header - Sticky within the content column */}
-                <header className="sticky top-0 z-50 w-full backdrop-blur-lg bg-background/80 border-b border-border px-6 py-4">
+                <header data-dev-id="app-header" className="sticky top-0 z-50 w-full backdrop-blur-lg bg-background/80 border-b border-border px-6 py-4">
                     <div className={`${mode === 'study' ? 'max-w-6xl' : 'max-w-4xl'} mx-auto flex items-center justify-between relative`}>
                         {/* Navigation - Fixed Width for visual balance */}
                         <div className="flex items-center gap-3 z-10 w-24">
@@ -1164,7 +1174,7 @@ function App() {
                         </div>
 
                         {/* Brand - Centered relative to container, shifted left in study mode to align with flashcard (compensating for right sidebar) */}
-                        <div className={`absolute left-1/2 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none transition-all duration-300 drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)] ${mode === 'study' ? 'md:-translate-x-[calc(50%+9rem)] -translate-x-1/2' : '-translate-x-1/2'}`}>
+                        <div data-dev-id="app-logo" className={`absolute left-1/2 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none transition-all duration-300 drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)] ${mode === 'study' ? 'md:-translate-x-[calc(50%+9rem)] -translate-x-1/2' : '-translate-x-1/2'}`}>
                             <Sparkles className="w-10 h-10 text-primary" />
                             <span className="text-5xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
                                 Lumina
@@ -1356,6 +1366,7 @@ function App() {
                                     isFavorite={user.favorites?.some(f => f.deckId === activeDeckId && !f.mode) ?? false}
                                     onToggleFavorite={() => handleToggleFavorite(activeDeckId || '', 'deck', getActiveTitle())}
                                     onBack={goBack}
+                                    deck={decks.find(d => d.id === activeDeckId)}
                                 />
                             )}
 
@@ -1533,6 +1544,7 @@ function App() {
                 })()}
             </div >
         </div >
+        </DevModeProvider>
     );
 }
 

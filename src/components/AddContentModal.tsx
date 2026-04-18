@@ -377,7 +377,7 @@ export const AddContentModal: React.FC<AddContentModalProps> = ({
                     let category = typeof row.category === 'string' ? row.category.trim() : '';
                     if (category) {
                         const words = category.split(' ');
-                        category = words.map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+                        category = words.map((w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
                     }
 
                     const card: Word = {
@@ -406,25 +406,25 @@ export const AddContentModal: React.FC<AddContentModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-            <div className="bg-background w-full max-w-2xl max-h-[90vh] rounded-2xl shadow-xl flex flex-col border border-border">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+            <div className="bg-color1 text-color5 w-full max-w-2xl max-h-[90vh] rounded-3xl shadow-2xl flex flex-col border-2 border-border overflow-hidden">
 
                 {/* Header */}
-                <div className="p-6 border-b border-border flex justify-between items-center bg-card/50">
+                <div className="p-6 border-b border-color3 flex justify-between items-center bg-color3 shadow-sm z-10 relative">
                     <div>
-                        <h2 className="text-2xl font-bold">Add Content</h2>
-                        <p className="text-muted-foreground text-sm">
+                        <h2 className="text-2xl font-extrabold text-color5">Add Content</h2>
+                        <p className="text-color5/80 text-sm font-bold mt-1">
                             {mode === 'student' ? `Adding to ${studentName}` : 'Manage Library'}
                         </p>
                         {mode === 'student' && (
-                            <p className="text-xs text-primary/80 mt-1 flex items-center gap-1">
+                            <p className="text-xs text-color5/60 mt-1 flex items-center gap-1 font-bold">
                                 <Sparkles className="w-3 h-3" />
                                 Also adds to your global library
                             </p>
                         )}
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-muted rounded-full">
-                        <X className="w-6 h-6" />
+                    <button onClick={onClose} className="p-2 hover:bg-white/50 bg-white border-2 border-color3 rounded-full absolute -top-4 -right-4 shadow-md transition-all">
+                        <X className="w-5 h-5 text-color5" />
                     </button>
                 </div>
 
@@ -747,7 +747,7 @@ export const AddContentModal: React.FC<AddContentModalProps> = ({
                                     <button
                                         onClick={handleAutoFill}
                                         disabled={!newCard.word || isGenerating || !apiKey}
-                                        className={`px-4 py-3 rounded-xl font-bold flex items-center gap-2 transition-all ${!apiKey ? 'bg-muted text-muted-foreground cursor-not-allowed' : 'bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 dark:bg-purple-900/20 dark:hover:bg-purple-900/40 dark:text-purple-300 dark:border-purple-800'}`}
+                                        className={`px-4 py-3 rounded-xl font-bold flex items-center gap-2 transition-all ${!apiKey ? 'bg-muted text-muted-foreground cursor-not-allowed' : 'bg-color4/20 text-color4 hover:bg-color4 hover:text-color1 border border-color4/30'}`}
                                         title={!apiKey ? "Set API Key in Settings to use AI" : "Auto-fill details with AI"}
                                     >
                                         <Sparkles className={`w-5 h-5 ${isGenerating ? 'animate-spin' : ''}`} />
@@ -760,7 +760,7 @@ export const AddContentModal: React.FC<AddContentModalProps> = ({
                                 <button
                                     onClick={handleSaveNewCard}
                                     disabled={!newCard.word || !newCard.definition || (!targetDeckId && targetDeckId !== 'NEW_DECK') || (targetDeckId === 'NEW_DECK' && !customDeckTitle.trim())}
-                                    className={`px-8 py-3 font-bold rounded-xl shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 ${isAiPopulated ? 'bg-green-600 text-white hover:bg-green-700 hover:scale-[1.02]' : 'bg-gradient-to-r from-primary to-purple-600 text-white hover:shadow-primary/25 hover:scale-[1.02]'}`}
+                                    className={`px-8 py-3 font-bold rounded-xl shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 ${isAiPopulated ? 'bg-color8 text-color5 hover:bg-color8/90 hover:scale-[1.02] border border-color8' : 'bg-color5 text-color1 hover:bg-color5/90 hover:scale-[1.02] border border-color5'}`}
                                 >
                                     {isAiPopulated ? <CheckCircle className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
                                     {isAiPopulated ? 'Accept & Save' : 'Add Flashcard'}
@@ -830,13 +830,13 @@ export const AddContentModal: React.FC<AddContentModalProps> = ({
                             </div>
 
                             <div className="relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-color5 opacity-50" />
                                 <input
                                     type="text"
                                     placeholder="Search library..."
                                     value={searchQuery}
                                     onChange={e => setSearchQuery(e.target.value)}
-                                    className="w-full pl-9 p-2 rounded-lg border border-input bg-background"
+                                    className="w-full pl-9 pr-4 py-2 rounded-xl bg-color1 border-2 border-color2 focus:bg-white focus:border-color4 outline-none transition-all text-color5 font-medium placeholder-color5/50 shadow-sm h-10"
                                 />
                             </div>
 
@@ -878,13 +878,13 @@ export const AddContentModal: React.FC<AddContentModalProps> = ({
                     {actionType === 'existing-deck' && (
                         <div className="space-y-4">
                             <div className="relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-color5 opacity-50" />
                                 <input
                                     type="text"
                                     placeholder="Search decks..."
                                     value={searchQuery}
                                     onChange={e => setSearchQuery(e.target.value)}
-                                    className="w-full pl-9 p-2 rounded-lg border border-input bg-background"
+                                    className="w-full pl-9 pr-4 py-2 rounded-xl bg-color1 border-2 border-color2 focus:bg-white focus:border-color4 outline-none transition-all text-color5 font-medium placeholder-color5/50 shadow-sm h-10"
                                 />
                             </div>
                             <div className="space-y-2">

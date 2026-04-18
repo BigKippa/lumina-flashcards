@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Word } from '../data/vocabulary';
-import { Volume2, Square, Flag } from 'lucide-react';
+import { Volume2, Square, Flag, Info, X } from 'lucide-react';
 
 import { AppSettings } from '../types';
 
@@ -27,6 +27,7 @@ const Flashcard: React.FC<FlashcardProps> = ({ word, isFlipped, onFlip, onReport
     const textStyle = categoryStyle ? { color: categoryStyle.textColor } : {};
 
     const [playingSection, setPlayingSection] = useState<AudioSection>('none');
+    const [showInfo, setShowInfo] = useState<boolean>(false);
     const audioRef = React.useRef<HTMLAudioElement | null>(null);
 
     // Reset audio when card flips
@@ -37,6 +38,7 @@ const Flashcard: React.FC<FlashcardProps> = ({ word, isFlipped, onFlip, onReport
             audioRef.current = null;
         }
         setPlayingSection('none');
+        setShowInfo(false);
     }, [isFlipped, word]);
 
     const playAudio = (text: string, section: AudioSection, rate: number = 0.8) => {
@@ -116,6 +118,43 @@ const Flashcard: React.FC<FlashcardProps> = ({ word, isFlipped, onFlip, onReport
         );
     };
 
+    const renderInfoOverlay = () => {
+        if (!showInfo) return null;
+        return (
+            <div className="absolute inset-0 bg-card/95 backdrop-blur-sm z-40 flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-200" onClick={(e) => e.stopPropagation()}>
+                <button
+                    onClick={(e) => { e.stopPropagation(); setShowInfo(false); }}
+                    className="absolute top-4 right-4 p-2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                    <X className="w-5 h-5" />
+                </button>
+                <h3 className="text-xl font-bold mb-4 text-foreground">Card Information</h3>
+                <div className="space-y-3 text-sm text-muted-foreground w-full max-w-[200px]">
+                    <div className="flex justify-between border-b border-border/50 pb-1">
+                        <span className="font-medium">Creator:</span>
+                        <span>{word.creatorUsername || 'System'}</span>
+                    </div>
+                    <div className="flex justify-between border-b border-border/50 pb-1">
+                        <span className="font-medium">Created:</span>
+                        <span>{word.createdAt ? new Date(word.createdAt).toLocaleDateString() : 'N/A'}</span>
+                    </div>
+                    <div className="flex justify-between border-b border-border/50 pb-1">
+                        <span className="font-medium">Views:</span>
+                        <span>{word.viewCount || 0}</span>
+                    </div>
+                    <div className="flex justify-between border-b border-border/50 pb-1">
+                        <span className="font-medium">Downloads:</span>
+                        <span>{word.downloadCount || 0}</span>
+                    </div>
+                    <div className="flex justify-between pb-1">
+                        <span className="font-medium">Language:</span>
+                        <span>{word.languageCategory || 'General'}</span>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div
             className="group h-72 w-full max-w-md perspective-1000 cursor-pointer relative"
@@ -147,6 +186,18 @@ const Flashcard: React.FC<FlashcardProps> = ({ word, isFlipped, onFlip, onReport
                             <Flag className="w-4 h-4" />
                         </button>
                     )}
+                    
+                    {/* Info Button (Front) */}
+                    <button
+                        onClick={(e) => { e.stopPropagation(); setShowInfo(true); }}
+                        className="absolute top-4 right-4 p-2 text-muted-foreground/50 hover:text-primary transition-colors z-20"
+                        title="View Card Info"
+                    >
+                        <Info className="w-4 h-4" />
+                    </button>
+
+                    {renderInfoOverlay()}
+
                     {/* Background Image if available */}
                     {word.imageUrl && (
                         <div className="absolute inset-0 z-0 opacity-10">
@@ -198,6 +249,17 @@ const Flashcard: React.FC<FlashcardProps> = ({ word, isFlipped, onFlip, onReport
                             <Flag className="w-4 h-4" />
                         </button>
                     )}
+
+                    {/* Info Button (Back) */}
+                    <button
+                        onClick={(e) => { e.stopPropagation(); setShowInfo(true); }}
+                        className="absolute top-4 right-4 p-2 text-muted-foreground/50 hover:text-primary transition-colors z-20"
+                        title="View Card Info"
+                    >
+                        <Info className="w-4 h-4" />
+                    </button>
+
+                    {renderInfoOverlay()}
 
                     <div className="flex-1 flex flex-col items-center justify-center text-center w-full overflow-y-auto custom-scrollbar">
 

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Word } from '../data/vocabulary';
-import { BookOpen, BrainCircuit, X, Clock, Heart } from 'lucide-react';
-
+import { BookOpen, BrainCircuit, X, Clock, Heart, Info } from 'lucide-react';
+import { InfoModal } from './InfoModal';
+import { Deck } from '../types';
 
 interface DeckViewProps {
     cards: Word[];
@@ -12,10 +13,12 @@ interface DeckViewProps {
     isFavorite: boolean;
     onToggleFavorite: () => void;
     onBack: () => void;
+    deck?: Deck;
 }
 
-const DeckView: React.FC<DeckViewProps> = ({ cards: _cards, title, onStartStudy, onStartQuiz, onStartTimedMode, isFavorite, onToggleFavorite, onBack }) => {
+const DeckView: React.FC<DeckViewProps> = ({ cards: _cards, title, onStartStudy, onStartQuiz, onStartTimedMode, isFavorite, onToggleFavorite, onBack, deck }) => {
     const [isQuizOptionsOpen, setIsQuizOptionsOpen] = useState(false);
+    const [showInfo, setShowInfo] = useState(false);
 
     return (
         <div className="flex flex-col items-center w-full max-w-4xl mx-auto p-6 animate-in fade-in duration-700">
@@ -42,6 +45,13 @@ const DeckView: React.FC<DeckViewProps> = ({ cards: _cards, title, onStartStudy,
                             title={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
                         >
                             <Heart className={`w-6 h-6 ${isFavorite ? "fill-current" : ""}`} />
+                        </button>
+                        <button
+                            onClick={() => setShowInfo(true)}
+                            className="p-2 rounded-full text-muted-foreground hover:bg-secondary hover:text-primary transition-all"
+                            title="View Deck Info"
+                        >
+                            <Info className="w-6 h-6" />
                         </button>
                     </div>
                     <p className="text-foreground/80 text-lg max-w-md mx-auto font-medium">
@@ -160,6 +170,26 @@ const DeckView: React.FC<DeckViewProps> = ({ cards: _cards, title, onStartStudy,
             <footer className="mt-16 text-muted-foreground/40 text-sm">
                 v1.1.0 • Built with React & Tailwind
             </footer>
+
+            {deck && (
+                <InfoModal 
+                    isOpen={showInfo} 
+                    onClose={() => setShowInfo(false)} 
+                    title={deck.title} 
+                    creatorUsername={deck.creatorUsername} 
+                    createdAt={deck.createdAt} 
+                    viewCount={deck.viewCount} 
+                    downloadCount={deck.downloadCount} 
+                    languageCategory={deck.languageCategory} 
+                />
+            )}
+            {!deck && (
+                <InfoModal 
+                    isOpen={showInfo} 
+                    onClose={() => setShowInfo(false)} 
+                    title={title || 'Study Session'} 
+                />
+            )}
         </div >
     );
 };

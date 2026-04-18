@@ -106,24 +106,24 @@ export const QuickAddFlashcardsModal: React.FC<QuickAddFlashcardsModalProps> = (
 
     return (
         <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-background/80 backdrop-blur-md animate-in fade-in duration-200">
-            <div className="bg-card w-full max-w-2xl rounded-3xl shadow-2xl border border-border overflow-hidden flex flex-col">
+            <div className="bg-color1 text-color5 w-full max-w-2xl rounded-3xl shadow-2xl border border-border overflow-hidden flex flex-col">
                 {/* Header */}
-                <div className="bg-primary/5 p-6 border-b border-border flex justify-between items-center relative">
-                    <div className="absolute top-0 left-0 h-1 bg-primary transition-all duration-300" style={{ width: step === 1 ? '50%' : '100%' }}></div>
+                <div className="bg-color3 p-6 border-b border-color3 flex justify-between items-center relative shadow-sm">
+                    <div className="absolute top-0 left-0 h-1 bg-color4 transition-all duration-300 shadow-md" style={{ width: step === 1 ? '50%' : '100%' }}></div>
                     <div>
-                        <h2 className="text-2xl font-bold flex items-center gap-2">
+                        <h2 className="text-2xl font-extrabold flex items-center gap-2 text-color5">
                             Quick Add Flashcards
                         </h2>
                         <p className="text-muted-foreground text-sm mt-1">
                             {step === 1 ? 'Step 1: Choose your audience' : `Step 2: Rapidly create flashcards (${cards.length} created)`}
                         </p>
                     </div>
-                    <button onClick={onClose} className="p-2 bg-black/5 hover:bg-black/10 dark:bg-white/5 dark:hover:bg-white/10 rounded-full transition-colors">
-                        <X className="w-5 h-5" />
+                    <button onClick={onClose} className="p-2 hover:bg-white/50 bg-white border-2 border-color3 rounded-full absolute -top-4 -right-4 transition-all shadow-md">
+                        <X className="w-5 h-5 text-color5" />
                     </button>
                 </div>
 
-                <div className="p-6 md:p-8 flex-1 overflow-y-auto">
+                <div className="p-6 md:p-8 flex-1 overflow-y-auto bg-color1/50">
                     {step === 1 && (
                         <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
                             <h3 className="font-bold text-lg mb-4">Who are these flashcards for?</h3>
@@ -131,38 +131,38 @@ export const QuickAddFlashcardsModal: React.FC<QuickAddFlashcardsModalProps> = (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <button 
                                     onClick={() => setAudience('specific_student')}
-                                    className={`p-4 rounded-xl border-2 text-left transition-all ${audience === 'specific_student' ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'}`}
+                                    className={`p-4 rounded-xl border-2 text-left transition-all ${audience === 'specific_student' ? 'border-color6 bg-color6 text-color1 shadow-md scale-[1.02]' : 'border-color6/40 bg-color6/20 hover:border-color6/60 hover:bg-color6/30'}`}
                                 >
-                                    <User className={`w-6 h-6 mb-3 ${audience === 'specific_student' ? 'text-primary' : 'text-muted-foreground'}`} />
-                                    <h4 className="font-bold text-md">A Specific Student</h4>
-                                    <p className="text-xs text-muted-foreground mt-1">Assign directly to one of your current students.</p>
+                                    <User className={`w-6 h-6 mb-3 ${audience === 'specific_student' ? 'text-color1' : 'text-color6'}`} />
+                                    <h4 className={`font-bold text-md ${audience === 'specific_student' ? 'text-color1' : 'text-color5'}`}>A Specific Student</h4>
+                                    <p className={`text-xs mt-1 ${audience === 'specific_student' ? 'text-color1/80' : 'text-color5/70'}`}>Assign directly to one of your current students.</p>
                                 </button>
                                 
                                 <button 
                                     onClick={() => setAudience('new_student')}
-                                    className={`p-4 rounded-xl border-2 text-left transition-all ${audience === 'new_student' ? 'border-green-500 bg-green-500/10' : 'border-border hover:border-green-500/50'}`}
+                                    className={`p-4 rounded-xl border-2 text-left transition-all ${audience === 'new_student' ? 'border-color7 bg-color7 text-color1 shadow-md scale-[1.02]' : 'border-color7/40 bg-color7/20 hover:border-color7/60 hover:bg-color7/30'}`}
                                 >
-                                    <UserPlus className={`w-6 h-6 mb-3 ${audience === 'new_student' ? 'text-green-500' : 'text-muted-foreground'}`} />
-                                    <h4 className="font-bold text-md">New Student</h4>
-                                    <p className="text-xs text-muted-foreground mt-1">Create an onboarding deck for a new student.</p>
+                                    <UserPlus className={`w-6 h-6 mb-3 ${audience === 'new_student' ? 'text-color1' : 'text-color7'}`} />
+                                    <h4 className={`font-bold text-md ${audience === 'new_student' ? 'text-color1' : 'text-color5'}`}>New Student</h4>
+                                    <p className={`text-xs mt-1 ${audience === 'new_student' ? 'text-color1/80' : 'text-color5/70'}`}>Create an onboarding deck for a new student.</p>
                                 </button>
                                 
                                 <button 
                                     onClick={() => setAudience('all_students')}
-                                    className={`p-4 rounded-xl border-2 text-left transition-all ${audience === 'all_students' ? 'border-blue-500 bg-blue-500/10' : 'border-border hover:border-blue-500/50'}`}
+                                    className={`p-4 rounded-xl border-2 text-left transition-all ${audience === 'all_students' ? 'border-color8 bg-color8 text-color1 shadow-md scale-[1.02]' : 'border-color8/40 bg-color8/20 hover:border-color8/60 hover:bg-color8/30'}`}
                                 >
-                                    <Users className={`w-6 h-6 mb-3 ${audience === 'all_students' ? 'text-blue-500' : 'text-muted-foreground'}`} />
-                                    <h4 className="font-bold text-md">All Students</h4>
-                                    <p className="text-xs text-muted-foreground mt-1">Make available to every student you tutor.</p>
+                                    <Users className={`w-6 h-6 mb-3 ${audience === 'all_students' ? 'text-color1' : 'text-color8'}`} />
+                                    <h4 className={`font-bold text-md ${audience === 'all_students' ? 'text-color1' : 'text-color5'}`}>All Students</h4>
+                                    <p className={`text-xs mt-1 ${audience === 'all_students' ? 'text-color1/80' : 'text-color5/70'}`}>Make available to every student you tutor.</p>
                                 </button>
                                 
                                 <button 
                                     onClick={() => setAudience('public')}
-                                    className={`p-4 rounded-xl border-2 text-left transition-all ${audience === 'public' ? 'border-purple-500 bg-purple-500/10' : 'border-border hover:border-purple-500/50'}`}
+                                    className={`p-4 rounded-xl border-2 text-left transition-all ${audience === 'public' ? 'border-color9 bg-color9 text-color5 shadow-md scale-[1.02]' : 'border-color9/40 bg-color9/20 hover:border-color9/60 hover:bg-color9/30'}`}
                                 >
-                                    <Globe className={`w-6 h-6 mb-3 ${audience === 'public' ? 'text-purple-500' : 'text-muted-foreground'}`} />
-                                    <h4 className="font-bold text-md">Publicly Available</h4>
-                                    <p className="text-xs text-muted-foreground mt-1">Add to the global Lumina community library.</p>
+                                    <Globe className={`w-6 h-6 mb-3 ${audience === 'public' ? 'text-color5' : 'text-color9'}`} />
+                                    <h4 className={`font-bold text-md ${audience === 'public' ? 'text-color5' : 'text-color5'}`}>Publicly Available</h4>
+                                    <p className={`text-xs mt-1 ${audience === 'public' ? 'text-color5/80' : 'text-color5/70'}`}>Add to the global Lumina community library.</p>
                                 </button>
                             </div>
 
@@ -264,9 +264,9 @@ export const QuickAddFlashcardsModal: React.FC<QuickAddFlashcardsModalProps> = (
                                     </button>
                                     <button
                                         onClick={handleDone}
-                                        className="flex-1 md:flex-none px-8 py-3 bg-gradient-to-r from-primary to-purple-600 text-white font-bold rounded-xl shadow-lg hover:opacity-90 hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
+                                        className="flex-1 md:flex-none px-8 py-3 bg-color5 text-color1 font-bold rounded-xl shadow-lg hover:bg-color5/90 hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
                                     >
-                                        <CheckCircle className="w-5 h-5" /> Done
+                                        <CheckCircle className="w-5 h-5 text-color1" /> Done
                                     </button>
                                 </div>
                             </div>

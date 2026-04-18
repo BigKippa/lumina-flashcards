@@ -82,7 +82,7 @@ function SortableDashboardTile({ id, children, isCustomizeMode }: { id: string, 
                     <div
                         {...attributes}
                         {...listeners}
-                        className="absolute top-3 right-3 p-2 bg-black/40 hover:bg-black/60 rounded-lg cursor-grab active:cursor-grabbing backdrop-blur-md z-20 text-white shadow-sm transition-colors border border-white/10"
+                        className="absolute top-3 right-3 p-2 bg-black/40 hover:bg-black/60 rounded-lg cursor-grab active:cursor-grabbing backdrop-blur-md z-20 text-color1 shadow-sm transition-colors border border-white/10"
                         title="Drag to reorder"
                     >
                         <Move className="w-5 h-5" />
@@ -612,12 +612,12 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                 {view === 'dashboard' && (
                     <div className="flex flex-col gap-6 max-w-6xl mx-auto mt-6">
                         {/* Tutor Hero Tile */}
-                        <div className="bg-zinc-700 border border-zinc-600 rounded-3xl p-8 flex flex-col md:flex-row gap-8 items-center shadow-md relative overflow-hidden text-zinc-100">
-                            <div className="absolute right-0 top-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+                        <div className="bg-color5 border border-color5/50 rounded-3xl p-8 flex flex-col md:flex-row gap-8 items-center shadow-md relative overflow-hidden text-color1">
+                            <div className="absolute right-0 top-0 w-64 h-64 bg-color1/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
 
                             {/* Profile Info (Left) */}
                             <div className="flex items-center gap-6 relative z-10 w-full md:w-auto md:min-w-[320px] shrink-0">
-                                <div className="w-24 h-24 rounded-2xl bg-primary/20 flex items-center justify-center text-primary shadow-inner border border-primary/20 flex-shrink-0 overflow-hidden">
+                                <div className="w-24 h-24 rounded-2xl bg-color1/20 flex items-center justify-center text-color1 shadow-inner border border-color1/20 flex-shrink-0 overflow-hidden">
                                     {user.avatarUrl ? (
                                         <img src={user.avatarUrl} alt="Tutor avatar" className="w-full h-full object-cover" />
                                     ) : (
@@ -625,13 +625,13 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                     )}
                                 </div>
                                 <div className="flex-1 z-10">
-                                    <h2 className="text-3xl font-bold mb-2 text-white">
+                                    <h2 className="text-3xl font-bold mb-2 text-color1">
                                         {user.preferredName || user.firstName || 'Tutor'} {user.lastName || ''}
                                     </h2>
-                                    <div className="flex flex-col gap-y-1.5 mt-3 text-sm text-zinc-400 font-medium">
-                                        <span className="flex items-center gap-2"><GraduationCap className="w-4 h-4 text-zinc-300" /> <span className="text-zinc-300 pointer-events-none">Professional Tutor</span></span>
+                                    <div className="flex flex-col gap-y-1.5 mt-3 text-sm text-color1/70 font-medium">
+                                        <span className="flex items-center gap-2"><GraduationCap className="w-4 h-4 text-color1" /> <span className="text-color1 pointer-events-none">Professional Tutor</span></span>
                                         <span
-                                            className="flex items-center gap-2 cursor-pointer hover:text-white transition-colors"
+                                            className="flex items-center gap-2 cursor-pointer hover:text-color1 transition-colors"
                                             onClick={() => onNavigateToProfile?.('section-location')}
                                             title="Edit Location"
                                         >
@@ -639,7 +639,7 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                             {user.currentCity ? `${user.currentCity}, ${user.currentCountry}` : (user.currentCountry || 'Location Not Set')}
                                         </span>
                                         <span
-                                            className="flex items-center gap-2 cursor-pointer hover:text-white transition-colors"
+                                            className="flex items-center gap-2 cursor-pointer hover:text-color1 transition-colors"
                                             onClick={() => onNavigateToProfile?.('section-timezone')}
                                             title="Edit Timezone"
                                         >
@@ -647,7 +647,7 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                             {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: user.timeZone || undefined })} ({user.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'Local Time'})
                                         </span>
                                         <span className="flex items-center gap-2">
-                                            <span className="w-4 h-4 flex items-center justify-center text-[10px] bg-zinc-600 rounded-sm border border-zinc-500/50">📅</span>
+                                            <span className="w-4 h-4 flex items-center justify-center text-[10px] bg-color5/50 rounded-sm border border-zinc-500/50">📅</span>
                                             {currentTime.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric', timeZone: user.timeZone || undefined })}
                                         </span>
                                     </div>
@@ -660,22 +660,22 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                 {/* Active Students Widget */}
                                 <div
                                     onClick={() => onViewChange('students')}
-                                    className="bg-blue-500/20 hover:bg-blue-500/30 cursor-pointer transition-colors backdrop-blur-sm border border-blue-500/30 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm"
+                                    className="bg-color4 hover:bg-color4/80 cursor-pointer transition-colors border border-color4/50 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm"
                                 >
-                                    <Users className="w-5 h-5 text-blue-400 mb-2" />
-                                    <span className="text-2xl font-bold text-white">{stats.active}</span>
-                                    <span className="text-xs text-zinc-300 text-center line-clamp-2">Active<br />Students</span>
+                                    <Users className="w-5 h-5 text-color5 mb-2" />
+                                    <span className="text-2xl font-bold text-color1">{stats.active}</span>
+                                    <span className="text-xs text-color1 text-center line-clamp-2">Active<br />Students</span>
                                 </div>
 
                                 {/* Inbox/Pending Widget */}
                                 <div
                                     onClick={() => alert('Messages Navigation - Coming Soon')}
-                                    className="bg-green-500/20 hover:bg-green-500/30 cursor-pointer transition-colors backdrop-blur-sm border border-green-500/30 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm relative"
+                                    className="bg-color2 hover:bg-color2/80 cursor-pointer transition-colors border border-color2/50 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm relative"
                                 >
-                                    <div className="absolute top-3 right-3 w-2.5 h-2.5 bg-red-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.6)]"></div>
-                                    <Bell className="w-5 h-5 text-green-400 mb-2" />
-                                    <span className="text-2xl font-bold text-white">3</span>
-                                    <span className="text-xs text-zinc-300 text-center line-clamp-2">New<br />Messages</span>
+                                    <div className="absolute top-3 right-3 w-2.5 h-2.5 bg-color5 rounded-full animate-pulse shadow-sm border border-color1/20"></div>
+                                    <Bell className="w-5 h-5 text-color5 mb-2" />
+                                    <span className="text-2xl font-bold text-color5">3</span>
+                                    <span className="text-xs text-color5 text-center line-clamp-2 font-medium">New<br />Messages</span>
                                 </div>
 
                                 {/* Add Student Widget */}
@@ -684,19 +684,19 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                         window.scrollTo({ top: 0, behavior: 'smooth' });
                                         setIsAddStudentModalOpen(true);
                                     }}
-                                    className="bg-primary/20 hover:bg-primary/30 cursor-pointer transition-colors backdrop-blur-sm border border-primary/30 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm group"
+                                    className="bg-color3 hover:bg-color3/80 cursor-pointer transition-colors border border-color3/50 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm group"
                                 >
-                                    <Plus className="w-6 h-6 text-primary mb-2 group-hover:scale-110 transition-transform" />
-                                    <span className="text-sm font-bold text-white text-center leading-tight">Add<br />Student</span>
+                                    <Plus className="w-6 h-6 text-color5 mb-2 group-hover:scale-110 transition-transform" />
+                                    <span className="text-sm font-bold text-color5 text-center leading-tight">Add<br />Student</span>
                                 </div>
 
                                 {/* Create Flashcards Widget */}
                                 <div
                                     onClick={() => setIsQuickAddOpen(true)}
-                                    className="bg-amber-500/20 hover:bg-amber-500/30 cursor-pointer transition-colors backdrop-blur-sm border border-amber-500/30 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm group"
+                                    className="bg-color3 hover:bg-color3/30 cursor-pointer transition-colors backdrop-blur-sm border border-amber-500/30 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm group"
                                 >
                                     <Library className="w-6 h-6 text-amber-400 mb-2 group-hover:scale-110 transition-transform" />
-                                    <span className="text-sm font-bold text-white text-center leading-tight">Create<br />Flashcards</span>
+                                    <span className="text-sm font-bold text-color1 text-center leading-tight">Create<br />Flashcards</span>
                                 </div>
                             </div>
                         </div>
@@ -752,10 +752,10 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                                 tileContent = (
                                                     <div
                                                         onClick={() => alert('Quickstart Navigation - Coming Soon')}
-                                                        className="bg-yellow-500/25 hover:bg-yellow-500/30 border border-yellow-500/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full"
+                                                        className="bg-color3 hover:bg-color3/30 border border-color3/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full"
                                                     >
-                                                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-yellow-500/10 rounded-full blur-2xl group-hover:bg-yellow-500/20 transition-colors"></div>
-                                                        <div className="w-12 h-12 rounded-xl bg-yellow-100 text-yellow-600 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-yellow-200 shrink-0">
+                                                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color3 transition-colors"></div>
+                                                        <div className="w-12 h-12 rounded-xl bg-color1 text-color3 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color3/30 shrink-0">
                                                             <Zap className="w-6 h-6" />
                                                         </div>
                                                         <div className="relative z-10 font-medium flex-1">
@@ -769,14 +769,14 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                                 tileContent = (
                                                     <div
                                                         onClick={() => onViewChange('students')}
-                                                        className="bg-blue-500/25 hover:bg-blue-500/30 border border-blue-500/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full"
+                                                        className="bg-color4 hover:bg-color4/30 border border-color4/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full"
                                                     >
-                                                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-colors"></div>
-                                                        <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-blue-200 shrink-0">
+                                                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color4 transition-colors"></div>
+                                                        <div className="w-12 h-12 rounded-xl bg-color1 text-color4 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color4/30 shrink-0">
                                                             <Users className="w-6 h-6" />
                                                         </div>
                                                         <div className="relative z-10 font-medium flex-1">
-                                                            <h2 className="text-xl font-bold mb-1 flex items-center gap-2">Students <span className="bg-blue-100 text-blue-800 text-xs py-0.5 px-2 rounded-full font-bold">{students.length}</span></h2>
+                                                            <h2 className="text-xl font-bold mb-1 flex items-center gap-2">Students <span className="bg-color1 text-color5 text-xs py-0.5 px-2 rounded-full font-bold">{students.length}</span></h2>
                                                             <p className="text-sm text-muted-foreground line-clamp-2">View progress, assign homework, and manage student profiles.</p>
                                                         </div>
                                                     </div>
@@ -786,10 +786,10 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                                 tileContent = (
                                                     <div
                                                         onClick={() => onViewChange('learning-content')}
-                                                        className="bg-green-500/25 hover:bg-green-500/30 border border-green-500/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full"
+                                                        className="bg-color2 hover:bg-color2/30 border border-color2/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full"
                                                     >
-                                                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-green-500/10 rounded-full blur-2xl group-hover:bg-green-500/20 transition-colors"></div>
-                                                        <div className="w-12 h-12 rounded-xl bg-green-100 text-green-600 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-green-200 shrink-0">
+                                                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color2 transition-colors"></div>
+                                                        <div className="w-12 h-12 rounded-xl bg-color1 text-color2 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color2/30 shrink-0">
                                                             <Layout className="w-6 h-6" />
                                                         </div>
                                                         <div className="relative z-10 font-medium flex-1">
@@ -803,15 +803,15 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                                 tileContent = (
                                                     <div
                                                         onClick={() => alert('Messages Navigation - Coming Soon')}
-                                                        className="bg-purple-500/25 hover:bg-purple-500/30 border border-purple-500/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full"
+                                                        className="bg-color5 hover:bg-color5/30 border border-color5/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
                                                     >
-                                                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl group-hover:bg-purple-500/20 transition-colors"></div>
-                                                        <div className="w-12 h-12 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-purple-200 shrink-0">
+                                                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color5 transition-colors"></div>
+                                                        <div className="w-12 h-12 rounded-xl bg-color1 text-color5 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color5/30 shrink-0">
                                                             <MessageSquare className="w-6 h-6" />
                                                         </div>
                                                         <div className="relative z-10 font-medium flex-1">
                                                             <h2 className="text-xl font-bold mb-1">Messages</h2>
-                                                            <p className="text-sm text-muted-foreground line-clamp-2">Communicate directly with your students and review feedback.</p>
+                                                            <p className="text-sm text-color1/70 line-clamp-2">Communicate directly with your students and review feedback.</p>
                                                         </div>
                                                     </div>
                                                 );
@@ -820,10 +820,10 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                                 tileContent = (
                                                     <div
                                                         onClick={() => alert('To-Do List Navigation - Coming Soon')}
-                                                        className="bg-orange-500/25 hover:bg-orange-500/30 border border-orange-500/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full"
+                                                        className="bg-color3 hover:bg-color3/30 border border-color3/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full"
                                                     >
-                                                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-orange-500/10 rounded-full blur-2xl group-hover:bg-orange-500/20 transition-colors"></div>
-                                                        <div className="w-12 h-12 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-orange-200 shrink-0">
+                                                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color3 transition-colors"></div>
+                                                        <div className="w-12 h-12 rounded-xl bg-color1 text-color3 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color3/30 shrink-0">
                                                             <CheckSquare className="w-6 h-6" />
                                                         </div>
                                                         <div className="relative z-10 font-medium flex-1">
@@ -867,9 +867,9 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                             </div>
                             <button
                                 onClick={() => setIsDiagnosticsModalOpen(true)}
-                                className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 dark:bg-indigo-900/20 dark:text-indigo-300 dark:border-indigo-800 rounded-lg text-sm font-bold shadow-sm transition-colors"
+                                className="flex items-center gap-2 px-4 py-2 bg-color3 text-color5 font-bold rounded-xl shadow-sm hover:bg-color3/80 transition-all text-sm"
                             >
-                                <Search className="w-4 h-4" /> Library Diagnostics
+                                <AlertTriangle className="w-4 h-4" /> Scan Library for Problems
                             </button>
                         </div>
 
@@ -878,10 +878,10 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                             {/* Manage Flashcards Tile */}
                             <div
                                 onClick={() => onViewChange('manage-flashcards')}
-                                className="bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden"
+                                className="bg-color4 hover:bg-color4/30 border border-color4/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden"
                             >
-                                <div className="absolute -right-6 -top-6 w-24 h-24 bg-sky-500/10 rounded-full blur-2xl group-hover:bg-sky-500/20 transition-colors"></div>
-                                <div className="w-12 h-12 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-sky-200">
+                                <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color4 transition-colors"></div>
+                                <div className="w-12 h-12 rounded-xl bg-color1 text-color4 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color4/30">
                                     <Library className="w-6 h-6" />
                                 </div>
                                 <div className="relative z-10 font-medium">
@@ -893,25 +893,25 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                             {/* Manage Decks Tile */}
                             <div
                                 onClick={() => onViewChange('flashcards')}
-                                className="bg-indigo-500/20 hover:bg-indigo-500/30 border border-indigo-500/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden"
+                                className="bg-color5 hover:bg-color5/30 border border-color5/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden text-color1"
                             >
-                                <div className="absolute -right-6 -top-6 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl group-hover:bg-indigo-500/20 transition-colors"></div>
-                                <div className="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-indigo-200">
+                                <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color5 transition-colors"></div>
+                                <div className="w-12 h-12 rounded-xl bg-color1 text-color5 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color5/30">
                                     <Layout className="w-6 h-6" />
                                 </div>
                                 <div className="relative z-10 font-medium">
                                     <h2 className="text-xl font-bold mb-1">Manage Decks</h2>
-                                    <p className="text-sm text-muted-foreground line-clamp-2">Organize your flashcards into structured learning decks.</p>
+                                    <p className="text-sm text-color1/70 line-clamp-2">Organize your flashcards into structured learning decks.</p>
                                 </div>
                             </div>
 
                             {/* Create New Tile */}
                             <div
                                 onClick={() => setIsManageContentOpen(true)}
-                                className="bg-green-500/20 hover:bg-green-500/30 border border-green-500/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden"
+                                className="bg-color2 hover:bg-color2/30 border border-color2/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden"
                             >
-                                <div className="absolute -right-6 -top-6 w-24 h-24 bg-green-500/10 rounded-full blur-2xl group-hover:bg-green-500/20 transition-colors"></div>
-                                <div className="w-12 h-12 rounded-xl bg-green-100 text-green-600 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-green-200">
+                                <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color2 transition-colors"></div>
+                                <div className="w-12 h-12 rounded-xl bg-color1 text-color2 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color2/30">
                                     <Plus className="w-6 h-6" />
                                 </div>
                                 <div className="relative z-10 font-medium">
@@ -923,10 +923,10 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                             {/* Browse for New Tile */}
                             <div
                                 onClick={() => alert('Browse Content Navigation - Coming Soon')}
-                                className="bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden"
+                                className="bg-color3 hover:bg-color3/30 border border-color3/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden"
                             >
-                                <div className="absolute -right-6 -top-6 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl group-hover:bg-amber-500/20 transition-colors"></div>
-                                <div className="w-12 h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-amber-200">
+                                <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color3 transition-colors"></div>
+                                <div className="w-12 h-12 rounded-xl bg-color1 text-color3 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color3/30">
                                     <Search className="w-6 h-6" />
                                 </div>
                                 <div className="relative z-10 font-medium">
@@ -938,15 +938,15 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                             {/* Student Requests Tile */}
                             <div
                                 onClick={() => alert('Student Requests Navigation - Coming Soon')}
-                                className="bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden"
+                                className="bg-color5 hover:bg-color5/30 border border-color5/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden text-color1"
                             >
-                                <div className="absolute -right-6 -top-6 w-24 h-24 bg-rose-500/10 rounded-full blur-2xl group-hover:bg-rose-500/20 transition-colors"></div>
-                                <div className="w-12 h-12 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-rose-200">
+                                <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color5 transition-colors"></div>
+                                <div className="w-12 h-12 rounded-xl bg-color1 text-color5 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color5/30">
                                     <Users className="w-6 h-6" />
                                 </div>
                                 <div className="relative z-10 font-medium">
                                     <h2 className="text-xl font-bold mb-1 flex items-center gap-2">Student Requests</h2>
-                                    <p className="text-sm text-muted-foreground line-clamp-2">Review topic and deck requests submitted by your students.</p>
+                                    <p className="text-sm text-color1/70 line-clamp-2">Review topic and deck requests submitted by your students.</p>
                                 </div>
                             </div>
                         </div>
@@ -975,13 +975,13 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
 
                             {/* Search */}
                             <div className="relative w-full md:w-96">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-color5 opacity-50" />
                                 <input
                                     type="text"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     placeholder="Search by name, language, country..."
-                                    className="w-full pl-9 pr-4 py-2 rounded-lg border border-input bg-background focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                                    className="w-full pl-9 pr-4 py-2 rounded-xl bg-color1 border-2 border-color2 focus:bg-white focus:border-color4 outline-none transition-all text-color5 font-medium placeholder-color5/50 shadow-sm h-10"
                                 />
                             </div>
 
@@ -1010,16 +1010,16 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                 </div>
 
                                 {/* Active/Archived Tabs (Toggle) */}
-                                <div className="flex bg-secondary/50 p-1 rounded-lg gap-1">
+                                <div className="flex gap-2 shrink-0">
                                     <button
                                         onClick={() => setActiveTab('active')}
-                                        className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${activeTab === 'active' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                                        className={`px-4 py-2 h-10 rounded-xl text-sm font-bold transition-all border-2 ${activeTab === 'active' ? 'bg-color4 text-color1 border-color4 shadow-sm' : 'bg-color2/30 text-color5 border-color2 hover:bg-color2/50'}`}
                                     >
                                         Active
                                     </button>
                                     <button
                                         onClick={() => setActiveTab('archived')}
-                                        className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${activeTab === 'archived' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                                        className={`px-4 py-2 h-10 rounded-xl text-sm font-bold transition-all border-2 ${activeTab === 'archived' ? 'bg-color4 text-color1 border-color4 shadow-sm' : 'bg-color2/30 text-color5 border-color2 hover:bg-color2/50'}`}
                                     >
                                         Archived
                                     </button>
@@ -1079,7 +1079,7 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                                     </div>
                                                     <div className="flex flex-col items-end gap-2">
                                                         <div className="flex items-center gap-2">
-                                                            <span className={`px-3 py-1 rounded-full text-xs uppercase font-extrabold tracking-widest shadow-sm ${student.status === 'active' ? 'bg-emerald-500 text-white' : 'bg-zinc-200 text-zinc-500'} `}>
+                                                            <span className={`px-3 py-1 rounded-full text-xs uppercase font-extrabold tracking-widest shadow-sm ${student.status === 'active' ? 'bg-emerald-500 text-color1' : 'bg-color1 text-color5/70'} `}>
                                                                 {student.status}
                                                             </span>
                                                             <button 
@@ -1197,7 +1197,7 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                             <div className={`p-3 ${color.iconBg} rounded-lg ${color.iconText}`}>
                                                 <Layout className="w-6 h-6" />
                                             </div>
-                                            <span className={`px - 2 py - 1 rounded text - xs font - bold uppercase ${deck.status === 'public' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'} `}>
+                                            <span className={`px - 2 py - 1 rounded text - xs font - bold uppercase ${deck.status === 'public' ? 'bg-color1 text-green-700' : 'bg-gray-100 text-gray-600'} `}>
                                                 {deck.status || 'private'}
                                             </span>
                                         </div>
@@ -1241,14 +1241,14 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
 
                         {/* Alert Notification Bar */}
                         {missingDataCount > 0 && (
-                            <div className={`border rounded-xl p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm transition-colors ${showMissingOnly ? 'bg-amber-100 border-amber-300 dark:bg-amber-900/40 dark:border-amber-700' : 'bg-amber-50 border-amber-200 dark:bg-amber-900/10 dark:border-amber-800/30 hover:bg-amber-100 dark:hover:bg-amber-900/20'}`}>
+                            <div className={`border rounded-xl p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm transition-colors ${showMissingOnly ? 'bg-color1 border-amber-300 dark:bg-amber-900/40 dark:border-amber-700' : 'bg-amber-50 border-color3/30 dark:bg-amber-900/10 dark:border-amber-800/30 hover:bg-color1 dark:hover:bg-amber-900/20'}`}>
                                 <div className="flex items-center gap-3">
                                     <div className={`p-2 rounded-lg shrink-0 ${showMissingOnly ? 'bg-amber-300 text-amber-900 dark:bg-amber-700 dark:text-amber-100' : 'bg-amber-200 text-amber-800 dark:bg-amber-800 dark:text-amber-200'}`}>
                                         <AlertTriangle className="w-5 h-5" />
                                     </div>
                                     <div>
-                                        <h3 className="font-bold text-black dark:text-white">Attention Required</h3>
-                                        <p className="text-sm font-medium text-black/80 dark:text-white/80">
+                                        <h3 className="font-bold text-black dark:text-color1">Attention Required</h3>
+                                        <p className="text-sm font-medium text-black/80 dark:text-color1/80">
                                             {missingDataCount} flashcard{missingDataCount === 1 ? '' : 's'} {missingDataCount === 1 ? 'is' : 'are'} missing field data.
                                         </p>
                                     </div>
@@ -1256,7 +1256,7 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                 <div className="flex gap-2 shrink-0">
                                     <button
                                         onClick={() => setShowMissingOnly(!showMissingOnly)}
-                                        className={`px-4 py-2 text-sm font-bold rounded-lg transition-colors whitespace-nowrap shrink-0 ${showMissingOnly ? 'bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200' : 'bg-white text-slate-900 border border-slate-300 shadow-sm hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100 dark:hover:bg-slate-700'}`}
+                                        className={`px-4 py-2 text-sm font-bold rounded-xl transition-all shadow-sm whitespace-nowrap shrink-0 border-2 ${showMissingOnly ? 'bg-color4 text-color1 border-color4 hover:bg-color4/90' : 'bg-color2/30 text-color5 border-color2 hover:bg-color2/50'}`}
                                     >
                                         {showMissingOnly ? 'Show All Cards' : 'View Alerts'}
                                     </button>
@@ -1266,7 +1266,7 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                             setPendingAiResolveCards(missing);
                                             setOriginalAiResolveTotal(missing.length);
                                         }}
-                                        className="px-4 py-2 text-sm font-bold rounded-lg transition-colors whitespace-nowrap shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2"
+                                        className="px-4 py-2 text-sm font-bold rounded-xl transition-all whitespace-nowrap shrink-0 bg-color3 text-color5 hover:bg-color3/80 shadow-sm flex items-center gap-2"
                                     >
                                         <Sparkles className="w-4 h-4" /> Auto-Resolve with A.I.
                                     </button>
@@ -1278,23 +1278,31 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full mb-2">
                             {/* Search */}
                             <div className="relative w-full sm:max-w-md flex-shrink-0">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground opacity-50" />
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-color5 opacity-50" />
                                 <input
                                     type="text"
                                     value={flashcardSearchQuery}
                                     onChange={(e) => setFlashcardSearchQuery(e.target.value)}
                                     placeholder="Search library..."
-                                    className="w-full h-10 pl-9 pr-4 py-2 rounded-lg border border-input bg-background/50 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-shadow shadow-sm hover:border-input/80"
+                                    className="w-full pl-9 pr-4 py-2 rounded-xl bg-color1 border-2 border-color2 focus:bg-white focus:border-color4 outline-none transition-all text-color5 font-medium placeholder-color5/50 shadow-sm h-10"
                                 />
                             </div>
 
-                            <button
-                                onClick={() => setShowArchivedCards(!showArchivedCards)}
-                                className={`flex items-center gap-2 px-3 py-2 h-10 text-sm font-medium rounded-lg transition-colors border shadow-sm shrink-0 whitespace-nowrap ${showArchivedCards ? 'bg-amber-100 text-amber-700 border-amber-200 hover:bg-amber-200' : 'bg-background hover:bg-secondary text-foreground'}`}
-                            >
-                                <Archive className="w-4 h-4" />
-                                {showArchivedCards ? 'Hide Archived' : 'Show Archived'}
-                            </button>
+                            <div className="flex items-center gap-2 shrink-0">
+                                <button 
+                                    onClick={() => setIsDiagnosticsModalOpen(true)}
+                                    className="flex items-center gap-2 px-4 py-2 h-10 bg-color3 text-color5 font-bold rounded-xl shadow-sm hover:bg-color3/80 transition-all text-sm shrink-0 whitespace-nowrap"
+                                >
+                                    <AlertTriangle className="w-4 h-4" /> Scan Library for Problems
+                                </button>
+                                <button
+                                    onClick={() => setShowArchivedCards(!showArchivedCards)}
+                                    className={`flex items-center gap-2 px-4 py-2 h-10 text-sm font-bold rounded-xl shadow-sm transition-all border-2 shrink-0 whitespace-nowrap ${showArchivedCards ? 'bg-color4 text-color1 border-color4 hover:bg-color4/90' : 'bg-color2/30 text-color5 border-color2 hover:bg-color2/50'}`}
+                                >
+                                    <Archive className="w-4 h-4" />
+                                    {showArchivedCards ? 'Hide Archived' : 'Show Archived'}
+                                </button>
+                            </div>
                         </div>
                         
                         {selectedCardIds.size > 0 && (
@@ -1316,7 +1324,7 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                                 setSelectedCardIds(new Set());
                                             }
                                         }}
-                                        className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-amber-600 bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors border border-amber-200"
+                                        className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-color3 bg-amber-50 hover:bg-color1 rounded-lg transition-colors border border-color3/30"
                                     >
                                         <Archive className="w-4 h-4" />
                                         Archive
@@ -1451,7 +1459,7 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                                                 onClick={(e) => e.stopPropagation()}
                                                             />
                                                         </td>
-                                                        <td className={`py-3 px-4 font-bold max-w-[200px] ${index % 2 !== 0 ? 'text-white' : 'text-primary'}`}>
+                                                        <td className={`py-3 px-4 font-bold max-w-[200px] ${index % 2 !== 0 ? 'text-color1' : 'text-primary'}`}>
                                                             <div className="flex items-center gap-2">
                                                                 {isMissingData && (
                                                                     <div title="Missing field data. Edit card to resolve." className="shrink-0">
@@ -1461,7 +1469,7 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                                                 <span className="truncate" title={card.word}>{card.word}</span>
                                                             </div>
                                                         </td>
-                                                        <td className={`py-3 px-4 truncate max-w-[200px] hidden sm:table-cell ${index % 2 !== 0 ? 'text-white' : 'text-muted-foreground'}`} title={card.definition}>
+                                                        <td className={`py-3 px-4 truncate max-w-[200px] hidden sm:table-cell ${index % 2 !== 0 ? 'text-color1' : 'text-muted-foreground'}`} title={card.definition}>
                                                             {card.definition}
                                                         </td>
                                                         <td className="py-3 px-4">
@@ -1469,7 +1477,7 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                                                 {card.category || 'Uncategorized'}
                                                             </span>
                                                         </td>
-                                                        <td className={`py-3 px-4 truncate max-w-[150px] hidden md:table-cell ${index % 2 !== 0 ? 'text-white' : 'text-muted-foreground'}`} title={card.deckTitle}>
+                                                        <td className={`py-3 px-4 truncate max-w-[150px] hidden md:table-cell ${index % 2 !== 0 ? 'text-color1' : 'text-muted-foreground'}`} title={card.deckTitle}>
                                                             {card.deckTitle}
                                                         </td>
                                                         <td className="py-3 px-4">
@@ -1479,14 +1487,14 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                                                         <button
                                                                             key={student.id}
                                                                             onClick={() => setSelectedStudentId(student.id)}
-                                                                            className="px-2 py-0.5 bg-blue-100 text-blue-700 hover:bg-blue-200 hover:text-blue-800 rounded text-xs font-medium transition-colors"
+                                                                            className="px-2 py-0.5 bg-color1 text-blue-700 hover:bg-blue-200 hover:text-color5 rounded text-xs font-medium transition-colors"
                                                                         >
                                                                             {student.name}
                                                                         </button>
                                                                     ))}
                                                                 </div>
                                                             ) : (
-                                                                <span className={`italic text-xs ${index % 2 !== 0 ? 'text-white' : 'text-muted-foreground'}`}>Unassigned</span>
+                                                                <span className={`italic text-xs ${index % 2 !== 0 ? 'text-color1' : 'text-muted-foreground'}`}>Unassigned</span>
                                                             )}
                                                         </td>
                                                         <td className="py-3 px-4 text-right">
@@ -1497,14 +1505,14 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                                                         setPreviewCard(card);
                                                                         setIsPreviewFlipped(false);
                                                                     }}
-                                                                    className={`p-1.5 rounded hover:bg-muted transition-colors ${index % 2 !== 0 ? 'text-white hover:text-white/80' : 'text-muted-foreground hover:text-secondary-foreground'}`}
+                                                                    className={`p-1.5 rounded hover:bg-muted transition-colors ${index % 2 !== 0 ? 'text-color1 hover:text-color1/80' : 'text-muted-foreground hover:text-secondary-foreground'}`}
                                                                     title="View as Flashcard"
                                                                 >
                                                                     <Eye className="w-4 h-4" />
                                                                 </button>
                                                                 <button
                                                                     onClick={(e) => { e.stopPropagation(); setEditingCard(card); }}
-                                                                    className={`p-1.5 rounded hover:bg-muted transition-colors ${index % 2 !== 0 ? 'text-white hover:text-white/80' : 'text-muted-foreground hover:text-primary'}`}
+                                                                    className={`p-1.5 rounded hover:bg-muted transition-colors ${index % 2 !== 0 ? 'text-color1 hover:text-color1/80' : 'text-muted-foreground hover:text-primary'}`}
                                                                     title="Edit Flashcard"
                                                                 >
                                                                     <Pencil className="w-4 h-4" />
@@ -1516,7 +1524,7 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                                                             onDeleteCard(String(card.id));
                                                                         }
                                                                     }}
-                                                                    className={`p-1.5 rounded hover:bg-red-100 transition-colors ${index % 2 !== 0 ? 'text-white hover:text-red-500' : 'text-muted-foreground hover:text-red-500'}`}
+                                                                    className={`p-1.5 rounded hover:bg-red-100 transition-colors ${index % 2 !== 0 ? 'text-color1 hover:text-red-500' : 'text-muted-foreground hover:text-red-500'}`}
                                                                     title="Delete Flashcard"
                                                                 >
                                                                     <Trash2 className="w-4 h-4" />
@@ -1587,7 +1595,7 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                         setQuickAddAiQueue(missing);
                                     }}
                                     disabled={pendingQuickAddCards.length === 0 || !apiKey}
-                                    className={`px-4 py-2 font-bold rounded-xl transition-all shadow-sm flex items-center gap-2 ${!apiKey ? 'bg-muted text-muted-foreground cursor-not-allowed' : 'bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 dark:bg-purple-900/20 dark:text-purple-300 dark:border-purple-800 dark:hover:bg-purple-900/40'}`}
+                                    className={`px-4 py-2 font-bold rounded-xl transition-all shadow-sm flex items-center gap-2 ${!apiKey ? 'bg-muted text-muted-foreground cursor-not-allowed' : 'bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20'}`}
                                     title={!apiKey ? "Set API Key in Settings to use AI" : "Auto-fill missing fields via AI"}
                                 >
                                     <Sparkles className="w-5 h-5" /> Fill Missing Fields with A.I.

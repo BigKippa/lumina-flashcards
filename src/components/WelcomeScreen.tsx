@@ -63,7 +63,7 @@ function SortableDashboardTile({ id, children, isCustomizeMode }: { id: string, 
                     <div
                         {...attributes}
                         {...listeners}
-                        className="absolute top-3 right-3 p-2 bg-black/40 hover:bg-black/60 rounded-lg cursor-grab active:cursor-grabbing backdrop-blur-md z-20 text-white shadow-sm transition-colors border border-white/10"
+                        className="absolute top-3 right-3 p-2 bg-black/40 hover:bg-black/60 rounded-lg cursor-grab active:cursor-grabbing backdrop-blur-md z-20 text-color1 shadow-sm transition-colors border border-white/10"
                         title="Drag to reorder"
                     >
                         <Move className="w-5 h-5" />
@@ -140,15 +140,15 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, lastSession,
                 return (
                     <div
                         onClick={() => onNavigate('topic-selection', null)}
-                        className="bg-blue-500/25 hover:bg-blue-500/30 border border-blue-500/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full"
+                        className="bg-color4 hover:bg-color4/30 border border-color4/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
                     >
-                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-colors"></div>
-                        <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-blue-200 shrink-0">
+                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color4 transition-colors"></div>
+                        <div className="w-12 h-12 rounded-xl bg-color1 text-color4 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
                             <BookOpen className="w-6 h-6" />
                         </div>
                         <div className="relative z-10 font-medium flex-1">
                             <h2 className="text-xl font-bold mb-1">{t('welcome.study', 'Study Topics')}</h2>
-                            <p className="text-sm text-muted-foreground line-clamp-2">{t('welcome.studyDesc', 'Explore vocabulary, grammar, reading comprehension, and more.')}</p>
+                            <p className="text-sm text-color1/80 line-clamp-2">{t('welcome.studyDesc', 'Explore vocabulary, grammar, reading comprehension, and more.')}</p>
                         </div>
                     </div>
                 );
@@ -156,24 +156,24 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, lastSession,
                 return (
                     <div
                         onClick={() => onNavigate('admin', null)}
-                        className="bg-purple-500/25 hover:bg-purple-500/30 border border-purple-500/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full"
+                        className="bg-color4 hover:bg-color4/30 border border-color4/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
                     >
-                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl group-hover:bg-purple-500/20 transition-colors"></div>
-                        <div className="w-12 h-12 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-purple-200 shrink-0">
+                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color4 transition-colors"></div>
+                        <div className="w-12 h-12 rounded-xl bg-color1 text-color4 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
                             <Sparkles className="w-6 h-6" />
                         </div>
                         <div className="relative z-10 font-medium flex-1">
                             <h2 className="text-xl font-bold mb-1">{t('welcome.manageFlashcards', 'Manage Flashcards')}</h2>
-                            <p className="text-sm text-muted-foreground line-clamp-2">{t('welcome.manageFlashcardsDesc', 'Create, edit, and use AI to generate cards.')}</p>
+                            <p className="text-sm text-color1/80 line-clamp-2">{t('welcome.manageFlashcardsDesc', 'Create, edit, and use AI to generate cards.')}</p>
                         </div>
                     </div>
                 );
             case 'favorites':
                 return (
-                    <div className="bg-rose-500/20 border border-rose-500/20 rounded-2xl p-6 flex flex-col gap-4 shadow-sm relative overflow-hidden h-full">
-                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-rose-500/10 rounded-full blur-2xl transition-colors"></div>
+                    <div className="bg-color5 border border-color5/20 rounded-2xl p-6 flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1">
+                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl transition-colors"></div>
                         <div className="flex items-center gap-3 relative z-10 shrink-0">
-                            <div className="w-12 h-12 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center shadow-sm border border-rose-200">
+                            <div className="w-12 h-12 rounded-xl bg-color1 text-color5 flex items-center justify-center shadow-sm border border-color5">
                                 <Heart className="w-6 h-6" />
                             </div>
                             <h2 className="text-xl font-bold">Favorites</h2>
@@ -184,14 +184,14 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, lastSession,
                                     <button
                                         key={fav.id}
                                         onClick={() => onSelectFavorite(fav)}
-                                        className="w-full text-left truncate text-sm px-3 py-2 bg-background/50 hover:bg-background/80 border border-border/50 rounded-lg transition-colors flex items-center gap-2"
+                                        className="w-full text-left truncate text-sm px-3 py-2 bg-color5/50 hover:bg-color5 border border-color1/20 rounded-lg transition-colors flex items-center gap-2"
                                     >
                                         <span className="opacity-70 shrink-0">{fav.type === 'mode' ? <Clock className="w-4 h-4" /> : <BookOpen className="w-4 h-4" />}</span>
                                         <span className="truncate">{fav.label}</span>
                                     </button>
                                 ))
                             ) : (
-                                <p className="text-sm text-muted-foreground mt-2">No favorites saved yet.</p>
+                                <p className="text-sm text-color1/70 mt-2">No favorites saved yet.</p>
                             )}
                         </div>
                     </div>
@@ -200,15 +200,15 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, lastSession,
                 return (
                     <div
                         onClick={() => alert('Search Library Navigation - Coming Soon')}
-                        className="bg-cyan-500/25 hover:bg-cyan-500/30 border border-cyan-500/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full"
+                        className="bg-color4 hover:bg-color4/30 border border-color4/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
                     >
-                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl group-hover:bg-cyan-500/20 transition-colors"></div>
-                        <div className="w-12 h-12 rounded-xl bg-cyan-100 text-cyan-600 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-cyan-200 shrink-0">
+                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color4 transition-colors"></div>
+                        <div className="w-12 h-12 rounded-xl bg-color1 text-color4 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
                             <Library className="w-6 h-6" />
                         </div>
                         <div className="relative z-10 font-medium flex-1">
                             <h2 className="text-xl font-bold mb-1">Search Library</h2>
-                            <p className="text-sm text-muted-foreground line-clamp-2">Browse community flashcards and decks to add to your collection.</p>
+                            <p className="text-sm text-color1/80 line-clamp-2">Browse community flashcards and decks to add to your collection.</p>
                         </div>
                     </div>
                 );
@@ -216,15 +216,15 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, lastSession,
                 return (
                     <div
                         onClick={() => alert('Messages Navigation - Coming Soon')}
-                        className="bg-green-500/25 hover:bg-green-500/30 border border-green-500/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full"
+                        className="bg-color2 hover:bg-color2/30 border border-color2/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
                     >
-                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-green-500/10 rounded-full blur-2xl group-hover:bg-green-500/20 transition-colors"></div>
-                        <div className="w-12 h-12 rounded-xl bg-green-100 text-green-600 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-green-200 shrink-0">
+                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color2 transition-colors"></div>
+                        <div className="w-12 h-12 rounded-xl bg-color1 text-color2 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
                             <MessageSquare className="w-6 h-6" />
                         </div>
                         <div className="relative z-10 font-medium flex-1">
                             <h2 className="text-xl font-bold mb-1">Messages</h2>
-                            <p className="text-sm text-muted-foreground line-clamp-2">Communicate with your tutors and review feedback.</p>
+                            <p className="text-sm text-color1/80 line-clamp-2">Communicate with your tutors and review feedback.</p>
                         </div>
                     </div>
                 );
@@ -232,15 +232,15 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, lastSession,
                 return (
                     <div
                         onClick={() => alert('Assignments Navigation - Coming Soon')}
-                        className="bg-orange-500/25 hover:bg-orange-500/30 border border-orange-500/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full"
+                        className="bg-color3 hover:bg-color3/30 border border-color3/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
                     >
-                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-orange-500/10 rounded-full blur-2xl group-hover:bg-orange-500/20 transition-colors"></div>
-                        <div className="w-12 h-12 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-orange-200 shrink-0">
+                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color3 transition-colors"></div>
+                        <div className="w-12 h-12 rounded-xl bg-color1 text-color3 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
                             <CheckSquare className="w-6 h-6" />
                         </div>
                         <div className="relative z-10 font-medium flex-1">
                             <h2 className="text-xl font-bold mb-1">Assignments</h2>
-                            <p className="text-sm text-muted-foreground line-clamp-2">Track homework, upcoming tests, and administrative tasks.</p>
+                            <p className="text-sm text-color1/80 line-clamp-2">Track homework, upcoming tests, and administrative tasks.</p>
                         </div>
                     </div>
                 );
@@ -255,7 +255,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, lastSession,
                 <div className="flex flex-col gap-6 max-w-6xl mx-auto mt-6">
                     
                     {/* Student Hero Tile */}
-                    <div className="bg-zinc-700 border border-zinc-600 rounded-3xl p-8 flex flex-col md:flex-row gap-8 items-center shadow-md relative overflow-hidden text-zinc-100">
+                    <div className="bg-color5 border border-color5/50 rounded-3xl p-8 flex flex-col md:flex-row gap-8 items-center shadow-md relative overflow-hidden text-color1">
                         <div className="absolute right-0 top-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
 
                         {/* Profile Info (Left) */}
@@ -268,21 +268,21 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, lastSession,
                                 )}
                             </div>
                             <div className="flex-1 z-10">
-                                <h2 className="text-3xl font-bold mb-2 text-white">
-                                    {t(`welcome.greeting.${timeOfDay}`)}, <span className="text-white">{user.preferredName || user.firstName || user.username}</span>
+                                <h2 className="text-3xl font-bold mb-2 text-color1">
+                                    {t(`welcome.greeting.${timeOfDay}`)}, <span className="text-color1">{user.preferredName || user.firstName || user.username}</span>
                                 </h2>
-                                <div className="flex flex-col gap-y-1.5 mt-3 text-sm text-zinc-400 font-medium">
-                                    <span className="flex items-center gap-2"><BookOpen className="w-4 h-4 text-zinc-300" /> <span className="text-zinc-300 pointer-events-none">Language Student</span></span>
-                                    <span className="flex items-center gap-2 hover:text-white transition-colors">
+                                <div className="flex flex-col gap-y-1.5 mt-3 text-sm text-color1/70 font-medium">
+                                    <span className="flex items-center gap-2"><BookOpen className="w-4 h-4 text-color1" /> <span className="text-color1 pointer-events-none">Language Student</span></span>
+                                    <span className="flex items-center gap-2 hover:text-color1 transition-colors">
                                         <MapPin className="w-4 h-4" />
                                         {user.currentCity ? `${user.currentCity}, ${user.currentCountry}` : (user.currentCountry || 'Location Not Set')}
                                     </span>
-                                    <span className="flex items-center gap-2 hover:text-white transition-colors">
+                                    <span className="flex items-center gap-2 hover:text-color1 transition-colors">
                                         <Clock className="w-4 h-4" />
                                         {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: user.timeZone || undefined })} ({user.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'Local Time'})
                                     </span>
                                     <span className="flex items-center gap-2">
-                                        <span className="w-4 h-4 flex items-center justify-center text-[10px] bg-zinc-600 rounded-sm border border-zinc-500/50">📅</span>
+                                        <span className="w-4 h-4 flex items-center justify-center text-[10px] bg-color5/50 rounded-sm border border-zinc-500/50">📅</span>
                                         {currentTime.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric', timeZone: user.timeZone || undefined })}
                                     </span>
                                 </div>
@@ -294,38 +294,38 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, lastSession,
                             {/* Active Decks Widget */}
                             <div
                                 onClick={() => onNavigate('topic-selection', null)}
-                                className="bg-blue-500/20 hover:bg-blue-500/30 cursor-pointer transition-colors backdrop-blur-sm border border-blue-500/30 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm"
+                                className="bg-color4 hover:bg-color4/30 cursor-pointer transition-colors backdrop-blur-sm border border-color4/30 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm"
                             >
-                                <BookOpen className="w-5 h-5 text-blue-400 mb-2" />
-                                <span className="text-2xl font-bold text-white">{user.activeDeckIds?.length || 0}</span>
-                                <span className="text-xs text-zinc-300 text-center line-clamp-2">Active<br />Decks</span>
+                                <BookOpen className="w-5 h-5 text-color4 mb-2" />
+                                <span className="text-2xl font-bold text-color1">{user.activeDeckIds?.length || 0}</span>
+                                <span className="text-xs text-color1 text-center line-clamp-2">Active<br />Decks</span>
                             </div>
 
                             {/* Inbox/Pending Widget */}
                             <div
                                 onClick={() => alert('Messages Navigation - Coming Soon')}
-                                className="bg-green-500/20 hover:bg-green-500/30 cursor-pointer transition-colors backdrop-blur-sm border border-green-500/30 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm relative group"
+                                className="bg-color2 hover:bg-color2/30 cursor-pointer transition-colors backdrop-blur-sm border border-color2/30 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm relative group"
                             >
-                                <div className="absolute top-3 right-3 w-2.5 h-2.5 bg-red-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.6)]"></div>
-                                <Bell className="w-5 h-5 text-green-400 mb-2 group-hover:scale-110 transition-transform" />
-                                <span className="text-2xl font-bold text-white">1</span>
-                                <span className="text-xs text-zinc-300 text-center line-clamp-2">New<br />Messages</span>
+                                <div className="absolute top-3 right-3 w-2.5 h-2.5 bg-color5 rounded-full animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.6)]"></div>
+                                <Bell className="w-5 h-5 text-color2 mb-2 group-hover:scale-110 transition-transform" />
+                                <span className="text-2xl font-bold text-color1">1</span>
+                                <span className="text-xs text-color1 text-center line-clamp-2">New<br />Messages</span>
                             </div>
 
                             {/* Quick Start Widget */}
                             {lastSession ? (
                                 <div
                                     onClick={onQuickStart}
-                                    className="bg-orange-500/20 hover:bg-orange-500/30 cursor-pointer transition-colors backdrop-blur-sm border border-orange-500/30 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm group"
+                                    className="bg-color3 hover:bg-color3/30 cursor-pointer transition-colors backdrop-blur-sm border border-color3/30 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm group"
                                     title={`Resume ${lastSession.label}`}
                                 >
-                                    <Clock className="w-6 h-6 text-orange-400 mb-2 group-hover:scale-110 transition-transform" />
-                                    <span className="text-sm font-bold text-white text-center leading-tight">Quick<br />Start</span>
+                                    <Clock className="w-6 h-6 text-color3 mb-2 group-hover:scale-110 transition-transform" />
+                                    <span className="text-sm font-bold text-color1 text-center leading-tight">Quick<br />Start</span>
                                 </div>
                             ) : (
-                                <div className="bg-orange-500/10 backdrop-blur-sm border border-orange-500/20 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm opacity-70">
-                                    <Clock className="w-6 h-6 text-orange-400/50 mb-2" />
-                                    <span className="text-sm font-bold text-white/70 text-center leading-tight">Quick<br/>Start</span>
+                                <div className="bg-color1 backdrop-blur-sm border border-color3/20 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm opacity-70">
+                                    <Clock className="w-6 h-6 text-color3/50 mb-2" />
+                                    <span className="text-sm font-bold text-color1/70 text-center leading-tight">Quick<br/>Start</span>
                                 </div>
                             )}
                         </div>

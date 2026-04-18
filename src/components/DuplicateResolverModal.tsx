@@ -39,38 +39,38 @@ export const DuplicateResolverModal: React.FC<DuplicateResolverModalProps> = ({ 
 
     if (isMerging) {
         return (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                <div className="bg-card w-full max-w-2xl rounded-2xl shadow-xl border border-border flex flex-col max-h-[90vh]">
-                    <div className="p-6 border-b border-border flex justify-between items-center">
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                <div className="bg-color1 text-color5 w-full max-w-2xl rounded-3xl shadow-2xl border-2 border-border overflow-hidden flex flex-col max-h-[90vh]">
+                    <div className="bg-color4 text-white p-6 border-b border-color4 flex justify-between items-center relative">
                         <h2 className="text-2xl font-bold">Merge Duplicates</h2>
-                        <button onClick={() => setIsMerging(false)} className="p-2 hover:bg-secondary rounded-full"><X className="w-5 h-5" /></button>
+                        <button onClick={() => setIsMerging(false)} className="p-2 hover:bg-white/20 bg-color4 border-2 border-white/50 rounded-full absolute -top-4 -right-4 transition-all"><X className="w-5 h-5 text-white" /></button>
                     </div>
-                    <div className="p-6 overflow-y-auto space-y-4">
-                        <p className="text-muted-foreground mb-4">Edit the final version of the card.</p>
+                    <div className="p-6 overflow-y-auto space-y-4 text-color5">
+                        <p className="text-color5/70 mb-4 font-medium">Edit the final version of the card.</p>
 
                         <div>
-                            <label className="block text-sm font-medium mb-1">Word</label>
+                            <label className="block text-sm font-bold mb-1">Word</label>
                             <input
                                 type="text"
                                 value={mergedCard.word}
                                 onChange={e => setMergedCard({ ...mergedCard, word: e.target.value })}
-                                className="w-full p-2 rounded-lg bg-secondary border border-border"
+                                className="w-full p-3 rounded-xl bg-white border-2 border-color2 focus:border-color4 outline-none font-bold"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium mb-1">Definition</label>
+                            <label className="block text-sm font-bold mb-1">Definition</label>
                             <textarea
                                 value={mergedCard.definition}
                                 onChange={e => setMergedCard({ ...mergedCard, definition: e.target.value })}
-                                className="w-full p-2 rounded-lg bg-secondary border border-border h-24"
+                                className="w-full p-3 rounded-xl bg-white border-2 border-color2 focus:border-color4 outline-none font-medium h-24 resize-none"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium mb-1">Category</label>
+                            <label className="block text-sm font-bold mb-1">Category</label>
                             <select
                                 value={mergedCard.category || 'Vocabulary'}
                                 onChange={e => setMergedCard({ ...mergedCard, category: e.target.value })}
-                                className="w-full p-2 rounded-lg bg-secondary border border-border"
+                                className="w-full p-3 rounded-xl bg-white border-2 border-color2 focus:border-color4 outline-none font-bold"
                             >
                                 {Object.keys(settings.categories).map(cat => (
                                     <option key={cat} value={cat}>{cat}</option>
@@ -78,10 +78,10 @@ export const DuplicateResolverModal: React.FC<DuplicateResolverModalProps> = ({ 
                             </select>
                         </div>
                     </div>
-                    <div className="p-6 border-t border-border flex justify-end gap-3">
-                        <button onClick={() => setIsMerging(false)} className="px-4 py-2 rounded-lg hover:bg-secondary">Cancel</button>
-                        <button onClick={handleSaveMerge} className="px-4 py-2 rounded-lg bg-primary text-primary-foreground font-bold">
-                            Save Merged Card
+                    <div className="p-6 border-t border-color2 shadow-inner bg-color2 flex flex-col sm:flex-row justify-end gap-3 rounded-b-3xl">
+                        <button onClick={() => setIsMerging(false)} className="px-6 py-3 rounded-xl font-bold hover:bg-color1 bg-white border-2 border-color3 transition-all text-color5 shadow-sm">Cancel</button>
+                        <button onClick={handleSaveMerge} className="px-6 py-3 rounded-xl bg-color4 hover:bg-color4/90 text-white font-bold transition-all shadow-lg flex items-center justify-center gap-2 border border-color4/80">
+                            <Check className="w-5 h-5" /> Save Final Merged Card
                         </button>
                     </div>
                 </div>
@@ -90,69 +90,86 @@ export const DuplicateResolverModal: React.FC<DuplicateResolverModalProps> = ({ 
     }
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-            <div className="bg-card w-full max-w-4xl rounded-2xl shadow-xl border border-border flex flex-col max-h-[90vh]">
-                <div className="p-6 border-b border-border flex justify-between items-center">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+            <div className="bg-color1 text-color5 w-full max-w-4xl rounded-3xl shadow-2xl border-2 border-border flex flex-col max-h-[90vh] overflow-hidden">
+                <div className="bg-color3 text-color5 p-6 border-b border-color3 flex justify-between items-center relative shadow-sm z-10">
                     <div>
-                        <h2 className="text-2xl font-bold flex items-center gap-2">
+                        <h2 className="text-2xl font-extrabold flex items-center gap-3">
                             Resolve Duplicates
-                            <span className="text-sm font-normal text-muted-foreground bg-secondary px-2 py-1 rounded-full">
+                            <span className="text-sm font-bold text-white bg-color4 px-4 py-1.5 rounded-full shadow-md border-2 border-white/20">
                                 {duplicates.length} versions found
                             </span>
                         </h2>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-secondary rounded-full transition-colors">
-                        <X className="w-6 h-6" />
+                    <button onClick={onClose} className="p-2 hover:bg-color3/80 bg-white border-2 border-color3 rounded-full absolute -top-4 -right-4 transition-all shadow-md">
+                        <X className="w-5 h-5 text-color5" />
                     </button>
                 </div>
 
-                <div className="p-6 overflow-y-auto flex-1">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {duplicates.map((card) => (
+                <div className="p-6 overflow-y-auto flex-1 bg-color1/50">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {duplicates.map((card, idx) => {
+                            const isSelected = selectedIds.includes(card.id);
+                            
+                            const getCardClasses = (index: number) => {
+                                const map = [
+                                    { selected: 'border-color6 bg-color6 text-color1 shadow-md scale-[1.02]', unselected: 'border-color6/40 bg-color6/10 hover:border-color6/60 hover:bg-color6/20' },
+                                    { selected: 'border-color7 bg-color7 text-color1 shadow-md scale-[1.02]', unselected: 'border-color7/40 bg-color7/10 hover:border-color7/60 hover:bg-color7/20' },
+                                    { selected: 'border-color8 bg-color8 text-color1 shadow-md scale-[1.02]', unselected: 'border-color8/40 bg-color8/10 hover:border-color8/60 hover:bg-color8/20' },
+                                    { selected: 'border-color9 bg-color9 text-color5 shadow-md scale-[1.02]', unselected: 'border-color9/40 bg-color9/10 hover:border-color9/60 hover:bg-color9/20' }
+                                ];
+                                const style = map[index % map.length];
+                                return isSelected ? style.selected : style.unselected;
+                            };
+
+                            const textColor = isSelected ? (idx % 4 === 3 ? 'text-color5' : 'text-color1') : 'text-color5';
+                            const innerBadgeColor = isSelected ? 'bg-black/20 text-current' : 'bg-white/80 border-color2/40 border-2 font-bold';
+                            
+                            return (
                             <div key={card.id} className={`
-                                relative p-4 rounded-xl border-2 transition-all cursor-pointer flex flex-col
-                                ${selectedIds.includes(card.id) ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}
+                                relative p-6 rounded-2xl border-2 transition-all cursor-pointer flex flex-col
+                                ${getCardClasses(idx)}
                             `}
                                 onClick={() => toggleSelection(card.id)}
                             >
-                                <div className="absolute top-3 right-3">
-                                    {selectedIds.includes(card.id) && <div className="bg-primary text-primary-foreground p-1 rounded-full"><Check className="w-4 h-4" /></div>}
+                                <div className="absolute top-4 right-4">
+                                    {isSelected && <div className="bg-white/30 text-current p-1.5 rounded-full backdrop-blur-sm"><Check className="w-5 h-5" /></div>}
                                 </div>
-                                <div className="mb-4">
-                                    <h3 className="font-bold text-lg">{card.word}</h3>
-                                    <p className="text-sm text-muted-foreground mt-1">{card.category || 'Uncategorized'}</p>
+                                <div className={`mb-4 ${textColor}`}>
+                                    <h3 className="font-extrabold text-2xl">{card.word}</h3>
+                                    <p className="text-sm opacity-80 mt-1 font-medium">{card.category || 'Uncategorized'}</p>
                                 </div>
-                                <div className="flex-1 bg-secondary/30 p-3 rounded-lg text-sm mb-4">
-                                    <p className="font-medium text-muted-foreground mb-1">Definition:</p>
-                                    <p>{card.definition}</p>
+                                <div className={`flex-1 p-4 rounded-xl text-sm mb-4 ${innerBadgeColor}`}>
+                                    <p className="font-extrabold opacity-70 mb-1 uppercase text-xs tracking-wider">Definition:</p>
+                                    <p className="font-medium text-base">{card.definition}</p>
                                 </div>
-                                <div className="text-xs text-muted-foreground mb-4">
-                                    ID: {card.id}
-                                    {card.isPublic ? <span className="ml-2 text-green-500 font-bold">Public</span> : <span className="ml-2">Private</span>}
+                                <div className={`text-xs opacity-70 mb-4 font-bold flex items-center justify-between ${textColor}`}>
+                                    <span>ID: {card.id}</span>
+                                    {card.isPublic ? <span className="bg-green-500/20 text-green-700 px-2 py-0.5 rounded font-bold">Public</span> : <span className="opacity-70">Private</span>}
                                 </div>
 
                                 <button
                                     onClick={(e) => { e.stopPropagation(); toggleSelection(card.id); }}
-                                    className={`w-full mt-auto py-2 font-bold rounded-lg transition-colors ${selectedIds.includes(card.id) ? 'bg-primary text-primary-foreground' : 'bg-secondary hover:bg-secondary/80 text-foreground'}`}
+                                    className={`w-full mt-auto py-3 font-bold rounded-xl transition-all shadow-sm ${isSelected ? 'bg-white text-color5 hover:bg-white/90 scale-105' : 'bg-white/50 hover:bg-white border-2 border-transparent hover:border-color2'}`}
                                 >
-                                    {selectedIds.includes(card.id) ? 'Selected' : 'Select'}
+                                    {isSelected ? 'Selected' : 'Select Version'}
                                 </button>
                             </div>
-                        ))}
+                        )})}
                     </div>
                 </div>
 
-                <div className="p-6 border-t border-border bg-secondary/10 flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <p className="text-muted-foreground text-sm">
-                        Select versions to keep, or merge them into a new card.
+                <div className="p-6 border-t border-color2 shadow-inner bg-color2 flex flex-col sm:flex-row justify-between items-center gap-4 rounded-b-3xl z-10">
+                    <p className="text-color5/80 font-bold text-sm bg-white/50 px-4 py-2 rounded-xl">
+                        Select multiple versions to combine them, or just one to keep exactly.
                     </p>
                     <div className="flex gap-3">
                         <button
                             onClick={handleStartMerge}
-                            className="flex items-center gap-2 px-6 py-3 bg-secondary hover:bg-secondary/80 text-foreground font-bold rounded-xl transition-colors shadow-sm"
+                            className="flex items-center gap-2 px-6 py-3 border-2 border-color3 bg-white hover:bg-color1 text-color5 font-bold rounded-xl transition-all shadow-md"
                         >
                             <Merge className="w-5 h-5" />
-                            Merge All
+                            Merge Selected
                         </button>
                         <button
                             onClick={() => {
@@ -162,7 +179,7 @@ export const DuplicateResolverModal: React.FC<DuplicateResolverModalProps> = ({ 
                                 }
                             }}
                             disabled={selectedIds.length === 0}
-                            className={`flex items-center gap-2 px-6 py-3 font-bold rounded-xl transition-colors shadow-lg ${selectedIds.length > 0 ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-500/20' : 'bg-secondary/50 text-muted-foreground cursor-not-allowed'}`}
+                            className={`flex items-center gap-2 px-6 py-3 font-bold rounded-xl transition-all shadow-lg ${selectedIds.length > 0 ? 'bg-color4 hover:bg-color4/90 text-white shadow-color4/40 scale-105' : 'bg-color2/30 text-color5/40 cursor-not-allowed border-2 border-color2'}`}
                         >
                             <Check className="w-5 h-5" />
                             Keep Selected ({selectedIds.length})

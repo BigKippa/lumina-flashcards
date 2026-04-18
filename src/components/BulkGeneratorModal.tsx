@@ -193,7 +193,7 @@ export const BulkGeneratorModal: React.FC<BulkGeneratorModalProps> = ({ isOpen, 
                 let category = typeof row.category === 'string' ? row.category.trim() : (row.Category ? String(row.Category).trim() : (row[4] ? String(row[4]).trim() : ''));
                 if (category) {
                     const words = category.split(' ');
-                    category = words.map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+                    category = words.map((w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
                 }
 
                 return {
