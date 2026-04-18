@@ -15,6 +15,37 @@ export const useDevMode = () => useContext(DevModeContext);
 
 type StyleOverrides = Record<string, React.CSSProperties>;
 
+const generateStructuralPath = (element: HTMLElement | null): string | null => {
+    if (!element) return null;
+    if (element.hasAttribute('data-dev-id')) {
+        return `[data-dev-id="${element.getAttribute('data-dev-id')}"]`;
+    }
+    const path: string[] = [];
+    let current: HTMLElement | null = element;
+    
+    while (current && current.nodeType === Node.ELEMENT_NODE && current.tagName !== 'BODY' && current.tagName !== 'HTML') {
+        if (current.hasAttribute('data-dev-id')) {
+            path.unshift(`[data-dev-id="${current.getAttribute('data-dev-id')}"]`);
+            break;
+        }
+        
+        let tag = current.tagName.toLowerCase();
+        let index = 1;
+        let sibling = current.previousElementSibling;
+        while (sibling) {
+            if (sibling.nodeName === current.nodeName) {
+                index++;
+            }
+            sibling = sibling.previousElementSibling;
+        }
+        
+        path.unshift(`${tag}:nth-of-type(${index})`);
+        current = current.parentElement;
+    }
+    
+    return path.join(' > ');
+};
+
 export const DevModeProvider: React.FC<{ children: React.ReactNode; isAdmin: boolean }> = ({ children, isAdmin }) => {
     const [isDevMode, setIsDevMode] = useState(false);
     const [enableDevStyling, setEnableDevStyling] = useState(false);
@@ -94,12 +125,6 @@ export const DevModeProvider: React.FC<{ children: React.ReactNode; isAdmin: boo
             return;
         }
 
-        const isDevUI = (el: HTMLElement) => 
-            el.closest('#dev-tools') || 
-            el.closest('#dev-editor-panel') || 
-            el.closest('#dev-theme-modal-content') || 
-            el.closest('#dev-publish-modal-content');
-
         const handleMouseOver = (e: MouseEvent) => {
             const el = e.target as HTMLElement;
             if (el.closest('#dev-tools-toggle')) {
@@ -151,17 +176,16 @@ export const DevModeProvider: React.FC<{ children: React.ReactNode; isAdmin: boo
                 e.preventDefault();
                 e.stopPropagation();
                 
-                // Ensure the element has a unique ID or path for selection
-                if (!hoveredElement.dataset.devId) {
-                    hoveredElement.dataset.devId = 'dev-' + Math.random().toString(36).substr(2, 9);
-                }
+                let targetEl = el;
+                // No more forced bubbling. They click exactly what they click.
+                // The DevMode saves its structural path instead of a random ID via generateStructuralPath!
                 
-                if (selectedElement && selectedElement !== hoveredElement) {
+                if (selectedElement && selectedElement !== targetEl) {
                     // Auto-commit any unsaved drafts from the previous element to the global history
                     commitPreviewToHistory();
                 }
                 
-                setSelectedElement(hoveredElement);
+                setSelectedElement(targetEl);
             }
         };
 
@@ -192,8 +216,9 @@ export const DevModeProvider: React.FC<{ children: React.ReactNode; isAdmin: boo
     };
 
     const handleApplyStyle = (newStyles: React.CSSProperties, commit: boolean = false) => {
-        if (!selectedElement || !selectedElement.dataset.devId) return;
-        const selector = `[data-dev-id="${selectedElement.dataset.devId}"]`;
+        if (!selectedElement) return;
+        const selector = generateStructuralPath(selectedElement);
+        if (!selector) return;
         
         let newOverrides = { ...currentOverrides };
         newOverrides[selector] = { ...newOverrides[selector], ...newStyles };
@@ -484,44 +509,42 @@ export const DevModeProvider: React.FC<{ children: React.ReactNode; isAdmin: boo
             )}
 
             {/* Editor Modal */}
-            {isDevMode && selectedElement && (
-                <EditorModal 
-                    key={selectedElement.dataset.devId || 'dev'}
-                    element={selectedElement} 
-                    currentStyles={selectedElement.dataset.devId ? currentOverrides[`[data-dev-id="${selectedElement.dataset.devId}"]`] || {} : {}}
-                    draftStyles={selectedElement.dataset.devId ? previewOverrides[`[data-dev-id="${selectedElement.dataset.devId}"]`] || {} : {}}
-                    onPreviewUpdate={(styles) => {
-                        if(selectedElement.dataset.devId) {
+            {isDevMode && selectedElement && (() => {
+                const selector = generateStructuralPath(selectedElement);
+                if (!selector) return null;
+                return (
+                    <EditorModal 
+                        key={selector}
+                        element={selectedElement} 
+                        currentStyles={currentOverrides[selector] || {}}
+                        draftStyles={previewOverrides[selector] || {}}
+                        onPreviewUpdate={(styles) => {
                             setPreviewOverrides(prev => ({
                                 ...prev,
-                                [`[data-dev-id="${selectedElement.dataset.devId}"]`]: styles
+                                [selector]: styles
                             }));
-                        }
-                    }}
-                    onEditPanelRequest={() => {
-                        const panel = document.getElementById('dev-editor-panel');
-                        if (panel) setSelectedElement(panel);
-                    }}
-                    onClose={() => setSelectedElement(null)} 
-                    onSave={(styles) => {
-                        handleApplyStyle(styles, true);
-                        if(selectedElement.dataset.devId) {
+                        }}
+                        onEditPanelRequest={() => {
+                            const panel = document.getElementById('dev-editor-panel');
+                            if (panel) setSelectedElement(panel);
+                        }}
+                        onClose={() => setSelectedElement(null)} 
+                        onSave={(styles) => {
+                            handleApplyStyle(styles, true);
                             const newPreviews = {...previewOverrides};
-                            delete newPreviews[`[data-dev-id="${selectedElement.dataset.devId}"]`];
+                            delete newPreviews[selector];
                             setPreviewOverrides(newPreviews);
-                        }
-                        setSelectedElement(null);
-                    }}
-                    onRevert={() => {
-                        if(selectedElement.dataset.devId) {
+                            setSelectedElement(null);
+                        }}
+                        onRevert={() => {
                             const newPreviews = {...previewOverrides};
-                            delete newPreviews[`[data-dev-id="${selectedElement.dataset.devId}"]`];
+                            delete newPreviews[selector];
                             setPreviewOverrides(newPreviews);
-                        }
-                        setSelectedElement(null);
-                    }}
-                />
-            )}
+                            setSelectedElement(null);
+                        }}
+                    />
+                );
+            })()}
         </DevModeContext.Provider>
     );
 };

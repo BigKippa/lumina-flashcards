@@ -298,6 +298,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, lastSession,
                         <div className="flex flex-wrap md:flex-nowrap justify-center gap-4 relative z-10 w-full md:flex-1">
                             {/* Active Decks Widget */}
                             <div
+                                data-dev-id="student-widget-active-decks"
                                 onClick={() => onNavigate('topic-selection', null)}
                                 className="bg-color4 hover:bg-color4/30 cursor-pointer transition-colors backdrop-blur-sm border border-color4/30 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm"
                             >
@@ -308,6 +309,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, lastSession,
 
                             {/* Inbox/Pending Widget */}
                             <div
+                                data-dev-id="student-widget-messages"
                                 onClick={() => alert('Messages Navigation - Coming Soon')}
                                 className="bg-color2 hover:bg-color2/30 cursor-pointer transition-colors backdrop-blur-sm border border-color2/30 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm relative group"
                             >
@@ -320,6 +322,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, lastSession,
                             {/* Quick Start Widget */}
                             {lastSession ? (
                                 <div
+                                    data-dev-id="student-widget-quickstart"
                                     onClick={onQuickStart}
                                     className="bg-color3 hover:bg-color3/30 cursor-pointer transition-colors backdrop-blur-sm border border-color3/30 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm group"
                                     title={`Resume ${lastSession.label}`}
@@ -328,7 +331,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, lastSession,
                                     <span className="text-sm font-bold text-color1 text-center leading-tight">Quick<br />Start</span>
                                 </div>
                             ) : (
-                                <div className="bg-color1 backdrop-blur-sm border border-color3/20 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm opacity-70">
+                                <div data-dev-id="student-widget-quickstart-disabled" className="bg-color1 backdrop-blur-sm border border-color3/20 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm opacity-70">
                                     <Clock className="w-6 h-6 text-color3/50 mb-2" />
                                     <span className="text-sm font-bold text-color1/70 text-center leading-tight">Quick<br/>Start</span>
                                 </div>

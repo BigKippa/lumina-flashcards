@@ -659,6 +659,7 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
 
                                 {/* Active Students Widget */}
                                 <div
+                                    data-dev-id="tutor-widget-active-students"
                                     onClick={() => onViewChange('students')}
                                     className="bg-color4 hover:bg-color4/80 cursor-pointer transition-colors border border-color4/50 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm"
                                 >
@@ -669,6 +670,7 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
 
                                 {/* Inbox/Pending Widget */}
                                 <div
+                                    data-dev-id="tutor-widget-messages"
                                     onClick={() => alert('Messages Navigation - Coming Soon')}
                                     className="bg-color2 hover:bg-color2/80 cursor-pointer transition-colors border border-color2/50 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm relative"
                                 >
@@ -680,6 +682,7 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
 
                                 {/* Add Student Widget */}
                                 <div
+                                    data-dev-id="tutor-widget-add-student"
                                     onClick={() => {
                                         window.scrollTo({ top: 0, behavior: 'smooth' });
                                         setIsAddStudentModalOpen(true);
@@ -692,6 +695,7 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
 
                                 {/* Create Flashcards Widget */}
                                 <div
+                                    data-dev-id="tutor-widget-create-flashcards"
                                     onClick={() => setIsQuickAddOpen(true)}
                                     className="bg-color3 hover:bg-color3/30 cursor-pointer transition-colors backdrop-blur-sm border border-amber-500/30 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm group"
                                 >
