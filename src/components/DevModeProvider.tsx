@@ -385,6 +385,17 @@ export const DevModeProvider: React.FC<{ children: React.ReactNode; isAdmin: boo
                                                 <div className="flex gap-2">
                                                     <button onClick={() => handleLoadTheme(themeStyles)} className="text-sm px-3 py-1 bg-primary/10 text-primary hover:bg-primary/20 rounded font-medium">Load</button>
                                                     <button onClick={() => {
+                                                        if (!confirm(`Are you sure you want to overwrite "${themeName}" with your current layout?`)) return;
+                                                        const newThemes: any = Array.isArray(savedThemes) ? [...savedThemes] : { ...savedThemes };
+                                                        if (Array.isArray(newThemes)) {
+                                                            newThemes[parseInt(key, 10)].overrides = currentOverrides;
+                                                        } else {
+                                                            newThemes[key] = currentOverrides;
+                                                        }
+                                                        setSavedThemes(newThemes);
+                                                        localStorage.setItem('lumina_dev_themes', JSON.stringify(newThemes));
+                                                    }} className="text-sm px-3 py-1 bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 rounded font-medium">Update</button>
+                                                    <button onClick={() => {
                                                         const newThemes: any = Array.isArray(savedThemes) ? [...savedThemes] : { ...savedThemes };
                                                         if (Array.isArray(newThemes)) {
                                                             newThemes.splice(parseInt(key, 10), 1);
