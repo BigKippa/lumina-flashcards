@@ -485,10 +485,10 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
     return (
         <div className="w-full h-full bg-background text-foreground flex flex-col">
             {/* Main Content */}
-            <main className="flex-1 w-full max-w-7xl mx-auto p-6 animate-in fade-in duration-500">
+            <main data-dev-id="tutor-main-content" className="flex-1 w-full max-w-7xl mx-auto p-6 animate-in fade-in duration-500">
 
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-                    <div>
+                    <div data-dev-id="tutor-header-title">
                         <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
                             <GraduationCap className="w-8 h-8 text-primary" />
                             Tutor Dashboard
@@ -612,7 +612,7 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                 {view === 'dashboard' && (
                     <div className="flex flex-col gap-6 max-w-6xl mx-auto mt-6">
                         {/* Tutor Hero Tile */}
-                        <div className="bg-color5 border border-color5/50 rounded-3xl p-8 flex flex-col md:flex-row gap-8 items-center shadow-md relative overflow-hidden text-color1">
+                        <div data-dev-id="tutor-hero-tile" className="bg-color5 border border-color5/50 rounded-3xl p-8 flex flex-col md:flex-row gap-8 items-center shadow-md relative overflow-hidden text-color1">
                             <div className="absolute right-0 top-0 w-64 h-64 bg-color1/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
 
                             {/* Profile Info (Left) */}
@@ -727,13 +727,14 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                             onDragEnd={handleDragEnd}
                         >
                             <SortableContext items={tileOrder} strategy={rectSortingStrategy}>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <div data-dev-id="tutor-tiles-grid" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                     {tileOrder.map(id => {
                                         let tileContent = null;
                                         switch (id) {
                                             case 'all-content':
                                                 tileContent = (
                                                     <div
+                                                        data-dev-id="tutor-tile-all-content"
                                                         onClick={() => onViewChange('flashcards')}
                                                         className="bg-cyan-500/25 hover:bg-cyan-500/30 border border-cyan-500/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full"
                                                     >
@@ -751,6 +752,7 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                             case 'quickstart':
                                                 tileContent = (
                                                     <div
+                                                        data-dev-id="tutor-tile-quickstart"
                                                         onClick={() => alert('Quickstart Navigation - Coming Soon')}
                                                         className="bg-color3 hover:bg-color3/30 border border-color3/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full"
                                                     >
@@ -768,6 +770,7 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                             case 'students':
                                                 tileContent = (
                                                     <div
+                                                        data-dev-id="tutor-tile-students"
                                                         onClick={() => onViewChange('students')}
                                                         className="bg-color4 hover:bg-color4/30 border border-color4/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full"
                                                     >
@@ -785,6 +788,7 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                             case 'manage-learning-content':
                                                 tileContent = (
                                                     <div
+                                                        data-dev-id="tutor-tile-content"
                                                         onClick={() => onViewChange('learning-content')}
                                                         className="bg-color2 hover:bg-color2/30 border border-color2/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full"
                                                     >
@@ -802,6 +806,7 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                             case 'messages':
                                                 tileContent = (
                                                     <div
+                                                        data-dev-id="tutor-tile-messages"
                                                         onClick={() => alert('Messages Navigation - Coming Soon')}
                                                         className="bg-color5 hover:bg-color5/30 border border-color5/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
                                                     >
@@ -819,6 +824,7 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                             case 'to-do':
                                                 tileContent = (
                                                     <div
+                                                        data-dev-id="tutor-tile-todo"
                                                         onClick={() => alert('To-Do List Navigation - Coming Soon')}
                                                         className="bg-color3 hover:bg-color3/30 border border-color3/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full"
                                                     >

@@ -139,6 +139,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, lastSession,
             case 'study-topics':
                 return (
                     <div
+                        data-dev-id="student-tile-study"
                         onClick={() => onNavigate('topic-selection', null)}
                         className="bg-color4 hover:bg-color4/30 border border-color4/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
                     >
@@ -155,6 +156,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, lastSession,
             case 'manage-flashcards':
                 return (
                     <div
+                        data-dev-id="student-tile-manage"
                         onClick={() => onNavigate('admin', null)}
                         className="bg-color4 hover:bg-color4/30 border border-color4/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
                     >
@@ -170,7 +172,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, lastSession,
                 );
             case 'favorites':
                 return (
-                    <div className="bg-color5 border border-color5/20 rounded-2xl p-6 flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1">
+                    <div data-dev-id="student-tile-favorites" className="bg-color5 border border-color5/20 rounded-2xl p-6 flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1">
                         <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl transition-colors"></div>
                         <div className="flex items-center gap-3 relative z-10 shrink-0">
                             <div className="w-12 h-12 rounded-xl bg-color1 text-color5 flex items-center justify-center shadow-sm border border-color5">
@@ -199,6 +201,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, lastSession,
             case 'search-library':
                 return (
                     <div
+                        data-dev-id="student-tile-search"
                         onClick={() => alert('Search Library Navigation - Coming Soon')}
                         className="bg-color4 hover:bg-color4/30 border border-color4/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
                     >
@@ -215,6 +218,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, lastSession,
             case 'messages':
                 return (
                     <div
+                        data-dev-id="student-tile-messages"
                         onClick={() => alert('Messages Navigation - Coming Soon')}
                         className="bg-color2 hover:bg-color2/30 border border-color2/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
                     >
@@ -231,6 +235,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, lastSession,
             case 'assignments':
                 return (
                     <div
+                        data-dev-id="student-tile-assignments"
                         onClick={() => alert('Assignments Navigation - Coming Soon')}
                         className="bg-color3 hover:bg-color3/30 border border-color3/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
                     >
@@ -250,12 +255,12 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, lastSession,
     };
 
     return (
-        <div className="w-full h-full bg-background text-foreground flex flex-col">
-            <main className="flex-1 w-full max-w-7xl mx-auto p-6 animate-in fade-in duration-500">
+        <div data-dev-id="student-dashboard-root" className="w-full h-full bg-background text-foreground flex flex-col">
+            <main data-dev-id="student-dashboard-main" className="flex-1 w-full max-w-7xl mx-auto p-6 animate-in fade-in duration-500">
                 <div className="flex flex-col gap-6 max-w-6xl mx-auto mt-6">
                     
                     {/* Student Hero Tile */}
-                    <div className="bg-color5 border border-color5/50 rounded-3xl p-8 flex flex-col md:flex-row gap-8 items-center shadow-md relative overflow-hidden text-color1">
+                    <div data-dev-id="student-hero-tile" className="bg-color5 border border-color5/50 rounded-3xl p-8 flex flex-col md:flex-row gap-8 items-center shadow-md relative overflow-hidden text-color1">
                         <div className="absolute right-0 top-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
 
                         {/* Profile Info (Left) */}
