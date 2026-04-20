@@ -594,113 +594,121 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                             <button
                                 data-dev-id="admin-tile-users"
                                 onClick={() => onTabChange('users')}
-                                className="flex flex-col items-center p-8 rounded-2xl bg-color1 text-color1-foreground border border-color5/20 transition-all group hover:scale-105 shadow-md hover:bg-color1/80"
+                                className="bg-color1 hover:bg-color1/30 border border-color1/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1 text-left"
                             >
-                                <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mb-6 group-hover:bg-white/40 transition-colors">
-                                    <Users className="w-8 h-8" />
+                                <div className="absolute -right-6 -top-6 w-24 h-24 bg-color5 rounded-full blur-2xl group-hover:bg-color1 transition-colors"></div>
+                                <div className="w-12 h-12 rounded-xl bg-color5 text-color1 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color5/20 shrink-0">
+                                    <Users className="w-6 h-6" />
                                 </div>
-                                <h3 className="text-xl font-bold mb-2">Manage Users</h3>
-                                <p className="opacity-80 text-center text-sm">
-                                    Create, edit, and remove user accounts.
-                                </p>
+                                <div className="relative z-10 font-medium flex-1">
+                                    <h2 className="text-xl font-bold mb-1 text-color5">Manage Users</h2>
+                                    <p className="text-sm text-color5/80 line-clamp-2">Create, edit, and remove user accounts.</p>
+                                </div>
                             </button>
                         )}
 
                         <button
                             data-dev-id="admin-tile-decks"
                             onClick={() => onTabChange('decks')}
-                            className="flex flex-col items-center p-8 rounded-2xl bg-color2 text-color2-foreground border border-color5/20 transition-all group hover:scale-105 shadow-md hover:bg-color2/80"
+                            className="bg-color2 hover:bg-color2/30 border border-color2/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1 text-left"
                         >
-                            <div className="w-16 h-16 rounded-full bg-black/10 flex items-center justify-center mb-6 group-hover:bg-black/20 transition-colors">
-                                <Library className="w-8 h-8 opacity-90" />
+                            <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color2 transition-colors"></div>
+                            <div className="w-12 h-12 rounded-xl bg-color1 text-color2 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
+                                <Library className="w-6 h-6" />
                             </div>
-                            <h3 className="text-xl font-bold mb-2">Manage Decks</h3>
-                            <p className="opacity-80 text-center text-sm">
-                                Create and organize deck collections.
-                            </p>
+                            <div className="relative z-10 font-medium flex-1">
+                                <h2 className="text-xl font-bold mb-1">Manage Decks</h2>
+                                <p className="text-sm text-color1/80 line-clamp-2">Create and organize deck collections.</p>
+                            </div>
                         </button>
 
                         <button
                             data-dev-id="admin-tile-cards"
                             onClick={() => onTabChange('cards')}
-                            className="flex flex-col items-center p-8 rounded-2xl bg-color3 text-color3-foreground border border-color5/20 transition-all group hover:scale-105 shadow-md hover:bg-color3/80"
+                            className="bg-color3 hover:bg-color3/30 border border-color3/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1 text-left"
                         >
-                            <div className="w-16 h-16 rounded-full bg-black/10 flex items-center justify-center mb-6 group-hover:bg-black/20 transition-colors">
-                                <Edit2 className="w-8 h-8 opacity-90" />
+                            <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color3 transition-colors"></div>
+                            <div className="w-12 h-12 rounded-xl bg-color1 text-color3 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
+                                <Edit2 className="w-6 h-6" />
                             </div>
-                            <h3 className="text-xl font-bold mb-2">Manage Flashcards</h3>
-                            <p className="opacity-80 text-center text-sm">
-                                View, edit, and bulk upload cards.
-                            </p>
+                            <div className="relative z-10 font-medium flex-1">
+                                <h2 className="text-xl font-bold mb-1">Manage Flashcards</h2>
+                                <p className="text-sm text-color1/80 line-clamp-2">View, edit, and bulk upload cards.</p>
+                            </div>
                         </button>
 
                         <button
                             data-dev-id="admin-tile-tickets"
                             onClick={() => onTabChange('tickets')}
-                            className="flex flex-col items-center p-8 rounded-2xl bg-color4 text-color4-foreground border border-color5/20 transition-all group hover:scale-105 shadow-md hover:bg-color4/80"
+                            className="bg-color4 hover:bg-color4/30 border border-color4/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1 text-left"
                         >
-                            <div className="w-16 h-16 rounded-full bg-black/10 flex items-center justify-center mb-6 group-hover:bg-black/20 transition-colors">
-                                <Sparkles className="w-8 h-8 opacity-90" />
+                            <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color4 transition-colors"></div>
+                            <div className="w-12 h-12 rounded-xl bg-color1 text-color4 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
+                                <Sparkles className="w-6 h-6" />
                             </div>
-                            <h3 className="text-xl font-bold mb-2">Support Tickets</h3>
-                            <p className="opacity-80 text-center text-sm">
-                                View feedback and issues from users.
-                            </p>
+                            <div className="relative z-10 font-medium flex-1">
+                                <h2 className="text-xl font-bold mb-1">Support Tickets</h2>
+                                <p className="text-sm text-color1/80 line-clamp-2">View feedback and issues from users.</p>
+                            </div>
                         </button>
 
                         <button
                             data-dev-id="admin-tile-review"
                             onClick={() => onTabChange('review-queue')}
-                            className="flex flex-col items-center p-8 rounded-2xl bg-color3 text-color3-foreground border border-color5/20 transition-all group hover:scale-105 shadow-md hover:bg-color3/80"
+                            className="bg-color3 hover:bg-color3/30 border border-color3/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1 text-left"
                         >
-                            <div className="w-16 h-16 rounded-full bg-black/10 flex items-center justify-center mb-6 group-hover:bg-black/20 transition-colors">
-                                <Bookmark className="w-8 h-8 opacity-90" />
+                            <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color3 transition-colors"></div>
+                            <div className="w-12 h-12 rounded-xl bg-color1 text-color3 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
+                                <Bookmark className="w-6 h-6" />
                             </div>
-                            <h3 className="text-xl font-bold mb-2">Review Queue</h3>
-                            <p className="opacity-80 text-center text-sm">
-                                Flashcards marked for review or correction.
-                            </p>
+                            <div className="relative z-10 font-medium flex-1">
+                                <h2 className="text-xl font-bold mb-1">Review Queue</h2>
+                                <p className="text-sm text-color1/80 line-clamp-2">Flashcards marked for review or correction.</p>
+                            </div>
                         </button>
 
                         <button
                             data-dev-id="admin-tile-archived"
                             onClick={() => onTabChange('archived')}
-                            className="flex flex-col items-center p-8 rounded-2xl bg-color5 text-color5-foreground border border-color1/20 transition-all group hover:scale-105 shadow-md hover:bg-color5/80"
+                            className="bg-color5 hover:bg-color5/30 border border-color5/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1 text-left"
                         >
-                            <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mb-6 group-hover:bg-white/20 transition-colors">
-                                <Archive className="w-8 h-8 opacity-90" />
+                            <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color5 transition-colors"></div>
+                            <div className="w-12 h-12 rounded-xl bg-color1 text-color5 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
+                                <Archive className="w-6 h-6" />
                             </div>
-                            <h3 className="text-xl font-bold mb-2">Archived</h3>
-                            <p className="opacity-80 text-center text-sm">
-                                Manage archived decks and content.
-                            </p>
+                            <div className="relative z-10 font-medium flex-1">
+                                <h2 className="text-xl font-bold mb-1 text-color5">Archived</h2>
+                                <p className="text-sm text-color5/80 line-clamp-2">Manage archived decks and content.</p>
+                            </div>
                         </button>
 
                         <button
                             data-dev-id="admin-tile-settings"
                             onClick={() => onTabChange('settings')}
-                            className="flex flex-col items-center p-8 rounded-2xl bg-color1 text-color1-foreground border border-color5/20 transition-all group hover:scale-105 shadow-md hover:bg-color1/80"
+                            className="bg-color1 hover:bg-color1/30 border border-color1/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1 text-left"
                         >
-                            <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mb-6 group-hover:bg-white/40 transition-colors">
-                                <Settings className="w-8 h-8 opacity-90" />
+                            <div className="absolute -right-6 -top-6 w-24 h-24 bg-color5 rounded-full blur-2xl group-hover:bg-color1 transition-colors"></div>
+                            <div className="w-12 h-12 rounded-xl bg-color5 text-color1 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color5/20 shrink-0">
+                                <Settings className="w-6 h-6" />
                             </div>
-                            <h3 className="text-xl font-bold mb-2">System</h3>
-                            <p className="opacity-80 text-center text-sm">
-                                Backup, restore, and app configuration.
-                            </p>
+                            <div className="relative z-10 font-medium flex-1">
+                                <h2 className="text-xl font-bold mb-1 text-color5">System</h2>
+                                <p className="text-sm text-color5/80 line-clamp-2">Backup, restore, and app configuration.</p>
+                            </div>
                         </button>
                         <button
                             data-dev-id="admin-tile-testmode"
                             onClick={() => onTabChange('testMode')}
-                            className="flex flex-col items-center p-8 rounded-2xl bg-color2 text-color2-foreground border border-color5/20 transition-all group hover:scale-105 shadow-md hover:bg-color2/80"
+                            className="bg-color2 hover:bg-color2/30 border border-color2/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1 text-left"
                         >
-                            <div className="w-16 h-16 rounded-full bg-black/10 flex items-center justify-center mb-6 group-hover:bg-black/20 transition-colors">
-                                <Beaker className="w-8 h-8 opacity-90" />
+                            <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color2 transition-colors"></div>
+                            <div className="w-12 h-12 rounded-xl bg-color1 text-color2 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
+                                <Beaker className="w-6 h-6" />
                             </div>
-                            <h3 className="text-xl font-bold mb-2">Test Mode</h3>
-                            <p className="opacity-80 text-center text-sm">
-                                Replicate user flows and simulate actions.
-                            </p>
+                            <div className="relative z-10 font-medium flex-1">
+                                <h2 className="text-xl font-bold mb-1">Test Mode</h2>
+                                <p className="text-sm text-color1/80 line-clamp-2">Replicate user flows and simulate actions.</p>
+                            </div>
                         </button>
                     </div>
                 )
