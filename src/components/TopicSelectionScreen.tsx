@@ -16,6 +16,7 @@ interface TopicGroup {
     descriptionKey: string;
     topics: Topic[];
     color: string;
+    hoverGlowColor?: string;
 }
 
 export const TOPIC_GROUPS: TopicGroup[] = [
@@ -23,7 +24,7 @@ export const TOPIC_GROUPS: TopicGroup[] = [
         id: "daily_life",
         titleKey: "topics.daily_life.title",
         descriptionKey: "topics.daily_life.description",
-        color: "text-blue-600 bg-blue-50 border-blue-200",
+        color: "bg-t-green hover:bg-t-green/30 border-t-green/20 text-color1 lumina-glow hover-glow-t-green", // Green
         topics: [
             { id: 'vocab-home', labelKey: 'topics.daily_life.home.label', descriptionKey: 'topics.daily_life.home.desc', icon: Home },
             { id: 'vocab-food', labelKey: 'topics.daily_life.food.label', descriptionKey: 'topics.daily_life.food.desc', icon: Utensils },
@@ -36,7 +37,7 @@ export const TOPIC_GROUPS: TopicGroup[] = [
         id: "business",
         titleKey: "topics.business.title",
         descriptionKey: "topics.business.description",
-        color: "text-purple-600 bg-purple-50 border-purple-200",
+        color: "bg-t-blue hover:bg-t-blue/30 border-t-blue/20 text-color1 lumina-glow hover-glow-t-blue", // Blue
         topics: [
             { id: 'vocab-office', labelKey: 'topics.business.office.label', descriptionKey: 'topics.business.office.desc', icon: Briefcase },
             { id: 'vocab-meetings', labelKey: 'topics.business.meetings.label', descriptionKey: 'topics.business.meetings.desc', icon: Users },
@@ -48,7 +49,7 @@ export const TOPIC_GROUPS: TopicGroup[] = [
         id: "communication",
         titleKey: "topics.communication.title",
         descriptionKey: "topics.communication.description",
-        color: "text-green-600 bg-green-50 border-green-200",
+        color: "bg-t-sand hover:bg-t-sand/30 border-t-sand/20 text-color1 lumina-glow hover-glow-t-sand", // Sand
         topics: [
             { id: 'vocab-phrasal', labelKey: 'topics.communication.phrasal.label', descriptionKey: 'topics.communication.phrasal.desc', icon: GitMerge },
             { id: 'vocab-idioms', labelKey: 'topics.communication.idioms.label', descriptionKey: 'topics.communication.idioms.desc', icon: MessageCircle },
@@ -60,7 +61,7 @@ export const TOPIC_GROUPS: TopicGroup[] = [
         id: "academic",
         titleKey: "topics.academic.title",
         descriptionKey: "topics.academic.description",
-        color: "text-orange-600 bg-orange-50 border-orange-200",
+        color: "bg-t-gray hover:bg-t-gray/30 border-t-gray/20 text-color5 lumina-glow hover-glow-t-gray", // Gray
         topics: [
             { id: 'vocab-science', labelKey: 'topics.academic.science.label', descriptionKey: 'topics.academic.science.desc', icon: Activity },
             { id: 'vocab-env', labelKey: 'topics.academic.env.label', descriptionKey: 'topics.academic.env.desc', icon: Globe },
@@ -72,7 +73,7 @@ export const TOPIC_GROUPS: TopicGroup[] = [
         id: "grammar",
         titleKey: "topics.grammar.title",
         descriptionKey: "topics.grammar.description",
-        color: "text-red-600 bg-red-50 border-red-200",
+        color: "bg-t-beige hover:bg-t-beige/30 border-t-beige/20 text-color1 lumina-glow hover-glow-t-beige", // Beige
         topics: [
             { id: 'vocab-temporal', labelKey: 'topics.grammar.temporal.label', descriptionKey: 'topics.grammar.temporal.desc', icon: Clock },
             { id: 'vocab-connectors', labelKey: 'topics.grammar.connectors.label', descriptionKey: 'topics.grammar.connectors.desc', icon: Link },
@@ -98,17 +99,19 @@ export const TopicSelectionScreen: React.FC<TopicSelectionScreenProps> = ({ onSe
 
     // Dynamic contrast colors for mapping distinct tiles
     const TILE_COLORS = [
-        'bg-blue-500/10 border-blue-500/20 text-blue-700 hover:bg-blue-500/20 hover:border-blue-500/40',
-        'bg-purple-500/10 border-purple-500/20 text-purple-700 hover:bg-purple-500/20 hover:border-purple-500/40',
-        'bg-amber-500/10 border-amber-500/20 text-amber-700 hover:bg-amber-500/20 hover:border-amber-500/40',
-        'bg-emerald-500/10 border-emerald-500/20 text-emerald-700 hover:bg-emerald-500/20 hover:border-emerald-500/40',
-        'bg-rose-500/10 border-rose-500/20 text-rose-700 hover:bg-rose-500/20 hover:border-rose-500/40',
-        'bg-cyan-500/10 border-cyan-500/20 text-cyan-700 hover:bg-cyan-500/20 hover:border-cyan-500/40',
+        'bg-t-green hover:bg-t-green/30 border-t-green/20 text-color1 lumina-glow hover-glow-t-green', // Green
+        'bg-t-blue hover:bg-t-blue/30 border-t-blue/20 text-color1 lumina-glow hover-glow-t-blue', // Blue
+        'bg-t-sand hover:bg-t-sand/30 border-t-sand/20 text-color1 lumina-glow hover-glow-t-sand', // Sand
+        'bg-t-gray hover:bg-t-gray/30 border-t-gray/20 text-color1 lumina-glow hover-glow-t-gray', // Gray
+        'bg-t-beige hover:bg-t-beige/30 border-t-beige/20 text-color5 lumina-glow hover-glow-t-beige', // Beige
+        'bg-t-black hover:bg-t-black/30 border-t-black/20 text-color1 lumina-glow hover-glow-t-black', // Black
     ];
 
     const ICON_COLORS = [
-        'text-blue-500', 'text-purple-500', 'text-amber-500', 'text-emerald-500', 'text-rose-500', 'text-cyan-500'
+        'text-t-green', 'text-t-blue', 'text-t-sand', 'text-color5', 'text-color5', 'text-t-black'
     ];
+
+
 
     React.useEffect(() => {
         if (onGroupSelect) {
@@ -188,11 +191,11 @@ export const TopicSelectionScreen: React.FC<TopicSelectionScreenProps> = ({ onSe
                                     onClick={() => onSelect(topic.id, topicLabel)}
                                     className={`
                                         flex flex-col p-6 rounded-xl border relative
-                                        transition-all duration-200 text-left h-full group
+                                        transition-all duration-200 text-left h-full
                                         ${tileColor} shadow-sm hover:shadow-md hover:scale-[1.02]
                                     `}
                                 >
-                                    <div className="flex justify-between items-start mb-4">
+                                    <div className="relative z-10 flex justify-between items-start mb-4 w-full">
                                         <div className="p-3 bg-white/60 dark:bg-black/10 w-fit rounded-lg shadow-sm">
                                             <topic.icon className={`w-6 h-6 ${iconColor}`} />
                                         </div>
@@ -206,8 +209,8 @@ export const TopicSelectionScreen: React.FC<TopicSelectionScreenProps> = ({ onSe
                                             <Heart className={`w-5 h-5 ${isTopicFav ? "fill-current" : ""}`} />
                                         </div>
                                     </div>
-                                    <h3 className="font-bold text-lg mb-2">{topicLabel}</h3>
-                                    <p className="text-sm opacity-80">{t(topic.descriptionKey)}</p>
+                                    <h3 className="relative z-10 font-bold text-lg mb-2">{topicLabel}</h3>
+                                    <p className="relative z-10 text-sm opacity-80">{t(topic.descriptionKey)}</p>
                                 </button>
                             );
                         })}
@@ -252,9 +255,9 @@ export const TopicSelectionScreen: React.FC<TopicSelectionScreenProps> = ({ onSe
                                     <button
                                         key={deck.id}
                                         onClick={() => onSelectDeck?.(deck.id)}
-                                        className={`flex flex-col p-6 rounded-xl border hover:shadow-lg transition-all text-left group relative overflow-hidden ${tileColor}`}
+                                        className={`flex flex-col p-6 rounded-xl border hover:shadow-lg transition-all text-left ${tileColor}`}
                                     >
-                                        <div className="absolute top-0 right-0 p-3 opacity-5 group-hover:opacity-10 transition-opacity">
+                                        <div className="absolute top-0 right-0 p-3 opacity-5 group-hover:opacity-10 transition-opacity z-0 pointer-events-none">
                                             <BookOpen className={`w-16 h-16 ${iconColor} transform translate-x-4 -translate-y-4`} />
                                         </div>
                                         <h3 className="font-bold text-lg mb-1 relative z-10">{deck.title}</h3>
@@ -311,11 +314,11 @@ export const TopicSelectionScreen: React.FC<TopicSelectionScreenProps> = ({ onSe
                                 onClick={() => setSelectedGroup(group)}
                                 className={`
                                 flex items-center p-6 rounded-2xl border border-transparent 
-                                transition-all duration-200 text-left w-full group
-                                ${group.color} hover:shadow-lg hover:scale-[1.01] relative
+                                transition-all duration-200 text-left w-full
+                                ${group.color} hover:shadow-lg hover:scale-[1.01]
                             `}
                             >
-                                <div className="flex-1">
+                                <div className="relative z-10 flex-1">
                                     <h3 className="font-bold text-xl mb-2 pr-8">{groupTitle}</h3>
                                     <p className="text-sm opacity-80 line-clamp-2">{t(group.descriptionKey)}</p>
                                     <div className="mt-4 flex items-center gap-2 text-xs font-bold uppercase tracking-wider opacity-60">

@@ -23,6 +23,14 @@
     --color-9: 71 24% 77%;  /* Pale Olive / Khaki */
     --color-10: 34 63% 72%; /* Sandy Wheat */
 
+    /* EXACT FIGMA TEMPLATE PALETTE */
+    --t-green: 136 9% 49%;
+    --t-blue: 205 29% 45%;
+    --t-sand: 37 22% 67%;
+    --t-gray: 180 5% 65%; /* Desaturated teal, acts as Gray */
+    --t-beige: 36 38% 67%; /* Gold/Beige */
+    --t-black: 205 13% 28%; /* Charcoal/Black */
+
     --color-1-foreground: var(--color-5);
     --color-2-foreground: var(--color-5);
     --color-3-foreground: var(--color-5);
@@ -96,6 +104,84 @@
   40%,
   60% {
     transform: translate3d(4px, 0, 0);
+  }
+
+  .shake {
+    animation: shake 0.5s cubic-bezier(.36, .07, .19, .97) both;
+  }
+}
+
+@layer components {
+  /* 
+   * LUMINA TILE GLOW SYSTEM 
+   * A pure aesthetic utility for adding ambient corner blurs.
+   */
+  .lumina-glow {
+    @apply relative overflow-hidden border-transparent;
+  }
+  
+  /* The ambient top-right glowing aura */
+  .lumina-glow::before {
+    content: '';
+    @apply absolute -right-6 -top-6 w-32 h-32 bg-color1/40 rounded-full blur-2xl transition-colors duration-500 pointer-events-none z-0;
+  }
+
+  /* Automatically map the glow's hover color to match the tile's native palette */
+  .lumina-glow.hover-glow-1:hover::before { @apply bg-color5/80; }
+  .lumina-glow.hover-glow-2:hover::before { @apply bg-color2/80; }
+  .lumina-glow.hover-glow-3:hover::before { @apply bg-color3/80; }
+  .lumina-glow.hover-glow-4:hover::before { @apply bg-color4/80; }
+  .lumina-glow.hover-glow-5:hover::before { @apply bg-color5/80; }
+  .lumina-glow.hover-glow-6:hover::before { @apply bg-color6/80; }
+  .lumina-glow.hover-glow-7:hover::before { @apply bg-color7/80; }
+  .lumina-glow.hover-glow-8:hover::before { @apply bg-color8/80; }
+  .lumina-glow.hover-glow-9:hover::before { @apply bg-color9/80; }
+  .lumina-glow.hover-glow-10:hover::before { @apply bg-color10/80; }
+  
+  /* Master Template Exact Binds */
+  .bg-t-green { background-color: hsl(var(--t-green)); }
+  .bg-t-blue { background-color: hsl(var(--t-blue)); }
+  .bg-t-sand { background-color: hsl(var(--t-sand)); }
+  .bg-t-gray { background-color: hsl(var(--t-gray)); }
+  .bg-t-beige { background-color: hsl(var(--t-beige)); }
+  .bg-t-black { background-color: hsl(var(--t-black)); }
+
+  .hover\:bg-t-green\/30:hover { background-color: hsl(var(--t-green) / 0.3); }
+  .hover\:bg-t-blue\/30:hover { background-color: hsl(var(--t-blue) / 0.3); }
+  .hover\:bg-t-sand\/30:hover { background-color: hsl(var(--t-sand) / 0.3); }
+  .hover\:bg-t-gray\/30:hover { background-color: hsl(var(--t-gray) / 0.3); }
+  .hover\:bg-t-beige\/30:hover { background-color: hsl(var(--t-beige) / 0.3); }
+  .hover\:bg-t-black\/30:hover { background-color: hsl(var(--t-black) / 0.3); }
+
+  .border-t-green\/20 { border-color: hsl(var(--t-green) / 0.2); }
+  .border-t-blue\/20 { border-color: hsl(var(--t-blue) / 0.2); }
+  .border-t-sand\/20 { border-color: hsl(var(--t-sand) / 0.2); }
+  .border-t-gray\/20 { border-color: hsl(var(--t-gray) / 0.2); }
+  .border-t-beige\/20 { border-color: hsl(var(--t-beige) / 0.2); }
+  .border-t-black\/20 { border-color: hsl(var(--t-black) / 0.2); }
+
+  .text-t-green { color: hsl(var(--t-green)); }
+  .text-t-blue { color: hsl(var(--t-blue)); }
+  .text-t-sand { color: hsl(var(--t-sand)); }
+  .text-t-gray { color: hsl(var(--t-gray)); }
+  .text-t-beige { color: hsl(var(--t-beige)); }
+  .text-t-black { color: hsl(var(--t-black)); }
+
+  .lumina-glow.hover-glow-t-green:hover::before { background-color: hsl(var(--t-green) / 0.8); }
+  .lumina-glow.hover-glow-t-blue:hover::before { background-color: hsl(var(--t-blue) / 0.8); }
+  .lumina-glow.hover-glow-t-sand:hover::before { background-color: hsl(var(--t-sand) / 0.8); }
+  .lumina-glow.hover-glow-t-gray:hover::before { background-color: hsl(var(--t-gray) / 0.8); }
+  .lumina-glow.hover-glow-t-beige:hover::before { background-color: hsl(var(--t-beige) / 0.8); }
+  .lumina-glow.hover-glow-t-black:hover::before { background-color: hsl(var(--t-black) / 0.8); }
+
+  /* Hero variant for massive dashboard banners */
+  .lumina-glow-hero::before {
+    @apply -right-12 -top-12 w-64 h-64 blur-3xl opacity-50 bg-color1/20;
+  }
+
+  /* Ensure the content inside stays layered above the ambient blur */
+  .lumina-glow > * {
+    @apply relative z-10;
   }
 }
 

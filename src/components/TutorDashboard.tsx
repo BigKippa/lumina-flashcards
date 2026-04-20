@@ -612,8 +612,7 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                 {view === 'dashboard' && (
                     <div className="flex flex-col gap-6 max-w-6xl mx-auto mt-6">
                         {/* Tutor Hero Tile */}
-                        <div data-dev-id="tutor-hero-tile" className="bg-color5 border border-color5/50 rounded-3xl p-8 flex flex-col md:flex-row gap-8 items-center shadow-md relative overflow-hidden text-color1">
-                            <div className="absolute right-0 top-0 w-64 h-64 bg-color1/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+                        <div data-dev-id="tutor-hero-tile" className="lumina-glow lumina-glow-hero hover-glow-5 bg-color5 border border-color5/50 rounded-3xl p-8 flex flex-col md:flex-row gap-8 items-center shadow-md text-color1">
 
                             {/* Profile Info (Left) */}
                             <div className="flex items-center gap-6 relative z-10 w-full md:w-auto md:min-w-[320px] shrink-0">

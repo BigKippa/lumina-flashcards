@@ -31,7 +31,7 @@ export function UserModeSelectionScreen({ onSelectMode }: UserModeSelectionScree
                     {/* Learner */}
                     <button
                         onClick={() => onSelectMode('user')}
-                        className="flex flex-col items-center p-8 rounded-2xl bg-color4 backdrop-blur-sm border border-color4/20 hover:border-color4/50 hover:bg-color4/30 transition-all group hover:scale-105 shadow-lg hover:shadow-xl"
+                        className="flex flex-col items-center p-8 rounded-2xl bg-color4 backdrop-blur-sm border border-color4/20 hover:border-color4/50 hover:bg-color4/30 transition-all lumina-glow hover-glow-4 hover:scale-105 shadow-lg hover:shadow-xl"
                     >
                         <div className="w-20 h-20 rounded-full bg-color4 text-color4 flex items-center justify-center mb-6 group-hover:bg-color4 group-hover:text-color1 transition-colors">
                             <Sparkles className="w-10 h-10" />
@@ -45,7 +45,7 @@ export function UserModeSelectionScreen({ onSelectMode }: UserModeSelectionScree
                     {/* Tutor */}
                     <button
                         onClick={() => onSelectMode('tutor')}
-                        className="flex flex-col items-center p-8 rounded-2xl bg-color4 backdrop-blur-sm border border-color4/20 hover:border-color4/50 hover:bg-color4/30 transition-all group hover:scale-105 shadow-lg hover:shadow-xl"
+                        className="flex flex-col items-center p-8 rounded-2xl bg-color4 backdrop-blur-sm border border-color4/20 hover:border-color4/50 hover:bg-color4/30 transition-all lumina-glow hover-glow-4 hover:scale-105 shadow-lg hover:shadow-xl"
                     >
                         <div className="w-20 h-20 rounded-full bg-color4 text-color4 flex items-center justify-center mb-6 group-hover:bg-color4 group-hover:text-color1 transition-colors">
                             <GraduationCap className="w-10 h-10" />
@@ -59,7 +59,7 @@ export function UserModeSelectionScreen({ onSelectMode }: UserModeSelectionScree
                     {/* Admin */}
                     <button
                         onClick={() => onSelectMode('admin')}
-                        className="flex flex-col items-center p-8 rounded-2xl bg-color3 backdrop-blur-sm border border-color3/20 hover:border-color3/50 hover:bg-color3/30 transition-all group hover:scale-105 shadow-lg hover:shadow-xl"
+                        className="flex flex-col items-center p-8 rounded-2xl bg-color3 backdrop-blur-sm border border-color3/20 hover:border-color3/50 hover:bg-color3/30 transition-all lumina-glow hover-glow-3 hover:scale-105 shadow-lg hover:shadow-xl"
                     >
                         <div className="w-20 h-20 rounded-full bg-color3 text-color3 flex items-center justify-center mb-6 group-hover:bg-color3 group-hover:text-color1 transition-colors">
                             <Shield className="w-10 h-10" />

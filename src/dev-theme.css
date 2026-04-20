@@ -434,9 +434,13 @@
 }
 [data-dev-id="student-widget-active-decks"] {
   background-color: color-mix(in srgb, hsl(var(--color-8)) 100%, transparent) !important;
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+  border-color: transparent !important;
 }
 [data-dev-id="student-widget-active-decks"] > svg:nth-of-type(1) {
   color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+  font-weight: 700 !important;
+  background-color: transparent !important;
 }
 [data-dev-id="student-widget-active-decks"] > span:nth-of-type(1) {
   color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
@@ -483,4 +487,48 @@
 [data-dev-id="app-header"] > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(1) {
   background-color: color-mix(in srgb, hsl(var(--color-6)) 100%, transparent) !important;
   color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="student-widget-messages"] > svg:nth-of-type(1) > path:nth-of-type(1) {
+  border-color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="student-widget-active-decks"] > svg:nth-of-type(1) > path:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+  font-weight: 700 !important;
+}
+[data-dev-id="app-main-column"] > main:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(1) > div:nth-of-type(1) > h3:nth-of-type(1) {
+}
+[data-dev-id="app-main-column"] > main:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(1) {
+  background-color: color-mix(in srgb, hsl(var(--color-8)) 100%, transparent) !important;
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="app-main-column"] > main:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(5) > div:nth-of-type(1) > h3:nth-of-type(1) {
+}
+[data-dev-id="app-main-column"] > main:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(5) {
+  background-color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="app-main-column"] > main:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(3) {
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="app-main-column"] > main:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(1) > div:nth-of-type(2) > svg:nth-of-type(1) > path:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="app-main-column"] > main:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(3) > div:nth-of-type(2) > svg:nth-of-type(1) {
+  border-color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="app-main-column"] > main:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(5) > div:nth-of-type(2) > svg:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="app-main-column"] > main:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(2) > div:nth-of-type(2) > svg:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="app-main-column"] > main:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(4) > div:nth-of-type(2) > svg:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="app-main-column"] > main:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(1) > div:nth-of-type(2) {
+  border-color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="app-main-column"] > main:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > button:nth-of-type(1) {
+  background-color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
 }

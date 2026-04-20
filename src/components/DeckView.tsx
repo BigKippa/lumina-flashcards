@@ -65,32 +65,30 @@ const DeckView: React.FC<DeckViewProps> = ({ cards: _cards, title, onStartStudy,
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 animate-in slide-in-from-bottom-3 fade-in duration-500 delay-100">
                 <button
                     onClick={onStartStudy}
-                    className="flex flex-col items-center justify-center p-6 bg-card hover:bg-secondary/20 border border-border rounded-xl shadow-sm hover:shadow-md transition-all group"
+                    className="flex flex-col items-center justify-center p-6 border rounded-xl shadow-sm hover:shadow-md transition-all group relative overflow-hidden bg-t-green hover:bg-t-green/30 border-t-green/20 text-color1 lumina-glow hover-glow-t-green"
                 >
-                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary group-hover:text-white transition-colors">
-                        <BookOpen className="w-6 h-6 text-primary group-hover:text-white" />
+                    <div className="w-12 h-12 rounded-xl bg-color1 text-t-green flex items-center justify-center mb-3 group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
+                        <BookOpen className="w-6 h-6" />
                     </div>
-                    <span className="font-semibold text-lg">Study Mode</span>
-                    <span className="text-sm text-muted-foreground">Standard flashcards</span>
+                    <span className="font-semibold text-lg relative z-10">Study Mode</span>
+                    <span className="text-sm text-color1/80 relative z-10">Standard flashcards</span>
                 </button>
 
                 <button
                     onClick={() => setIsQuizOptionsOpen(true)}
-                    className="group relative overflow-hidden rounded-3xl bg-muted border border-muted/80 hover:border-muted-foreground/30 transition-all duration-300 cursor-pointer hover:scale-[1.02] hover:shadow-2xl hover:shadow-muted/20"
+                    className="group relative overflow-hidden rounded-3xl border transition-all duration-300 cursor-pointer hover:scale-[1.02] bg-t-blue hover:bg-t-blue/30 border-t-blue/20 text-color1 lumina-glow hover-glow-t-blue shadow-lg"
                 >
-                    <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
                     <div className="p-8 flex flex-col h-full relative z-10">
-                        <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center mb-6 text-white group-hover:bg-white/30 transition-colors duration-300">
+                        <div className="w-14 h-14 rounded-2xl bg-color1 text-t-blue flex items-center justify-center mb-6 group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
                             <BrainCircuit className="w-7 h-7" />
                         </div>
 
-                        <h3 className="text-2xl font-bold text-white mb-2">Quiz Challenge</h3>
-                        <p className="text-white/90 mb-8 flex-grow">
+                        <h3 className="text-2xl font-bold mb-2">Quiz Challenge</h3>
+                        <p className="text-color1/90 mb-8 flex-grow">
                             Test your knowledge with multiple choice questions.
                         </p>
 
-                        <div className="flex items-center text-sm font-medium text-white/80 group-hover:text-white transition-colors">
+                        <div className="flex items-center text-sm font-medium text-color1/80 transition-colors">
                             <span>Endless</span>
                             <span className="mx-2">•</span>
                             <span>Multiple Choice</span>
@@ -157,13 +155,13 @@ const DeckView: React.FC<DeckViewProps> = ({ cards: _cards, title, onStartStudy,
 
                 <button
                     onClick={onStartTimedMode}
-                    className="flex flex-col items-center justify-center p-6 bg-card hover:bg-secondary/20 border border-border rounded-xl shadow-sm hover:shadow-md transition-all group"
+                    className="flex flex-col items-center justify-center p-6 border rounded-xl shadow-sm hover:shadow-md transition-all group relative overflow-hidden bg-t-sand hover:bg-t-sand/30 border-t-sand/20 text-color1 lumina-glow hover-glow-t-sand"
                 >
-                    <div className="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center mb-3 group-hover:bg-orange-500 group-hover:text-white transition-colors">
-                        <Clock className="w-6 h-6 text-orange-600 dark:text-orange-400 group-hover:text-white" />
+                    <div className="w-12 h-12 rounded-xl bg-color1 text-t-sand flex items-center justify-center mb-3 group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
+                        <Clock className="w-6 h-6" />
                     </div>
-                    <span className="font-semibold text-lg">Timed Mode</span>
-                    <span className="text-sm text-muted-foreground">Speed & Accuracy</span>
+                    <span className="font-semibold text-lg relative z-10">Timed Mode</span>
+                    <span className="text-sm text-color1/80 relative z-10">Speed & Accuracy</span>
                 </button>
             </div>
 

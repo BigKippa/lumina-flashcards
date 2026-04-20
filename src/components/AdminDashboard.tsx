@@ -594,9 +594,8 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                             <button
                                 data-dev-id="admin-tile-users"
                                 onClick={() => onTabChange('users')}
-                                className="bg-color1 hover:bg-color1/30 border border-color1/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1 text-left"
+                                className="bg-color1 hover:bg-color1/30 border border-color1/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg lumina-glow hover-glow-1 flex flex-col gap-4 shadow-sm h-full text-color1 text-left"
                             >
-                                <div className="absolute -right-6 -top-6 w-24 h-24 bg-color5 rounded-full blur-2xl group-hover:bg-color1 transition-colors"></div>
                                 <div className="w-12 h-12 rounded-xl bg-color5 text-color1 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color5/20 shrink-0">
                                     <Users className="w-6 h-6" />
                                 </div>
@@ -610,9 +609,8 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                         <button
                             data-dev-id="admin-tile-decks"
                             onClick={() => onTabChange('decks')}
-                            className="bg-color2 hover:bg-color2/30 border border-color2/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1 text-left"
+                            className="bg-color2 hover:bg-color2/30 border border-color2/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg lumina-glow hover-glow-2 flex flex-col gap-4 shadow-sm h-full text-color1 text-left"
                         >
-                            <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color2 transition-colors"></div>
                             <div className="w-12 h-12 rounded-xl bg-color1 text-color2 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
                                 <Library className="w-6 h-6" />
                             </div>
@@ -625,9 +623,8 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                         <button
                             data-dev-id="admin-tile-cards"
                             onClick={() => onTabChange('cards')}
-                            className="bg-color3 hover:bg-color3/30 border border-color3/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1 text-left"
+                            className="bg-color3 hover:bg-color3/30 border border-color3/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg lumina-glow hover-glow-3 flex flex-col gap-4 shadow-sm h-full text-color1 text-left"
                         >
-                            <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color3 transition-colors"></div>
                             <div className="w-12 h-12 rounded-xl bg-color1 text-color3 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
                                 <Edit2 className="w-6 h-6" />
                             </div>
@@ -640,9 +637,8 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                         <button
                             data-dev-id="admin-tile-tickets"
                             onClick={() => onTabChange('tickets')}
-                            className="bg-color4 hover:bg-color4/30 border border-color4/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1 text-left"
+                            className="bg-color4 hover:bg-color4/30 border border-color4/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg lumina-glow hover-glow-4 flex flex-col gap-4 shadow-sm h-full text-color1 text-left"
                         >
-                            <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color4 transition-colors"></div>
                             <div className="w-12 h-12 rounded-xl bg-color1 text-color4 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
                                 <Sparkles className="w-6 h-6" />
                             </div>
@@ -655,9 +651,8 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                         <button
                             data-dev-id="admin-tile-review"
                             onClick={() => onTabChange('review-queue')}
-                            className="bg-color3 hover:bg-color3/30 border border-color3/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1 text-left"
+                            className="bg-color3 hover:bg-color3/30 border border-color3/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg lumina-glow hover-glow-3 flex flex-col gap-4 shadow-sm h-full text-color1 text-left"
                         >
-                            <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color3 transition-colors"></div>
                             <div className="w-12 h-12 rounded-xl bg-color1 text-color3 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
                                 <Bookmark className="w-6 h-6" />
                             </div>
@@ -670,9 +665,8 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                         <button
                             data-dev-id="admin-tile-archived"
                             onClick={() => onTabChange('archived')}
-                            className="bg-color5 hover:bg-color5/30 border border-color5/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1 text-left"
+                            className="bg-color5 hover:bg-color5/30 border border-color5/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg lumina-glow hover-glow-5 flex flex-col gap-4 shadow-sm h-full text-color1 text-left"
                         >
-                            <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color5 transition-colors"></div>
                             <div className="w-12 h-12 rounded-xl bg-color1 text-color5 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
                                 <Archive className="w-6 h-6" />
                             </div>
@@ -685,9 +679,8 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                         <button
                             data-dev-id="admin-tile-settings"
                             onClick={() => onTabChange('settings')}
-                            className="bg-color1 hover:bg-color1/30 border border-color1/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1 text-left"
+                            className="bg-color1 hover:bg-color1/30 border border-color1/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg lumina-glow hover-glow-1 flex flex-col gap-4 shadow-sm h-full text-color1 text-left"
                         >
-                            <div className="absolute -right-6 -top-6 w-24 h-24 bg-color5 rounded-full blur-2xl group-hover:bg-color1 transition-colors"></div>
                             <div className="w-12 h-12 rounded-xl bg-color5 text-color1 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color5/20 shrink-0">
                                 <Settings className="w-6 h-6" />
                             </div>
@@ -699,9 +692,8 @@ export function AdminDashboard({ decks, cards, activeDeckId, activeTab, onTabCha
                         <button
                             data-dev-id="admin-tile-testmode"
                             onClick={() => onTabChange('testMode')}
-                            className="bg-color2 hover:bg-color2/30 border border-color2/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1 text-left"
+                            className="bg-color2 hover:bg-color2/30 border border-color2/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg lumina-glow hover-glow-2 flex flex-col gap-4 shadow-sm h-full text-color1 text-left"
                         >
-                            <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color2 transition-colors"></div>
                             <div className="w-12 h-12 rounded-xl bg-color1 text-color2 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
                                 <Beaker className="w-6 h-6" />
                             </div>
