@@ -354,8 +354,133 @@
   background-color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
 }
 [data-dev-id="app-main-column"] > main:nth-of-type(1) {
-  background-color: color-mix(in srgb, hsl(var(--color-6)) 100%, transparent) !important;
+  background-color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
 }
 [data-dev-id="app-main-column"] > main:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) {
+  background-color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="app-main-column"] > main:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > button:nth-of-type(2) {
+  background-color: color-mix(in srgb, hsl(var(--color-4)) 100%, transparent) !important;
+  border-color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="app-main-column"] > main:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(2) > button:nth-of-type(3) {
+  border-color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-widget-add-student"] {
+  background-color: color-mix(in srgb, hsl(var(--color-8)) 100%, transparent) !important;
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-widget-add-student"] > span:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-widget-active-students"] > span:nth-of-type(2) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+  font-weight: 700 !important;
+}
+[data-dev-id="tutor-widget-messages"] > span:nth-of-type(2) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+  font-weight: 700 !important;
+}
+[data-dev-id="tutor-widget-create-flashcards"] > svg:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-tile-quickstart"] {
+  background-color: color-mix(in srgb, hsl(var(--color-8)) 100%, transparent) !important;
+}
+[data-dev-id="student-tile-study"] {
+  background-color: color-mix(in srgb, hsl(var(--color-8)) 100%, transparent) !important;
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="student-tile-search"] {
+  background-color: color-mix(in srgb, #979595 100%, transparent) !important;
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="student-tile-favorites"] > div:nth-of-type(2) {
+}
+[data-dev-id="student-tile-favorites"] > div:nth-of-type(3) {
+}
+[data-dev-id="student-tile-favorites"] {
+  background-color: color-mix(in srgb, hsl(var(--color-3)) 100%, transparent) !important;
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="student-tile-assignments"] {
+  background-color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="student-tile-study"] > div:nth-of-type(3) > p:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="student-tile-manage"] > div:nth-of-type(3) > h2:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="student-tile-manage"] > div:nth-of-type(3) > p:nth-of-type(1) {
   background-color: transparent !important;
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="student-tile-search"] > div:nth-of-type(3) > p:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="student-tile-messages"] > div:nth-of-type(3) > h2:nth-of-type(1) {
+  background-color: transparent !important;
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="student-tile-messages"] > div:nth-of-type(3) > p:nth-of-type(1) {
+  background-color: transparent !important;
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="student-tile-favorites"] > div:nth-of-type(3) > p:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="student-tile-favorites"] > div:nth-of-type(2) > h2:nth-of-type(1) {
+}
+[data-dev-id="student-widget-active-decks"] {
+  background-color: color-mix(in srgb, hsl(var(--color-8)) 100%, transparent) !important;
+}
+[data-dev-id="student-widget-active-decks"] > svg:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="student-widget-active-decks"] > span:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="student-widget-active-decks"] > span:nth-of-type(2) {
+  background-color: transparent !important;
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+  font-weight: 700 !important;
+}
+[data-dev-id="student-widget-messages"] {
+  background-color: color-mix(in srgb, hsl(var(--color-4)) 100%, transparent) !important;
+}
+[data-dev-id="student-widget-messages"] > svg:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="student-widget-messages"] > span:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="student-widget-messages"] > span:nth-of-type(2) {
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+  font-weight: 700 !important;
+}
+[data-dev-id="student-widget-quickstart-disabled"] > svg:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+  background-color: transparent !important;
+  border-color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="student-widget-quickstart-disabled"] > svg:nth-of-type(1) > polyline:nth-of-type(1) {
+}
+[data-dev-id="student-widget-quickstart-disabled"] {
+  background-color: color-mix(in srgb, hsl(var(--color-10)) 100%, transparent) !important;
+}
+[data-dev-id="student-widget-quickstart-disabled"] > span:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="student-dashboard-main"] {
+}
+[data-dev-id="student-tile-favorites"] > div:nth-of-type(3) > div:nth-of-type(1) > p:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="student-widget-quickstart-disabled"] > span:nth-of-type(2) {
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="app-header"] > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(1) {
+  background-color: color-mix(in srgb, hsl(var(--color-6)) 100%, transparent) !important;
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
 }

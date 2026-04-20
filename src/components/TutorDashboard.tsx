@@ -689,8 +689,9 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                     }}
                                     className="bg-color3 hover:bg-color3/80 cursor-pointer transition-colors border border-color3/50 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm group"
                                 >
-                                    <Plus className="w-6 h-6 text-color5 mb-2 group-hover:scale-110 transition-transform" />
-                                    <span className="text-sm font-bold text-color5 text-center leading-tight">Add<br />Student</span>
+                                    <Plus className="w-5 h-5 text-color5 mb-2 group-hover:scale-110 transition-transform" />
+                                    <span className="text-2xl font-bold invisible block">&nbsp;</span>
+                                    <span className="text-xs font-bold text-color5 text-center line-clamp-2">Add<br />Student</span>
                                 </div>
 
                                 {/* Create Flashcards Widget */}
@@ -699,8 +700,9 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                     onClick={() => setIsQuickAddOpen(true)}
                                     className="bg-color3 hover:bg-color3/30 cursor-pointer transition-colors backdrop-blur-sm border border-amber-500/30 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm group"
                                 >
-                                    <Library className="w-6 h-6 text-amber-400 mb-2 group-hover:scale-110 transition-transform" />
-                                    <span className="text-sm font-bold text-color1 text-center leading-tight">Create<br />Flashcards</span>
+                                    <Library className="w-5 h-5 text-amber-400 mb-2 group-hover:scale-110 transition-transform" />
+                                    <span className="text-2xl font-bold invisible block">&nbsp;</span>
+                                    <span className="text-xs font-bold text-color1 text-center line-clamp-2">Create<br />Flashcards</span>
                                 </div>
                             </div>
                         </div>
@@ -740,15 +742,15 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                                     <div
                                                         data-dev-id="tutor-tile-all-content"
                                                         onClick={() => onViewChange('flashcards')}
-                                                        className="bg-cyan-500/25 hover:bg-cyan-500/30 border border-cyan-500/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full"
+                                                        className="bg-color2 hover:bg-color2/30 border border-color2/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
                                                     >
-                                                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl group-hover:bg-cyan-500/20 transition-colors"></div>
-                                                        <div className="w-12 h-12 rounded-xl bg-cyan-100 text-cyan-600 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-cyan-200 shrink-0">
+                                                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color2 transition-colors"></div>
+                                                        <div className="w-12 h-12 rounded-xl bg-color1 text-color2 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
                                                             <Library className="w-6 h-6" />
                                                         </div>
                                                         <div className="relative z-10 font-medium flex-1">
                                                             <h2 className="text-xl font-bold mb-1">Get New Material</h2>
-                                                            <p className="text-sm text-muted-foreground line-clamp-2">Browse the complete library of global flashcards and decks.</p>
+                                                            <p className="text-sm text-color1/80 line-clamp-2">Browse the complete library of global flashcards and decks.</p>
                                                         </div>
                                                     </div>
                                                 );
@@ -758,15 +760,15 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                                     <div
                                                         data-dev-id="tutor-tile-quickstart"
                                                         onClick={() => alert('Quickstart Navigation - Coming Soon')}
-                                                        className="bg-color3 hover:bg-color3/30 border border-color3/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full"
+                                                        className="bg-color4 hover:bg-color4/30 border border-color4/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
                                                     >
-                                                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color3 transition-colors"></div>
-                                                        <div className="w-12 h-12 rounded-xl bg-color1 text-color3 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color3/30 shrink-0">
+                                                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color4 transition-colors"></div>
+                                                        <div className="w-12 h-12 rounded-xl bg-color1 text-color4 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
                                                             <Zap className="w-6 h-6" />
                                                         </div>
                                                         <div className="relative z-10 font-medium flex-1">
                                                             <h2 className="text-xl font-bold mb-1">Quickstart</h2>
-                                                            <p className="text-sm text-muted-foreground line-clamp-2">Jump straight into your next scheduled session or lesson plan.</p>
+                                                            <p className="text-sm text-color1/80 line-clamp-2">Jump straight into your next scheduled session or lesson plan.</p>
                                                         </div>
                                                     </div>
                                                 );
@@ -776,15 +778,15 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                                     <div
                                                         data-dev-id="tutor-tile-students"
                                                         onClick={() => onViewChange('students')}
-                                                        className="bg-color4 hover:bg-color4/30 border border-color4/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full"
+                                                        className="bg-color5 hover:bg-color5/30 border border-color5/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
                                                     >
-                                                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color4 transition-colors"></div>
-                                                        <div className="w-12 h-12 rounded-xl bg-color1 text-color4 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color4/30 shrink-0">
+                                                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color5 transition-colors"></div>
+                                                        <div className="w-12 h-12 rounded-xl bg-color1 text-color5 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
                                                             <Users className="w-6 h-6" />
                                                         </div>
                                                         <div className="relative z-10 font-medium flex-1">
                                                             <h2 className="text-xl font-bold mb-1 flex items-center gap-2">Students <span className="bg-color1 text-color5 text-xs py-0.5 px-2 rounded-full font-bold">{students.length}</span></h2>
-                                                            <p className="text-sm text-muted-foreground line-clamp-2">View progress, assign homework, and manage student profiles.</p>
+                                                            <p className="text-sm text-color1/80 line-clamp-2">View progress, assign homework, and manage student profiles.</p>
                                                         </div>
                                                     </div>
                                                 );
@@ -794,15 +796,15 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                                     <div
                                                         data-dev-id="tutor-tile-content"
                                                         onClick={() => onViewChange('learning-content')}
-                                                        className="bg-color2 hover:bg-color2/30 border border-color2/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full"
+                                                        className="bg-color3 hover:bg-color3/30 border border-color3/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
                                                     >
-                                                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color2 transition-colors"></div>
-                                                        <div className="w-12 h-12 rounded-xl bg-color1 text-color2 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color2/30 shrink-0">
+                                                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color3 transition-colors"></div>
+                                                        <div className="w-12 h-12 rounded-xl bg-color1 text-color3 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
                                                             <Layout className="w-6 h-6" />
                                                         </div>
                                                         <div className="relative z-10 font-medium flex-1">
                                                             <h2 className="text-xl font-bold mb-1 flex items-center gap-2">Manage Learning Content</h2>
-                                                            <p className="text-sm text-muted-foreground line-clamp-2">Create, edit, and organize flashcard decks for your students.</p>
+                                                            <p className="text-sm text-color1/80 line-clamp-2">Create, edit, and organize flashcard decks for your students.</p>
                                                         </div>
                                                     </div>
                                                 );
@@ -812,15 +814,15 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                                     <div
                                                         data-dev-id="tutor-tile-messages"
                                                         onClick={() => alert('Messages Navigation - Coming Soon')}
-                                                        className="bg-color5 hover:bg-color5/30 border border-color5/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
+                                                        className="bg-color2 hover:bg-color2/30 border border-color2/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
                                                     >
-                                                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color5 transition-colors"></div>
-                                                        <div className="w-12 h-12 rounded-xl bg-color1 text-color5 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color5/30 shrink-0">
+                                                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color2 transition-colors"></div>
+                                                        <div className="w-12 h-12 rounded-xl bg-color1 text-color2 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
                                                             <MessageSquare className="w-6 h-6" />
                                                         </div>
                                                         <div className="relative z-10 font-medium flex-1">
                                                             <h2 className="text-xl font-bold mb-1">Messages</h2>
-                                                            <p className="text-sm text-color1/70 line-clamp-2">Communicate directly with your students and review feedback.</p>
+                                                            <p className="text-sm text-color1/80 line-clamp-2">Communicate directly with your students and review feedback.</p>
                                                         </div>
                                                     </div>
                                                 );
@@ -830,15 +832,15 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                                     <div
                                                         data-dev-id="tutor-tile-todo"
                                                         onClick={() => alert('To-Do List Navigation - Coming Soon')}
-                                                        className="bg-color3 hover:bg-color3/30 border border-color3/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full"
+                                                        className="bg-color4 hover:bg-color4/30 border border-color4/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
                                                     >
-                                                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color3 transition-colors"></div>
-                                                        <div className="w-12 h-12 rounded-xl bg-color1 text-color3 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color3/30 shrink-0">
+                                                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color4 transition-colors"></div>
+                                                        <div className="w-12 h-12 rounded-xl bg-color1 text-color4 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
                                                             <CheckSquare className="w-6 h-6" />
                                                         </div>
                                                         <div className="relative z-10 font-medium flex-1">
                                                             <h2 className="text-xl font-bold mb-1">To Do List</h2>
-                                                            <p className="text-sm text-muted-foreground line-clamp-2">Track your administrative tasks, grading, and upcoming goals.</p>
+                                                            <p className="text-sm text-color1/80 line-clamp-2">Track your administrative tasks, grading, and upcoming goals.</p>
                                                         </div>
                                                     </div>
                                                 );
@@ -888,15 +890,15 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                             {/* Manage Flashcards Tile */}
                             <div
                                 onClick={() => onViewChange('manage-flashcards')}
-                                className="bg-color4 hover:bg-color4/30 border border-color4/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden"
+                                className="bg-color2 hover:bg-color2/30 border border-color2/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
                             >
-                                <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color4 transition-colors"></div>
-                                <div className="w-12 h-12 rounded-xl bg-color1 text-color4 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color4/30">
+                                <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color2 transition-colors"></div>
+                                <div className="w-12 h-12 rounded-xl bg-color1 text-color2 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
                                     <Library className="w-6 h-6" />
                                 </div>
-                                <div className="relative z-10 font-medium">
+                                <div className="relative z-10 font-medium flex-1">
                                     <h2 className="text-xl font-bold mb-1">Manage Flashcards</h2>
-                                    <p className="text-sm text-muted-foreground line-clamp-2">View and edit your entire library of individual flashcards.</p>
+                                    <p className="text-sm text-color1/80 line-clamp-2">View and edit your entire library of individual flashcards.</p>
                                 </div>
                             </div>
 

@@ -73,7 +73,16 @@ export const DevModeProvider: React.FC<{ children: React.ReactNode; isAdmin: boo
     const [previewOverrides, setPreviewOverrides] = useState<StyleOverrides>({});
 
     useEffect(() => {
-        localStorage.setItem('lumina_dev_active_history', JSON.stringify(history));
+        try {
+            localStorage.setItem('lumina_dev_active_history', JSON.stringify(history));
+        } catch (e) {
+            console.warn("Storage Quota Exceeded for dev history. Purging older states.", e);
+            if (history.length > 5) {
+                const pruned = history.slice(-5);
+                setHistory(pruned);
+                setCurrentIndex(pruned.length - 1);
+            }
+        }
     }, [history]);
 
     useEffect(() => {
@@ -208,8 +217,13 @@ export const DevModeProvider: React.FC<{ children: React.ReactNode; isAdmin: boo
             newOverrides[selector] = { ...newOverrides[selector], ...rules };
         }
         
-        const newHistory = history.slice(0, currentIndex + 1);
+        let newHistory = history.slice(0, currentIndex + 1);
         newHistory.push(newOverrides);
+        
+        if (newHistory.length > 30) {
+            newHistory = newHistory.slice(-30);
+        }
+        
         setHistory(newHistory);
         setCurrentIndex(newHistory.length - 1);
         setPreviewOverrides({});
@@ -240,8 +254,13 @@ export const DevModeProvider: React.FC<{ children: React.ReactNode; isAdmin: boo
             for (const [selector, rules] of Object.entries(previewOverrides)) {
                 newOverrides[selector] = { ...newOverrides[selector], ...rules };
             }
-            const newHistory = history.slice(0, currentIndex + 1);
+            let newHistory = history.slice(0, currentIndex + 1);
             newHistory.push(newOverrides);
+            
+            if (newHistory.length > 30) {
+                newHistory = newHistory.slice(-30);
+            }
+            
             setHistory(newHistory);
             actualIndex = newHistory.length - 1;
             setPreviewOverrides({});
@@ -590,16 +609,18 @@ const EditorModal: React.FC<EditorModalProps> = ({ element, currentStyles, draft
     const [newColorValue, setNewColorValue] = useState('#ffffff');
 
     const handleAddColor = () => {
-        if (!newColorName.trim() || !newColorValue.trim()) return;
-        const newPalette = [...palette, { name: newColorName, value: newColorValue }];
+        if (!newColorValue.trim()) return;
+        const finalName = newColorName.trim() ? newColorName.trim() : `Custom ${newColorValue}`;
+        const newPalette = [...palette, { name: finalName, value: newColorValue }];
         setPalette(newPalette);
         localStorage.setItem('dev_palette', JSON.stringify(newPalette));
         setNewColorName('');
         setNewColorValue('#ffffff');
     };
 
-    const handleRemoveColor = (val: string) => {
-        const newPalette = palette.filter(c => c.value !== val);
+    const handleRemoveColor = (idx: number) => {
+        const newPalette = [...palette];
+        newPalette.splice(idx, 1);
         setPalette(newPalette);
         localStorage.setItem('dev_palette', JSON.stringify(newPalette));
     };
@@ -612,12 +633,13 @@ const EditorModal: React.FC<EditorModalProps> = ({ element, currentStyles, draft
         return (
             <div className="flex flex-col gap-2">
                 <div className="grid grid-cols-5 gap-y-3 gap-x-2">
-                    {palette.map(c => (
-                        <div key={c.value} className="relative flex justify-center">
+                    {palette.map((c, idx) => (
+                        <div key={`pal-${idx}-${c.value}`} className="relative flex justify-center">
                             <button 
+                                type="button"
                                 onClick={() => {
                                     if (isEditingPalette) {
-                                        handleRemoveColor(c.value);
+                                        handleRemoveColor(idx);
                                     } else {
                                         applyColorWithOptions(propToUpdate, c.value, 100);
                                     }
@@ -631,6 +653,17 @@ const EditorModal: React.FC<EditorModalProps> = ({ element, currentStyles, draft
                             )}
                         </div>
                     ))}
+                    
+                    {!isEditingPalette && (
+                        <div className="relative flex justify-center items-center">
+                            <label className="w-8 h-8 rounded-full border border-color1/40 shadow-sm flex items-center justify-center cursor-pointer hover:scale-105 active:scale-95 transition-transform overflow-hidden" title="Custom Color" style={{ background: 'conic-gradient(#ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000)' }}>
+                                <input type="color" className="opacity-0 absolute inset-0 w-full h-full cursor-pointer" onChange={(e) => applyColorWithOptions(propToUpdate, e.target.value, 100)} />
+                                <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none">
+                                    <Plus className="w-5 h-5 text-white drop-shadow-md" />
+                                </div>
+                            </label>
+                        </div>
+                    )}
                 </div>
                 
                 {/* Strength Slider */}
@@ -708,10 +741,10 @@ const EditorModal: React.FC<EditorModalProps> = ({ element, currentStyles, draft
             
             <div className="p-4 space-y-6 overflow-y-auto max-h-[60vh] custom-scrollbar text-sm">
                 
-                {/* Background & Text Colors */}
+                {/* Background Color */}
                 <div className="space-y-5">
                     <div className="flex items-center justify-between border-b border-color6/30 pb-1">
-                        <h3 className="font-bold text-color4">Colors</h3>
+                        <h3 className="font-bold text-color4">Background</h3>
                         <button onClick={() => setIsEditingPalette(!isEditingPalette)} className="text-xs text-color1/70 hover:text-color1 underline">
                             {isEditingPalette ? 'Done Editing' : 'Edit Palette'}
                         </button>
@@ -727,18 +760,13 @@ const EditorModal: React.FC<EditorModalProps> = ({ element, currentStyles, draft
                                     <input type="text" value={newColorValue} onChange={e => setNewColorValue(e.target.value)} placeholder="Hex or rgb/hsl" className="flex-1 bg-color5 border border-color6 text-color1 rounded p-1.5 text-xs outline-none focus:border-color4" />
                                 </div>
                             </div>
-                            <button onClick={handleAddColor} className="mt-1 bg-color4 text-color1 rounded p-1.5 text-xs font-bold hover:bg-color4/90 flex items-center justify-center gap-1 transition-colors"><Plus className="w-3 h-3"/> Add to Palette</button>
+                            <button type="button" onClick={handleAddColor} className="mt-1 bg-color4 text-color1 rounded p-1.5 text-xs font-bold hover:bg-color4/90 flex items-center justify-center gap-1 transition-colors"><Plus className="w-3 h-3"/> Add to Palette</button>
                         </div>
                     )}
                     
                     <div className="bg-color5/30 p-2 rounded-lg border border-color6/10">
                         <label className="block mb-2 font-semibold text-color1 text-xs uppercase tracking-wider">Background Color</label>
                         {renderPaletteGrid('backgroundColor')}
-                    </div>
-                    
-                    <div className="bg-color5/30 p-2 rounded-lg border border-color6/10">
-                        <label className="block mb-2 font-semibold text-color1 text-xs uppercase tracking-wider">Text Color</label>
-                        {renderPaletteGrid('color')}
                     </div>
                 </div>
 
@@ -780,6 +808,11 @@ const EditorModal: React.FC<EditorModalProps> = ({ element, currentStyles, draft
                 <div className="space-y-4">
                     <h3 className="font-bold text-color4 border-b border-color6/30 pb-1 flex items-center gap-2"><Type className="w-4 h-4"/> Typography</h3>
                     
+                    <div className="bg-color5/30 p-2 rounded-lg border border-color6/10">
+                        <label className="block mb-2 font-semibold text-color1 text-xs uppercase tracking-wider">Text Color</label>
+                        {renderPaletteGrid('color')}
+                    </div>
+
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block mb-1 font-medium text-xs text-color1/80">Size</label>

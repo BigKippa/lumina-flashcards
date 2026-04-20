@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { UserProfile, ContactDetail, TutorProfileData } from '../types';
 import {
     Book, Pencil, Check, X, AlertCircle, Eye, EyeOff, Mail, RefreshCcw, Lock, KeyRound,
-    User, MapPin, Briefcase, Heart, Globe, Clock, Activity, Settings, Shield, UserSquare2, Upload, Trash2, Phone, Locate, Loader2, Camera, CheckCircle2, XCircle, Move
+    User, MapPin, Briefcase, Heart, Globe, Clock, Activity, Settings, Shield, UserSquare2, Upload, Trash2, Phone, Locate, Loader2, Camera, CheckCircle2, XCircle, Move, UserCircle, BookOpen
 } from 'lucide-react';
 import {
     DndContext,
@@ -1308,19 +1308,20 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
                 </button>
             </div>
 
-            {/* Main Profile Header Card */}
-            <div className="bg-card border border-border rounded-xl p-6 shadow-lg">
-                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+            {/* Main Profile Header Card (Hero Tile Standardized) */}
+            <div data-dev-id="profile-hero-tile" className="bg-color5 border border-color5/50 rounded-3xl p-8 flex flex-col md:flex-row gap-8 items-center shadow-md relative overflow-hidden text-color1">
+                <div className="absolute right-0 top-0 w-64 h-64 bg-color1/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+
+                {/* Profile Info (Left) */}
+                <div className="flex items-center gap-6 relative z-10 w-full md:w-auto md:min-w-[320px] shrink-0">
                     <div className="relative group shrink-0">
-                        {editForm.avatarUrl || user.avatarUrl ? (
-                            <div className="w-24 h-24 rounded-full overflow-hidden bg-secondary flex items-center justify-center border-4 border-background shadow-md">
+                        <div className="w-24 h-24 rounded-2xl bg-color1/20 flex items-center justify-center text-color1 shadow-inner border border-color1/20 flex-shrink-0 overflow-hidden">
+                            {editForm.avatarUrl || user.avatarUrl ? (
                                 <img src={isEditing ? editForm.avatarUrl : (user.avatarUrl || '')} alt={`${user.username} profile`} className="w-full h-full object-cover" />
-                            </div>
-                        ) : (
-                            <div className="w-24 h-24 rounded-full bg-primary/20 flex items-center justify-center text-primary border-4 border-background shadow-md">
-                                {user.role === 'admin' ? <Shield className="w-10 h-10" /> : user.role === 'tutor' ? <UserSquare2 className="w-10 h-10" /> : <User className="w-10 h-10" />}
-                            </div>
-                        )}
+                            ) : (
+                                user.role === 'admin' ? <Shield className="w-12 h-12" /> : user.role === 'tutor' ? <UserSquare2 className="w-12 h-12" /> : <UserCircle className="w-12 h-12" />
+                            )}
+                        </div>
 
                         {isEditing && (
                             <>
@@ -1344,15 +1345,15 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
                                         }
                                     }}
                                 />
-                                <div className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1">
+                                <div className="absolute inset-0 rounded-2xl bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1">
                                     <div className="flex gap-2">
-                                        <label htmlFor="profile-picture-upload" className="cursor-pointer text-white hover:text-primary transition-colors p-1" title="Upload Picture">
+                                        <label htmlFor="profile-picture-upload" className="cursor-pointer text-white hover:text-color5 transition-colors p-1" title="Upload Picture">
                                             <Upload className="w-5 h-5" />
                                         </label>
                                         <button
                                             type="button"
                                             onClick={startCamera}
-                                            className="text-white hover:text-primary transition-colors p-1"
+                                            className="text-white hover:text-color5 transition-colors p-1"
                                             title="Take Photo"
                                         >
                                             <Camera className="w-5 h-5" />
@@ -1362,7 +1363,7 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
                                         <button
                                             type="button"
                                             onClick={() => setEditForm(prev => ({ ...prev, avatarUrl: '' }))}
-                                            className="text-white hover:text-destructive transition-colors p-1 mt-1"
+                                            className="text-white hover:text-red-400 transition-colors p-1 mt-1"
                                             title="Remove Picture"
                                         >
                                             <Trash2 className="w-4 h-4" />
@@ -1373,68 +1374,77 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
                         )}
                     </div>
                     {isEditing && (
-                        <div className="text-sm text-primary mt-3 font-bold text-center w-full animate-pulse transition-all">Upload a Photo for your Profile!</div>
+                        <div className="text-sm text-color1/70 mt-3 font-bold text-center w-full animate-pulse transition-all absolute -bottom-6">Upload Photo</div>
                     )}
-                    <div className="flex-1 text-center sm:text-left space-y-2 w-full mt-2">
-                        {isEditing ? (
-                            <div className="space-y-4 max-w-sm mx-auto sm:mx-0">
-                                <div>
-                                    <label className="text-xs font-semibold text-muted-foreground uppercase">Username</label>
-                                    <input
-                                        value={editForm.username}
-                                        onChange={e => setEditForm({ ...editForm, username: e.target.value })}
-                                        className="w-full p-2 mb-2 rounded bg-secondary/50 border border-border focus:border-primary outline-none text-sm"
-                                    />
-                                    <label className="text-xs font-semibold text-muted-foreground uppercase">Role</label>
-                                    <select
-                                        value={editForm.role}
-                                        onChange={e => setEditForm({ ...editForm, role: e.target.value as 'user' | 'tutor' | 'admin' })}
-                                        className="w-full p-2 rounded bg-secondary/50 border border-border focus:border-primary outline-none text-sm"
-                                    >
-                                        <option value="user">Student</option>
-                                        <option value="tutor">Tutor</option>
-                                        <option value="admin">Admin</option>
-                                    </select>
-                                </div>
-                                <div className="flex gap-2 justify-center sm:justify-start mt-2">
-                                    <button onClick={handleSaveProfile} className="flex items-center gap-1 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90">
-                                        <Check className="w-4 h-4" /> Save
-                                    </button>
-                                    <button onClick={handleCancel} className="flex items-center gap-1 px-4 py-2 rounded-lg bg-secondary text-secondary-foreground text-sm font-bold hover:bg-secondary/80">
-                                        <X className="w-4 h-4" /> Cancel
-                                    </button>
+                </div>
+
+                <div className="flex-1 text-center sm:text-left space-y-2 w-full mt-2 relative z-10">
+                    {isEditing ? (
+                        <div className="space-y-4 max-w-sm mx-auto sm:mx-0">
+                            <div>
+                                <label className="text-xs font-semibold text-color1/70 uppercase">Username</label>
+                                <input
+                                    value={editForm.username}
+                                    onChange={e => setEditForm(prev => ({ ...prev, username: e.target.value }))}
+                                    className="w-full p-2 mb-2 rounded bg-color1/20 border border-color1/30 text-color1 focus:border-color1 outline-none text-sm placeholder:text-color1/50"
+                                />
+                                <label className="text-xs font-semibold text-color1/70 uppercase">Role</label>
+                                <select
+                                    value={editForm.role}
+                                    onChange={e => setEditForm(prev => ({ ...prev, role: e.target.value as 'user' | 'tutor' | 'admin' }))}
+                                    className="w-full p-2 rounded bg-color1/20 border border-color1/30 text-color1 focus:border-color1 outline-none text-sm"
+                                >
+                                    <option value="user" className="text-foreground bg-background">Student</option>
+                                    <option value="tutor" className="text-foreground bg-background">Tutor</option>
+                                    <option value="admin" className="text-foreground bg-background">Admin</option>
+                                </select>
+                            </div>
+                            <div className="flex gap-2 justify-center sm:justify-start mt-2">
+                                <button onClick={handleSaveProfile} className="flex items-center gap-1 px-4 py-2 rounded-lg bg-color1 text-color5 text-sm font-bold shadow-sm hover:bg-color1/90 transition-all">
+                                    <Check className="w-4 h-4" /> Save
+                                </button>
+                                <button onClick={handleCancel} className="flex items-center gap-1 px-4 py-2 rounded-lg bg-color5/50 border border-color1/20 text-color1 text-sm font-bold hover:bg-color5/70 transition-all">
+                                    <X className="w-4 h-4" /> Cancel
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        <>
+                            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
+                                <h3 className="text-3xl font-bold text-color1">{user.username}</h3>
+                                <div className="flex flex-col gap-y-1.5 mt-2 sm:mt-0 text-sm text-color1/70 font-medium">
+                                    <span className="flex items-center gap-2">
+                                        {user.role === 'admin' ? <Shield className="w-4 h-4 text-color1" /> : user.role === 'tutor' ? <BookOpen className="w-4 h-4 text-color1" /> : <User className="w-4 h-4 text-color1" />}
+                                        <span className="text-color1 capitalize">{user.role === 'user' ? 'Learner' : user.role || 'Learner'}</span>
+                                    </span>
+                                    {user.email && (
+                                        <span className="flex items-center gap-2">
+                                            <Mail className="w-4 h-4 text-color1" />
+                                            {maskEmail(user.email)}
+                                        </span>
+                                    )}
                                 </div>
                             </div>
-                        ) : (
-                            <>
-                                <div className="flex flex-col sm:flex-row items-center gap-3">
-                                    <h3 className="text-2xl font-bold text-foreground">{user.username}</h3>
-                                    <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border border-primary/20">
-                                        {user.role === 'user' ? 'learner' : user.role || 'learner'}
+                            <div className="flex flex-wrap justify-center sm:justify-start gap-2 mt-4">
+                                {user.nativeLanguage && (
+                                    <span className="bg-color1/20 px-3 py-1 rounded-full text-xs font-medium text-color1 border border-color1/20 flex items-center gap-1">
+                                        <Globe className="w-3 h-3" /> {user.nativeLanguage}
                                     </span>
-                                </div>
-                                <p className="text-muted-foreground">{user.email ? maskEmail(user.email) : 'No email linked'}</p>
-                                <div className="flex flex-wrap justify-center sm:justify-start gap-2">
-                                    {user.nativeLanguage && (
-                                        <span className="bg-secondary px-3 py-1 rounded-full text-xs font-medium text-muted-foreground border border-border flex items-center gap-1">
-                                            <Globe className="w-3 h-3" /> {user.nativeLanguage}
-                                        </span>
-                                    )}
-                                    {user.currentCountry && (
-                                        <span className="bg-secondary px-3 py-1 rounded-full text-xs font-medium text-muted-foreground border border-border flex items-center gap-1">
-                                            <MapPin className="w-3 h-3" /> {user.currentCountry}
-                                        </span>
-                                    )}
-                                </div>
-                                <button
-                                    onClick={() => setIsEditing(true)}
-                                    className="mt-4 text-primary hover:underline flex items-center justify-center sm:justify-start gap-1 mx-auto sm:mx-0"
-                                >
-                                    <Pencil className="w-4 h-4" /> Edit Profile
-                                </button>
-                            </>
-                        )}
-                    </div>
+                                )}
+                                {user.currentCountry && (
+                                    <span className="bg-color1/20 px-3 py-1 rounded-full text-xs font-medium text-color1 border border-color1/20 flex items-center gap-1">
+                                        <MapPin className="w-3 h-3" /> {user.currentCountry}
+                                    </span>
+                                )}
+                            </div>
+                            <button
+                                onClick={() => setIsEditing(true)}
+                                className="mt-4 text-color1 hover:text-white transition-colors flex items-center justify-center sm:justify-start gap-1 mx-auto sm:mx-0 opacity-80 hover:opacity-100"
+                            >
+                                <Pencil className="w-4 h-4" /> Edit Profile
+                            </button>
+                        </>
+                    )}
                 </div>
             </div>
 

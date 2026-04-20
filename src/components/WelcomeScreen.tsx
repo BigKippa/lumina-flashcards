@@ -141,10 +141,10 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, lastSession,
                     <div
                         data-dev-id="student-tile-study"
                         onClick={() => onNavigate('topic-selection', null)}
-                        className="bg-color4 hover:bg-color4/30 border border-color4/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
+                        className="bg-color2 hover:bg-color2/30 border border-color2/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
                     >
-                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color4 transition-colors"></div>
-                        <div className="w-12 h-12 rounded-xl bg-color1 text-color4 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
+                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color2 transition-colors"></div>
+                        <div className="w-12 h-12 rounded-xl bg-color1 text-color2 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
                             <BookOpen className="w-6 h-6" />
                         </div>
                         <div className="relative z-10 font-medium flex-1">
@@ -172,15 +172,14 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, lastSession,
                 );
             case 'favorites':
                 return (
-                    <div data-dev-id="student-tile-favorites" className="bg-color5 border border-color5/20 rounded-2xl p-6 flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1">
-                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl transition-colors"></div>
-                        <div className="flex items-center gap-3 relative z-10 shrink-0">
-                            <div className="w-12 h-12 rounded-xl bg-color1 text-color5 flex items-center justify-center shadow-sm border border-color5">
-                                <Heart className="w-6 h-6" />
-                            </div>
-                            <h2 className="text-xl font-bold">Favorites</h2>
+                    <div data-dev-id="student-tile-favorites" className="bg-color5 hover:bg-color5/30 border border-color5/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1">
+                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color5 transition-colors"></div>
+                        <div className="w-12 h-12 rounded-xl bg-color1 text-color5 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
+                            <Heart className="w-6 h-6" />
                         </div>
-                        <div className="relative z-10 font-medium flex-1 overflow-y-auto custom-scrollbar max-h-[100px] flex flex-col gap-2">
+                        <div className="relative z-10 font-medium flex-1 flex flex-col gap-2">
+                            <h2 className="text-xl font-bold mb-1">Favorites</h2>
+                            <div className="overflow-y-auto custom-scrollbar max-h-[100px] flex flex-col gap-2">
                             {favorites.length > 0 ? (
                                 favorites.map((fav) => (
                                     <button
@@ -195,6 +194,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, lastSession,
                             ) : (
                                 <p className="text-sm text-color1/70 mt-2">No favorites saved yet.</p>
                             )}
+                            </div>
                         </div>
                     </div>
                 );
@@ -203,10 +203,10 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, lastSession,
                     <div
                         data-dev-id="student-tile-search"
                         onClick={() => alert('Search Library Navigation - Coming Soon')}
-                        className="bg-color4 hover:bg-color4/30 border border-color4/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
+                        className="bg-color3 hover:bg-color3/30 border border-color3/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
                     >
-                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color4 transition-colors"></div>
-                        <div className="w-12 h-12 rounded-xl bg-color1 text-color4 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
+                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color3 transition-colors"></div>
+                        <div className="w-12 h-12 rounded-xl bg-color1 text-color3 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
                             <Library className="w-6 h-6" />
                         </div>
                         <div className="relative z-10 font-medium flex-1">
@@ -237,10 +237,10 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, lastSession,
                     <div
                         data-dev-id="student-tile-assignments"
                         onClick={() => alert('Assignments Navigation - Coming Soon')}
-                        className="bg-color3 hover:bg-color3/30 border border-color3/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
+                        className="bg-color4 hover:bg-color4/30 border border-color4/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
                     >
-                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color3 transition-colors"></div>
-                        <div className="w-12 h-12 rounded-xl bg-color1 text-color3 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
+                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color4 transition-colors"></div>
+                        <div className="w-12 h-12 rounded-xl bg-color1 text-color4 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
                             <CheckSquare className="w-6 h-6" />
                         </div>
                         <div className="relative z-10 font-medium flex-1">
@@ -265,7 +265,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, lastSession,
 
                         {/* Profile Info (Left) */}
                         <div className="flex items-center gap-6 relative z-10 w-full md:w-auto md:min-w-[320px] shrink-0">
-                            <div className="w-24 h-24 rounded-2xl bg-primary/20 flex items-center justify-center text-primary shadow-inner border border-primary/20 flex-shrink-0 overflow-hidden">
+                            <div className="w-24 h-24 rounded-2xl bg-color1/20 flex items-center justify-center text-color1 shadow-inner border border-color1/20 flex-shrink-0 overflow-hidden">
                                 {user.avatarUrl ? (
                                     <img src={user.avatarUrl} alt="Student avatar" className="w-full h-full object-cover" />
                                 ) : (
@@ -327,13 +327,15 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, lastSession,
                                     className="bg-color3 hover:bg-color3/30 cursor-pointer transition-colors backdrop-blur-sm border border-color3/30 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm group"
                                     title={`Resume ${lastSession.label}`}
                                 >
-                                    <Clock className="w-6 h-6 text-color3 mb-2 group-hover:scale-110 transition-transform" />
-                                    <span className="text-sm font-bold text-color1 text-center leading-tight">Quick<br />Start</span>
+                                    <Clock className="w-5 h-5 text-color1 mb-2 group-hover:scale-110 transition-transform" />
+                                    <span className="text-2xl font-bold invisible block">&nbsp;</span>
+                                    <span className="text-xs font-bold text-color1 text-center line-clamp-2">Quick<br />Start</span>
                                 </div>
                             ) : (
-                                <div data-dev-id="student-widget-quickstart-disabled" className="bg-color1 backdrop-blur-sm border border-color3/20 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm opacity-70">
-                                    <Clock className="w-6 h-6 text-color3/50 mb-2" />
-                                    <span className="text-sm font-bold text-color1/70 text-center leading-tight">Quick<br/>Start</span>
+                                <div data-dev-id="student-widget-quickstart-disabled" className="bg-color3 backdrop-blur-sm border border-color3/30 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm">
+                                    <Clock className="w-5 h-5 text-color1 mb-2" />
+                                    <span className="text-2xl font-bold invisible block">&nbsp;</span>
+                                    <span className="text-xs font-bold text-color1 text-center line-clamp-2">Quick<br/>Start</span>
                                 </div>
                             )}
                         </div>

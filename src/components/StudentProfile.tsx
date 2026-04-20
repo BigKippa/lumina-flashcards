@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Student, Deck, AppSettings } from '../types';
-import { X, Save, User, Globe, MapPin, Clock, Phone, Briefcase, Heart, BookOpen, Calendar, Settings, MessageSquare, CheckCircle, Activity, Layout, Mail, Plus, Volume2, Archive, Trash2 } from 'lucide-react';
+import { X, Save, User, Globe, MapPin, Clock, Phone, Briefcase, Heart, BookOpen, Calendar, Settings, MessageSquare, CheckCircle, Activity, Layout, Mail, Plus, Volume2, Archive, Trash2, UserCircle } from 'lucide-react';
 import { Word } from '../data/vocabulary';
 import { AddContentModal } from './AddContentModal';
 import { EditCardModal } from './EditCardModal';
@@ -84,67 +84,80 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student, onClose
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
             <div className="bg-background w-full max-w-4xl h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-border">
 
-                {/* Header */}
-                <div className="p-6 border-b border-border flex justify-between items-start bg-card/50">
-                    <div className="flex items-center gap-4">
-                        <div 
-                            className={`w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary border border-primary/20 relative ${isEditing ? 'cursor-pointer hover:bg-primary/20 transition-colors group' : ''}`}
-                            onClick={() => isEditing && fileInputRef.current?.click()}
-                            title={isEditing ? 'Change Profile Picture' : ''}
-                        >
-                            {formData.avatarUrl ? (
-                                <img src={formData.avatarUrl} alt={formData.name} className="w-full h-full object-cover rounded-full" />
-                            ) : (
-                                <User className="w-8 h-8" />
-                            )}
+                {/* Header (Hero Tile Standardized) */}
+                <div data-dev-id="student-profile-hero-tile" className="m-6 bg-color5 border border-color5/50 rounded-3xl p-8 flex flex-col md:flex-row gap-8 items-center shadow-md relative overflow-hidden text-color1">
+                    <div className="absolute right-0 top-0 w-64 h-64 bg-color1/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+
+                    {/* Profile Info (Left) */}
+                    <div className="flex items-center gap-6 relative z-10 w-full md:w-auto md:min-w-[320px] shrink-0">
+                        <div className="relative group shrink-0">
+                            <div className="w-24 h-24 rounded-2xl flex-shrink-0 bg-color1/20 flex items-center justify-center text-color1 shadow-inner border border-color1/20 overflow-hidden">
+                                {formData.avatarUrl ? (
+                                    <img src={formData.avatarUrl} alt={formData.name} className="w-full h-full object-cover" />
+                                ) : (
+                                    <UserCircle className="w-12 h-12" />
+                                )}
+                            </div>
                             {isEditing && (
-                                <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <span className="text-[9px] text-white font-bold uppercase tracking-wider text-center">Edit</span>
-                                </div>
+                                <>
+                                    <input 
+                                        type="file" 
+                                        ref={fileInputRef}
+                                        className="hidden" 
+                                        accept="image/png, image/jpeg, image/webp"
+                                        onChange={(e) => {
+                                            if (e.target.files && e.target.files.length > 0) {
+                                                setAvatarFile(e.target.files[0]);
+                                            }
+                                            e.target.value = ''; // Reset
+                                        }}
+                                    />
+                                    <div 
+                                        onClick={() => fileInputRef.current?.click()}
+                                        className="absolute inset-0 rounded-2xl bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+                                        title="Change Profile Picture"
+                                    >
+                                        <span className="text-[10px] text-white font-bold uppercase tracking-wider text-center">Edit</span>
+                                    </div>
+                                </>
                             )}
-                            <input 
-                                type="file" 
-                                ref={fileInputRef}
-                                className="hidden" 
-                                accept="image/png, image/jpeg, image/webp"
-                                onChange={(e) => {
-                                    if (e.target.files && e.target.files.length > 0) {
-                                        setAvatarFile(e.target.files[0]);
-                                    }
-                                    e.target.value = ''; // Reset
-                                }}
-                            />
                         </div>
-                        <div>
-                            <h2 className="text-2xl font-bold flex items-center gap-2">
+                    </div>
+                    
+                    {/* User Details */}
+                    <div className="flex-1 space-y-2 relative z-10 w-full md:w-auto">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                            <h2 className="text-3xl font-bold flex items-center gap-3 text-color1">
                                 {formData.name}
                                 <StatusBadge status={formData.status} />
                             </h2>
-                            <p className="text-muted-foreground text-sm flex items-center gap-2">
-                                <Mail className="w-3 h-3" /> {formData.email || 'No email'}
-                            </p>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-color1/80 font-medium">
+                            <Mail className="w-4 h-4" /> {formData.email || 'No email'}
                         </div>
                     </div>
-                    <div className="flex items-center gap-2">
+
+                    {/* Action Buttons */}
+                    <div className="flex flex-wrap items-center gap-2 relative z-10 w-full md:w-auto md:shrink-0 justify-end mt-4 md:mt-0">
                         {isEditing ? (
-                            <button onClick={handleDoneEditing} className="flex items-center gap-2 px-4 py-2 bg-color5 text-color1 rounded-lg hover:bg-color5/90 transition-colors shadow-sm font-bold">
-                                <CheckCircle className="w-4 h-4" /> Done Editing
+                            <button onClick={handleDoneEditing} className="flex items-center gap-2 px-4 py-2 bg-color1 text-color5 rounded-lg hover:bg-color1/90 transition-colors shadow-sm font-bold text-sm">
+                                <CheckCircle className="w-4 h-4" /> Done
                             </button>
                         ) : (
-                            <button onClick={() => setIsEditing(true)} className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
-                                <Settings className="w-4 h-4" /> Edit Profile
+                            <button onClick={() => setIsEditing(true)} className="flex items-center gap-2 px-4 py-2 bg-color1 text-color5 rounded-lg hover:bg-color1/90 transition-colors shadow-sm font-bold text-sm">
+                                <Settings className="w-4 h-4" /> Edit
                             </button>
                         )}
-                        <button onClick={() => { onSave({...formData, status: formData.status === 'archived' ? 'active' : 'archived'}); }} className="flex items-center gap-2 px-3 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80 transition-colors" title={formData.status === 'archived' ? "Unarchive Student" : "Archive Student"}>
+                        <button onClick={() => { onSave({...formData, status: formData.status === 'archived' ? 'active' : 'archived'}); }} className="flex items-center gap-2 px-3 py-2 bg-color5/50 border border-color1/20 text-color1 rounded-lg hover:bg-color5/70 transition-colors text-sm font-medium" title={formData.status === 'archived' ? "Unarchive Student" : "Archive Student"}>
                             <Archive className="w-4 h-4" /> <span className="hidden sm:inline">{formData.status === 'archived' ? 'Unarchive' : 'Archive'}</span>
                         </button>
                         {onDeleteStudent && (
-                            <button onClick={() => { if(window.confirm(`Are you sure you want to delete ${formData.name}?`)) { onDeleteStudent(formData.id); onClose(); } }} className="flex items-center gap-2 px-3 py-2 border border-border text-foreground rounded-lg hover:bg-secondary transition-colors" title="Delete Student">
+                            <button onClick={() => { if(window.confirm(`Are you sure you want to delete ${formData.name}?`)) { onDeleteStudent(formData.id); onClose(); } }} className="flex items-center gap-2 px-3 py-2 border border-color1/20 text-color1 rounded-lg hover:bg-color5/70 transition-colors text-sm font-medium" title="Delete Student">
                                 <Trash2 className="w-4 h-4" /> <span className="hidden sm:inline">Delete</span>
                             </button>
                         )}
-                        <button onClick={onClose} className="p-2 hover:bg-muted rounded-full transition-colors ml-2">
-                            <X className="w-6 h-6 text-muted-foreground" />
+                        <button onClick={onClose} className="p-2 hover:bg-white/20 text-color1 rounded-full transition-colors ml-2">
+                            <X className="w-6 h-6" />
                         </button>
                     </div>
                 </div>
