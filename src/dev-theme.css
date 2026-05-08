@@ -737,7 +737,7 @@
   border-width: 2px !important;
 }
 [data-dev-id="tutor-tile-todo"] {
-  border-color: color-mix(in srgb, hsl(var(--color-4)) 100%, transparent) !important;
+  border-color: color-mix(in srgb, hsl(var(--color-4)) 25%, transparent) !important;
   border-width: 2px !important;
 }
 [data-dev-id="tutor-tile-all-content"] > div:nth-of-type(3) > h2:nth-of-type(1) {
@@ -855,4 +855,40 @@
 }
 [data-dev-id="tutor-header-title"] > h1:nth-of-type(1) {
   font-size: 2.25rem !important;
+}
+[data-dev-id="tutor-tile-todo"] > div:nth-of-type(3) > svg:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-tile-todo"] > div:nth-of-type(3) {
+  border-color: color-mix(in srgb, hsl(var(--color-4)) 50%, transparent) !important;
+  border-width: 4px !important;
+}
+[data-dev-id="tutor-tile-todo"] > div:nth-of-type(4) > h2:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-tile-todo"] > div:nth-of-type(4) > p:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+  font-weight: 400 !important;
+}
+[data-dev-id="tutor-tile-todo"] > div:nth-of-type(4) > p:nth-of-type(2) {
+  background-color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+  font-weight: 400 !important;
+}
+[data-dev-id="tutor-tile-todo"] > div:nth-of-type(4) {
+  border-color: color-mix(in srgb, hsl(var(--color-4)) 50%, transparent) !important;
+  border-width: 4px !important;
+}
+[data-dev-id="tutor-tile-todo"] > div:nth-of-type(4) > svg:nth-of-type(1) > path:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-tile-todo"] > div:nth-of-type(4) > svg:nth-of-type(1) > path:nth-of-type(2) {
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-tile-todo"] > div:nth-of-type(5) > h2:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-tile-todo"] > div:nth-of-type(5) > p:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+  font-weight: 400 !important;
 }

@@ -839,17 +839,21 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                                             </div>
                                                         )}
                                                         <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color4 transition-colors"></div>
+                                                        
+                                                        {uncompletedProfilesCount > 0 && (
+                                                            <div className="absolute inset-0 bg-color4/95 backdrop-blur-sm z-30 flex items-center justify-center p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                                                                <p className="text-sm text-color1 font-bold text-center leading-relaxed">
+                                                                    You have {uncompletedProfilesCount} uncompleted student profile{uncompletedProfilesCount !== 1 ? 's' : ''} to finish setting up.
+                                                                </p>
+                                                            </div>
+                                                        )}
+                                                        
                                                         <div className="w-12 h-12 rounded-xl bg-color1 text-color4 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
                                                             <CheckSquare className="w-6 h-6" />
                                                         </div>
                                                         <div className="relative z-10 font-medium flex-1">
                                                             <h2 className="text-xl font-bold mb-1">To Do List</h2>
                                                             <p className="text-sm text-color1/80 line-clamp-2">Track your administrative tasks, grading, and upcoming goals.</p>
-                                                            {uncompletedProfilesCount > 0 && (
-                                                                <p className="text-xs text-red-100 mt-3 font-bold bg-red-500/20 border border-red-500/30 p-2 rounded-lg">
-                                                                    You have {uncompletedProfilesCount} uncompleted student profile{uncompletedProfilesCount !== 1 ? 's' : ''} to finish setting up.
-                                                                </p>
-                                                            )}
                                                         </div>
                                                     </div>
                                                 );
@@ -1710,79 +1714,95 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                 )}
 
                 {/* To-Do List View */}
-                {view === 'todo' && (
-                    <div className="max-w-4xl mx-auto mt-6 animate-in fade-in slide-in-from-bottom-4">
-                        <div className="flex items-center justify-between mb-6">
-                            <div>
-                                <h1 className="text-3xl font-extrabold flex items-center gap-3">
-                                    <CheckSquare className="w-8 h-8 text-primary" /> To-Do List
-                                </h1>
-                                <p className="text-muted-foreground mt-2">Track administrative tasks and profile completion statuses.</p>
-                            </div>
-                            <button
-                                onClick={() => onViewChange('dashboard')}
-                                className="px-4 py-2 bg-secondary text-secondary-foreground font-bold rounded-xl shadow-sm hover:bg-secondary/80 transition-colors flex items-center gap-2"
-                            >
-                                <ArrowLeft className="w-4 h-4" /> Back
-                            </button>
-                        </div>
+                {view === 'todo' && (() => {
+                    const pendingTodos = students
+                        .filter(s => s.isUncompletedProfile)
+                        .map(s => ({
+                            id: `pending-${s.id}`,
+                            title: `Complete profile for ${s.name}`,
+                            description: 'Missing mandatory fields',
+                            createdAt: s.joinedDate,
+                            status: 'pending' as const,
+                            relatedStudentId: s.id
+                        }));
+                    
+                    const completedTodos = (user.todos || []).filter(t => t.status === 'completed');
+                    const displayTodos = [...pendingTodos, ...completedTodos].sort((a, b) => b.createdAt - a.createdAt);
 
-                        <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
-                            {(!user.todos || user.todos.length === 0) ? (
-                                <div className="p-12 text-center text-muted-foreground">
-                                    <Check className="w-12 h-12 mx-auto mb-4 opacity-20" />
-                                    <h3 className="text-xl font-bold mb-2">You're all caught up!</h3>
-                                    <p>There are currently no tasks on your to-do list.</p>
+                    return (
+                        <div className="max-w-4xl mx-auto mt-6 animate-in fade-in slide-in-from-bottom-4">
+                            <div className="flex items-center justify-between mb-6">
+                                <div>
+                                    <h1 className="text-3xl font-extrabold flex items-center gap-3">
+                                        <CheckSquare className="w-8 h-8 text-primary" /> To-Do List
+                                    </h1>
+                                    <p className="text-muted-foreground mt-2">Track administrative tasks and profile completion statuses.</p>
                                 </div>
-                            ) : (
-                                <div className="divide-y divide-border">
-                                    {user.todos.map(todo => (
-                                        <div key={todo.id} className={`p-6 flex items-start gap-4 transition-colors ${todo.status === 'completed' ? 'bg-secondary/30' : 'hover:bg-muted/50'}`}>
-                                            <div className="mt-1">
-                                                {todo.status === 'completed' ? (
-                                                    <CheckCircle className="w-6 h-6 text-green-500" />
-                                                ) : (
-                                                    <div className="w-6 h-6 rounded-full border-2 border-primary/50 flex items-center justify-center">
-                                                        <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse"></div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div className="flex-1">
-                                                <h3 className={`text-lg font-bold ${todo.status === 'completed' ? 'text-muted-foreground line-through decoration-muted-foreground/30' : 'text-foreground'}`}>
-                                                    {todo.title}
-                                                </h3>
-                                                <p className="text-sm text-muted-foreground mt-1">{todo.description}</p>
-                                                
-                                                <div className="flex flex-wrap items-center gap-4 mt-3 text-xs text-muted-foreground font-medium">
-                                                    <span className="flex items-center gap-1.5 bg-background border border-border px-2.5 py-1 rounded-md">
-                                                        <Clock className="w-3.5 h-3.5" /> Added: {new Date(todo.createdAt).toLocaleString()}
-                                                    </span>
-                                                    {todo.completedAt && (
-                                                        <span className="flex items-center gap-1.5 bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/20 px-2.5 py-1 rounded-md">
-                                                            <Check className="w-3.5 h-3.5" /> Completed: {new Date(todo.completedAt).toLocaleString()}
-                                                        </span>
+                                <button
+                                    onClick={() => onViewChange('dashboard')}
+                                    className="px-4 py-2 bg-secondary text-secondary-foreground font-bold rounded-xl shadow-sm hover:bg-secondary/80 transition-colors flex items-center gap-2"
+                                >
+                                    <ArrowLeft className="w-4 h-4" /> Back
+                                </button>
+                            </div>
+
+                            <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
+                                {displayTodos.length === 0 ? (
+                                    <div className="p-12 text-center text-muted-foreground">
+                                        <Check className="w-12 h-12 mx-auto mb-4 opacity-20" />
+                                        <h3 className="text-xl font-bold mb-2">You're all caught up!</h3>
+                                        <p>There are currently no tasks on your to-do list.</p>
+                                    </div>
+                                ) : (
+                                    <div className="divide-y divide-border">
+                                        {displayTodos.map(todo => (
+                                            <div key={todo.id} className={`p-6 flex items-start gap-4 transition-colors ${todo.status === 'completed' ? 'bg-secondary/30' : 'hover:bg-muted/50'}`}>
+                                                <div className="mt-1">
+                                                    {todo.status === 'completed' ? (
+                                                        <CheckCircle className="w-6 h-6 text-green-500" />
+                                                    ) : (
+                                                        <div className="w-6 h-6 rounded-full border-2 border-primary/50 flex items-center justify-center">
+                                                            <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse"></div>
+                                                        </div>
                                                     )}
                                                 </div>
+                                                <div className="flex-1">
+                                                    <h3 className={`text-lg font-bold ${todo.status === 'completed' ? 'text-muted-foreground line-through decoration-muted-foreground/30' : 'text-foreground'}`}>
+                                                        {todo.title}
+                                                    </h3>
+                                                    <p className="text-sm text-muted-foreground mt-1">{todo.description}</p>
+                                                    
+                                                    <div className="flex flex-wrap items-center gap-4 mt-3 text-xs text-muted-foreground font-medium">
+                                                        <span className="flex items-center gap-1.5 bg-background border border-border px-2.5 py-1 rounded-md">
+                                                            <Clock className="w-3.5 h-3.5" /> Added: {new Date(todo.createdAt).toLocaleString()}
+                                                        </span>
+                                                        {(todo as any).completedAt && (
+                                                            <span className="flex items-center gap-1.5 bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/20 px-2.5 py-1 rounded-md">
+                                                                <Check className="w-3.5 h-3.5" /> Completed: {new Date((todo as any).completedAt).toLocaleString()}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                
+                                                {todo.status === 'pending' && todo.relatedStudentId && (
+                                                    <button
+                                                        onClick={() => {
+                                                            const student = students.find(s => s.id === todo.relatedStudentId);
+                                                            if (student) setSelectedStudentId(student.id);
+                                                        }}
+                                                        className="px-4 py-2 bg-primary/10 text-primary hover:bg-primary/20 transition-colors rounded-lg font-bold text-sm whitespace-nowrap border border-primary/20"
+                                                    >
+                                                        Complete Now
+                                                    </button>
+                                                )}
                                             </div>
-                                            
-                                            {todo.status === 'pending' && todo.relatedStudentId && (
-                                                <button
-                                                    onClick={() => {
-                                                        const student = students.find(s => s.id === todo.relatedStudentId);
-                                                        if (student) setSelectedStudentId(student.id);
-                                                    }}
-                                                    className="px-4 py-2 bg-primary/10 text-primary hover:bg-primary/20 transition-colors rounded-lg font-bold text-sm whitespace-nowrap border border-primary/20"
-                                                >
-                                                    Complete Now
-                                                </button>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </div>
-                    </div>
-                )}
+                    );
+                })}
             </main>
 
             {/* Global Add Content Modal */}
