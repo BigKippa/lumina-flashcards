@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Student, Deck, AppSettings } from '../types';
-import { X, Save, User, Globe, MapPin, Clock, Phone, Briefcase, Heart, BookOpen, Calendar, Settings, MessageSquare, CheckCircle, Activity, Layout, Mail, Plus, Volume2, Archive, Trash2, UserCircle } from 'lucide-react';
+import { X, Save, User, Globe, MapPin, Clock, Phone, Briefcase, Heart, BookOpen, Calendar, Settings, MessageSquare, CheckCircle, Activity, Layout, Mail, Plus, Volume2, Archive, Trash2, UserCircle, Zap, ArrowRight } from 'lucide-react';
 import { Word } from '../data/vocabulary';
 import { AddContentModal } from './AddContentModal';
 import { EditCardModal } from './EditCardModal';
@@ -23,6 +23,7 @@ interface StudentProfileProps {
 export const StudentProfile: React.FC<StudentProfileProps> = ({ student, onClose, onSave, onDeleteStudent, decks, onAddCard, onEditCard, apiKey, settings }) => {
     const [activeTab, setActiveTab] = useState<'basic' | 'learning' | 'library'>('basic');
     const [editingCard, setEditingCard] = useState<Word | null>(null);
+    const isNewProfile = student.name === 'New Student';
 
     // Initialize with defaults safely
     const [formData, setFormData] = useState<Student>({
@@ -40,7 +41,12 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student, onClose
         }));
     }, [student]);
 
-    const [isEditing, setIsEditing] = useState(false);
+    const [isEditing, setIsEditing] = useState(isNewProfile);
+    useEffect(() => {
+        if (student.name === 'New Student') {
+            setIsEditing(true);
+        }
+    }, [student.id, student.name]);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -82,14 +88,18 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student, onClose
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-            <div className="bg-background w-full max-w-4xl h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-border">
+            <div className="bg-background w-full max-w-4xl h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-border relative">
+                {/* Close Button Top Right */}
+                <button onClick={onClose} className="absolute top-4 right-4 p-2 bg-background/50 backdrop-blur-md hover:bg-secondary rounded-full transition-colors z-50 shadow-sm border border-border/50">
+                    <X className="w-5 h-5 text-foreground" />
+                </button>
 
                 {/* Header (Hero Tile Standardized) */}
                 <div data-dev-id="student-profile-hero-tile" className="m-6 bg-color5 border border-color5/50 rounded-3xl p-8 flex flex-col md:flex-row gap-8 items-center shadow-md relative overflow-hidden text-color1">
                     <div className="absolute right-0 top-0 w-64 h-64 bg-color1/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
 
                     {/* Profile Info (Left) */}
-                    <div className="flex items-center gap-6 relative z-10 w-full md:w-auto md:min-w-[320px] shrink-0">
+                    <div className="flex flex-col sm:flex-row items-center gap-6 relative z-10 flex-1">
                         <div className="relative group shrink-0">
                             <div className="w-24 h-24 rounded-2xl flex-shrink-0 bg-color1/20 flex items-center justify-center text-color1 shadow-inner border border-color1/20 overflow-hidden">
                                 {formData.avatarUrl ? (
@@ -122,27 +132,40 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student, onClose
                                 </>
                             )}
                         </div>
-                    </div>
-                    
-                    {/* User Details */}
-                    <div className="flex-1 space-y-2 relative z-10 w-full md:w-auto">
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                            <h2 className="text-3xl font-bold flex items-center gap-3 text-color1">
-                                {formData.name}
-                                <StatusBadge status={formData.status} />
-                            </h2>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-color1/80 font-medium">
-                            <Mail className="w-4 h-4" /> {formData.email || 'No email'}
+                        
+                        {/* User Details */}
+                        <div className="space-y-2 text-center sm:text-left">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-center sm:justify-start gap-3">
+                                <h2 className="text-3xl font-bold flex items-center gap-3 text-color1">
+                                    {formData.name}
+                                    <StatusBadge status={formData.status} />
+                                </h2>
+                            </div>
+                            <div className="flex items-center justify-center sm:justify-start gap-2 text-sm text-color1/80 font-medium">
+                                <Mail className="w-4 h-4" /> {formData.email || 'No email'}
+                            </div>
                         </div>
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex flex-wrap items-center gap-2 relative z-10 w-full md:w-auto md:shrink-0 justify-end mt-4 md:mt-0">
+                    <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2 relative z-10 shrink-0">
                         {isEditing ? (
-                            <button onClick={handleDoneEditing} className="flex items-center gap-2 px-4 py-2 bg-color1 text-color5 rounded-lg hover:bg-color1/90 transition-colors shadow-sm font-bold text-sm">
-                                <CheckCircle className="w-4 h-4" /> Done
-                            </button>
+                            <>
+                                <button 
+                                    data-dev-id="btn-quick-add"
+                                    onClick={() => {
+                                        const finalName = (!formData.name || formData.name.trim() === '' || formData.name === 'New Student') ? 'Unnamed Student' : formData.name;
+                                        onSave({...formData, name: finalName, isUncompletedProfile: true});
+                                        onClose();
+                                    }}
+                                    className="flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm transition-all shadow-sm bg-color3 text-color5 hover:bg-color3/90"
+                                >
+                                    <Zap className="w-4 h-4 pointer-events-none" /> Quick Add
+                                </button>
+                                <button onClick={handleDoneEditing} className="flex items-center gap-2 px-4 py-2 bg-color1 text-color5 rounded-lg hover:bg-color1/90 transition-colors shadow-sm font-bold text-sm">
+                                    <CheckCircle className="w-4 h-4" /> Done
+                                </button>
+                            </>
                         ) : (
                             <button onClick={() => setIsEditing(true)} className="flex items-center gap-2 px-4 py-2 bg-color1 text-color5 rounded-lg hover:bg-color1/90 transition-colors shadow-sm font-bold text-sm">
                                 <Settings className="w-4 h-4" /> Edit
@@ -156,9 +179,6 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student, onClose
                                 <Trash2 className="w-4 h-4" /> <span className="hidden sm:inline">Delete</span>
                             </button>
                         )}
-                        <button onClick={onClose} className="p-2 hover:bg-white/20 text-color1 rounded-full transition-colors ml-2">
-                            <X className="w-6 h-6" />
-                        </button>
                     </div>
                 </div>
 
@@ -176,14 +196,14 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student, onClose
                     {activeTab === 'basic' && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-2">
                             <SectionCard title="Personal Details" icon={User} isEditing={isEditing} onSaveRegion={handleSave}>
-                                <Field label="Full Name" value={formData.name} isEditing={isEditing} onChange={v => handleChange('name', v)} />
+                                <Field label="Full Name" value={formData.name} isEditing={isEditing} onChange={v => handleChange('name', v)} isMandatory={true} />
                                 <div className="space-y-1">
                                     <label className="text-xs font-bold text-muted-foreground uppercase">Native Language</label>
                                     {isEditing ? (
                                         <select
                                             value={formData.nativeLanguage || ''}
                                             onChange={e => handleChange('nativeLanguage', e.target.value)}
-                                            className="w-full p-2 rounded-md border border-input bg-background"
+                                            className={`w-full p-2 rounded-md border bg-background transition-colors ${!formData.nativeLanguage ? 'border-red-500 shadow-[0_0_0_1px_rgba(239,68,68,1)]' : 'border-green-500 shadow-[0_0_0_1px_rgba(34,197,94,1)]'}`}
                                         >
                                             <option value="">Select Language</option>
                                             {LANGUAGES.map(l => <option key={l} value={l}>{l}</option>)}
@@ -192,6 +212,24 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student, onClose
                                         <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-md">
                                             <Globe className="w-4 h-4 text-muted-foreground" />
                                             {formData.nativeLanguage || 'Not set'}
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="space-y-1 mt-4">
+                                    <label className="text-xs font-bold text-muted-foreground uppercase">Learning Platform</label>
+                                    {isEditing ? (
+                                        <select
+                                            value={formData.learningPlatform || ''}
+                                            onChange={e => handleChange('learningPlatform', e.target.value)}
+                                            className={`w-full p-2 rounded-md border bg-background transition-colors ${!formData.learningPlatform ? 'border-red-500 shadow-[0_0_0_1px_rgba(239,68,68,1)]' : 'border-green-500 shadow-[0_0_0_1px_rgba(34,197,94,1)]'}`}
+                                        >
+                                            <option value="">Select Platform</option>
+                                            {['Zoom', 'Google Meet', 'Preply', 'Skype', 'Microsoft Teams', 'In-Person', 'Other'].map(p => <option key={p} value={p}>{p}</option>)}
+                                        </select>
+                                    ) : (
+                                        <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-md">
+                                            <Globe className="w-4 h-4 text-muted-foreground" />
+                                            {formData.learningPlatform || 'Not set'}
                                         </div>
                                     )}
                                 </div>
@@ -224,6 +262,13 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student, onClose
                                 <Field label="Interests / Hobbies" value={formData.interests} isEditing={isEditing} onChange={v => handleChange('interests', v)} />
                                 <TextArea label="Private Notes" value={formData.basicNotes} isEditing={isEditing} onChange={v => handleChange('basicNotes', v)} />
                             </SectionCard>
+                            {isNewProfile && isEditing && (
+                                <div className="col-span-1 md:col-span-2 flex justify-end mt-4">
+                                    <button onClick={() => setActiveTab('learning')} className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-xl font-bold hover:bg-primary/90 transition-all shadow-md">
+                                        Next: Learning Needs <ArrowRight className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     )}
 
@@ -257,6 +302,13 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student, onClose
                             <SectionCard title="Preferences" icon={Settings} isEditing={isEditing} onSaveRegion={handleSave}>
                                 <TextArea label="Student Preferences" value={formData.preferences} isEditing={isEditing} onChange={v => handleChange('preferences', v)} />
                             </SectionCard>
+                            {isNewProfile && isEditing && (
+                                <div className="col-span-1 md:col-span-2 flex justify-end mt-4">
+                                    <button onClick={() => setActiveTab('library')} className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-xl font-bold hover:bg-primary/90 transition-all shadow-md">
+                                        Next: Setup Library <ArrowRight className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     )}
 
@@ -507,7 +559,13 @@ const SectionCard = ({ title, icon: Icon, children, isEditing, onSaveRegion }: {
     </div>
 );
 
-const Field = ({ label, value, isEditing, onChange, icon: Icon, placeholder, list }: { label: string, value?: string, isEditing: boolean, onChange: (v: string) => void, icon?: any, placeholder?: string, list?: string }) => (
+const Field = ({ label, value, isEditing, onChange, icon: Icon, placeholder, list, isMandatory }: { label: string, value?: string, isEditing: boolean, onChange: (v: string) => void, icon?: any, placeholder?: string, list?: string, isMandatory?: boolean }) => {
+    const hasValue = value && value.trim() !== '' && value !== 'New Student';
+    const borderClass = isMandatory 
+        ? (!hasValue ? 'border-red-500 shadow-[0_0_0_1px_rgba(239,68,68,1)]' : 'border-green-500 shadow-[0_0_0_1px_rgba(34,197,94,1)]')
+        : 'border-input';
+
+    return (
     <div className="w-full">
         <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">{label}</label>
         {isEditing ? (
@@ -519,7 +577,7 @@ const Field = ({ label, value, isEditing, onChange, icon: Icon, placeholder, lis
                     onChange={e => onChange(e.target.value)}
                     placeholder={placeholder || `Enter ${label.toLowerCase()}`}
                     list={list}
-                    className={`w-full p-2 rounded-md border border-input bg-background ${Icon ? 'pl-9' : ''}`}
+                    className={`w-full p-2 rounded-md border bg-background transition-colors ${borderClass} ${Icon ? 'pl-9' : ''}`}
                 />
             </div>
         ) : (
@@ -529,7 +587,8 @@ const Field = ({ label, value, isEditing, onChange, icon: Icon, placeholder, lis
             </div>
         )}
     </div>
-);
+    );
+};
 
 const TextArea = ({ label, value, isEditing, onChange, placeholder }: { label: string, value?: string, isEditing: boolean, onChange: (v: string) => void, placeholder?: string }) => (
     <div className="w-full">

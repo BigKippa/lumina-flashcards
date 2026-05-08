@@ -588,6 +588,7 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                 students={students}
                                 initialAudience={quickAddInitialParams?.audience}
                                 initialSpecificStudentId={quickAddInitialParams?.studentId}
+                                onNavigateToCreateStudent={handleAddNew}
                                 onClose={() => { setIsQuickAddOpen(false); setQuickAddInitialParams(null); }}
                                 onComplete={(cards, audience, specificStudentId) => {
                                     setPendingQuickAddCards(cards);
@@ -664,7 +665,7 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                 >
                                     <Users className="w-5 h-5 text-color5 mb-2" />
                                     <span className="text-2xl font-bold text-color1">{stats.active}</span>
-                                    <span className="text-xs text-color1 text-center line-clamp-2">Active<br />Students</span>
+                                    <span className="text-xs text-color1 text-center leading-tight">Active<br />Students</span>
                                 </div>
 
                                 {/* Inbox/Pending Widget */}
@@ -676,21 +677,18 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                     <div className="absolute top-3 right-3 w-2.5 h-2.5 bg-color5 rounded-full animate-pulse shadow-sm border border-color1/20"></div>
                                     <Bell className="w-5 h-5 text-color5 mb-2" />
                                     <span className="text-2xl font-bold text-color5">3</span>
-                                    <span className="text-xs text-color5 text-center line-clamp-2 font-medium">New<br />Messages</span>
+                                    <span className="text-xs text-color5 text-center leading-tight font-medium">New<br />Messages</span>
                                 </div>
 
-                                {/* Add Student Widget */}
+                                {/* Lesson Mode Widget */}
                                 <div
-                                    data-dev-id="tutor-widget-add-student"
-                                    onClick={() => {
-                                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                                        setIsAddStudentModalOpen(true);
-                                    }}
+                                    data-dev-id="tutor-widget-lesson-mode"
+                                    onClick={() => setIsQuickAddOpen(true)}
                                     className="bg-color3 hover:bg-color3/80 cursor-pointer transition-colors border border-color3/50 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm group"
                                 >
-                                    <Plus className="w-5 h-5 text-color5 mb-2 group-hover:scale-110 transition-transform" />
+                                    <Sparkles className="w-5 h-5 text-color5 mb-2 group-hover:scale-110 transition-transform" />
                                     <span className="text-2xl font-bold invisible block">&nbsp;</span>
-                                    <span className="text-xs font-bold text-color5 text-center line-clamp-2">Add<br />Student</span>
+                                    <span className="text-xs font-bold text-color5 text-center leading-tight">Lesson<br />Mode</span>
                                 </div>
 
                                 {/* Create Flashcards Widget */}
@@ -701,7 +699,7 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                 >
                                     <Library className="w-5 h-5 text-amber-400 mb-2 group-hover:scale-110 transition-transform" />
                                     <span className="text-2xl font-bold invisible block">&nbsp;</span>
-                                    <span className="text-xs font-bold text-color1 text-center line-clamp-2">Create<br />Flashcards</span>
+                                    <span className="text-xs font-bold text-color1 text-center leading-tight">Create<br />Flashcards</span>
                                 </div>
                             </div>
                         </div>
@@ -827,12 +825,19 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                                 );
                                                 break;
                                             case 'to-do':
+                                                const uncompletedProfilesCount = students.filter(s => s.isUncompletedProfile).length;
                                                 tileContent = (
                                                     <div
                                                         data-dev-id="tutor-tile-todo"
                                                         onClick={() => alert('To-Do List Navigation - Coming Soon')}
                                                         className="bg-color4 hover:bg-color4/30 border border-color4/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
                                                     >
+                                                        {uncompletedProfilesCount > 0 && (
+                                                            <div className="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-md z-20 animate-pulse flex items-center gap-1.5 border border-red-400">
+                                                                <span className="w-1.5 h-1.5 bg-white rounded-full block animate-ping"></span>
+                                                                {uncompletedProfilesCount} Action{uncompletedProfilesCount !== 1 ? 's' : ''} Needed
+                                                            </div>
+                                                        )}
                                                         <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color4 transition-colors"></div>
                                                         <div className="w-12 h-12 rounded-xl bg-color1 text-color4 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
                                                             <CheckSquare className="w-6 h-6" />
@@ -840,6 +845,11 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                                         <div className="relative z-10 font-medium flex-1">
                                                             <h2 className="text-xl font-bold mb-1">To Do List</h2>
                                                             <p className="text-sm text-color1/80 line-clamp-2">Track your administrative tasks, grading, and upcoming goals.</p>
+                                                            {uncompletedProfilesCount > 0 && (
+                                                                <p className="text-xs text-red-100 mt-3 font-bold bg-red-500/20 border border-red-500/30 p-2 rounded-lg">
+                                                                    You have {uncompletedProfilesCount} uncompleted student profile{uncompletedProfilesCount !== 1 ? 's' : ''} to finish setting up.
+                                                                </p>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 );

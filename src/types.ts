@@ -249,6 +249,7 @@ export interface Student {
 
     // Basic Info
     nativeLanguage?: string;
+    learningPlatform?: string;
     originCity?: string;
     originCountry?: string;
     currentCity?: string;
@@ -282,6 +283,7 @@ export interface Student {
 
     homeworkStatus?: 'Incomplete' | 'Completed' | 'Needs Review';
     requests?: StudentRequest[];
+    isUncompletedProfile?: boolean;
 }
 
 export interface AppSettings {

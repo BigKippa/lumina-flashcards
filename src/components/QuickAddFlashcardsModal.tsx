@@ -9,9 +9,10 @@ interface QuickAddFlashcardsModalProps {
     students: Student[];
     initialAudience?: string;
     initialSpecificStudentId?: string;
+    onNavigateToCreateStudent?: () => void;
 }
 
-export const QuickAddFlashcardsModal: React.FC<QuickAddFlashcardsModalProps> = ({ onClose, onComplete, students, initialAudience, initialSpecificStudentId }) => {
+export const QuickAddFlashcardsModal: React.FC<QuickAddFlashcardsModalProps> = ({ onClose, onComplete, students, initialAudience, initialSpecificStudentId, onNavigateToCreateStudent }) => {
     const [step, setStep] = useState<1 | 2>(1);
     
     // Step 1 State
@@ -45,7 +46,24 @@ export const QuickAddFlashcardsModal: React.FC<QuickAddFlashcardsModalProps> = (
     const handleNextStep = () => {
         if (!audience) return;
         if (audience === 'specific_student' && !specificStudentId) return;
+        if (audience === 'new_student' && onNavigateToCreateStudent) {
+            onNavigateToCreateStudent();
+            onClose();
+            return;
+        }
         setStep(2);
+    };
+
+    const handleAudienceClick = (type: 'specific_student' | 'new_student' | 'all_students' | 'public') => {
+        setAudience(type);
+        if (type !== 'specific_student') {
+            if (type === 'new_student' && onNavigateToCreateStudent) {
+                onNavigateToCreateStudent();
+                onClose();
+            } else {
+                setStep(2);
+            }
+        }
     };
 
     const handleSaveCurrentCard = () => {
@@ -118,7 +136,7 @@ export const QuickAddFlashcardsModal: React.FC<QuickAddFlashcardsModalProps> = (
                             {step === 1 ? 'Step 1: Choose your audience' : `Step 2: Rapidly create flashcards (${cards.length} created)`}
                         </p>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-white/50 bg-white border-2 border-color3 rounded-full absolute -top-4 -right-4 transition-all shadow-md">
+                    <button onClick={onClose} className="p-2 hover:bg-white/50 bg-white border-2 border-color3 rounded-full transition-all shadow-md flex-shrink-0">
                         <X className="w-5 h-5 text-color5" />
                     </button>
                 </div>
@@ -130,7 +148,7 @@ export const QuickAddFlashcardsModal: React.FC<QuickAddFlashcardsModalProps> = (
                             
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <button 
-                                    onClick={() => setAudience('specific_student')}
+                                    onClick={() => handleAudienceClick('specific_student')}
                                     className={`p-4 rounded-xl border-2 text-left transition-all ${audience === 'specific_student' ? 'border-color6 bg-color6 text-color1 shadow-md scale-[1.02]' : 'border-color6/40 bg-color6/20 hover:border-color6/60 hover:bg-color6/30'}`}
                                 >
                                     <User className={`w-6 h-6 mb-3 ${audience === 'specific_student' ? 'text-color1' : 'text-color6'}`} />
@@ -139,7 +157,7 @@ export const QuickAddFlashcardsModal: React.FC<QuickAddFlashcardsModalProps> = (
                                 </button>
                                 
                                 <button 
-                                    onClick={() => setAudience('new_student')}
+                                    onClick={() => handleAudienceClick('new_student')}
                                     className={`p-4 rounded-xl border-2 text-left transition-all ${audience === 'new_student' ? 'border-color7 bg-color7 text-color1 shadow-md scale-[1.02]' : 'border-color7/40 bg-color7/20 hover:border-color7/60 hover:bg-color7/30'}`}
                                 >
                                     <UserPlus className={`w-6 h-6 mb-3 ${audience === 'new_student' ? 'text-color1' : 'text-color7'}`} />
@@ -148,7 +166,7 @@ export const QuickAddFlashcardsModal: React.FC<QuickAddFlashcardsModalProps> = (
                                 </button>
                                 
                                 <button 
-                                    onClick={() => setAudience('all_students')}
+                                    onClick={() => handleAudienceClick('all_students')}
                                     className={`p-4 rounded-xl border-2 text-left transition-all ${audience === 'all_students' ? 'border-color8 bg-color8 text-color1 shadow-md scale-[1.02]' : 'border-color8/40 bg-color8/20 hover:border-color8/60 hover:bg-color8/30'}`}
                                 >
                                     <Users className={`w-6 h-6 mb-3 ${audience === 'all_students' ? 'text-color1' : 'text-color8'}`} />
@@ -157,7 +175,7 @@ export const QuickAddFlashcardsModal: React.FC<QuickAddFlashcardsModalProps> = (
                                 </button>
                                 
                                 <button 
-                                    onClick={() => setAudience('public')}
+                                    onClick={() => handleAudienceClick('public')}
                                     className={`p-4 rounded-xl border-2 text-left transition-all ${audience === 'public' ? 'border-color9 bg-color9 text-color5 shadow-md scale-[1.02]' : 'border-color9/40 bg-color9/20 hover:border-color9/60 hover:bg-color9/30'}`}
                                 >
                                     <Globe className={`w-6 h-6 mb-3 ${audience === 'public' ? 'text-color5' : 'text-color9'}`} />
@@ -172,7 +190,10 @@ export const QuickAddFlashcardsModal: React.FC<QuickAddFlashcardsModalProps> = (
                                     <select 
                                         className="w-full p-3 rounded-xl border border-input bg-background focus:ring-2 focus:ring-primary/20 outline-none"
                                         value={specificStudentId}
-                                        onChange={(e) => setSpecificStudentId(e.target.value)}
+                                        onChange={(e) => {
+                                            setSpecificStudentId(e.target.value);
+                                            setTimeout(() => setStep(2), 150);
+                                        }}
                                     >
                                         <option value="" disabled>Choose a student...</option>
                                         {students.filter(s => s.status === 'active').map(s => (
@@ -181,16 +202,6 @@ export const QuickAddFlashcardsModal: React.FC<QuickAddFlashcardsModalProps> = (
                                     </select>
                                 </div>
                             )}
-
-                            <div className="pt-6 flex justify-end">
-                                <button
-                                    onClick={handleNextStep}
-                                    disabled={!audience || (audience === 'specific_student' && !specificStudentId)}
-                                    className="px-8 py-3 bg-primary text-primary-foreground font-bold rounded-xl shadow-lg hover:shadow-primary/25 hover:scale-[1.02] transition-all disabled:opacity-50 flex items-center gap-2"
-                                >
-                                    Continue <ArrowRight className="w-5 h-5" />
-                                </button>
-                            </div>
                         </div>
                     )}
 

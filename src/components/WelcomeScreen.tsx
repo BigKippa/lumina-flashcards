@@ -303,7 +303,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, lastSession,
                             >
                                 <BookOpen className="w-5 h-5 text-color4 mb-2" />
                                 <span className="text-2xl font-bold text-color1">{user.activeDeckIds?.length || 0}</span>
-                                <span className="text-xs text-color1 text-center line-clamp-2">Active<br />Decks</span>
+                                <span className="text-xs text-color1 text-center leading-tight">Active<br />Decks</span>
                             </div>
 
                             {/* Inbox/Pending Widget */}
@@ -315,7 +315,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, lastSession,
                                 <div className="absolute top-3 right-3 w-2.5 h-2.5 bg-color5 rounded-full animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.6)]"></div>
                                 <Bell className="w-5 h-5 text-color2 mb-2 group-hover:scale-110 transition-transform" />
                                 <span className="text-2xl font-bold text-color1">1</span>
-                                <span className="text-xs text-color1 text-center line-clamp-2">New<br />Messages</span>
+                                <span className="text-xs text-color1 text-center leading-tight">New<br />Messages</span>
                             </div>
 
                             {/* Quick Start Widget */}
@@ -328,13 +328,13 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, lastSession,
                                 >
                                     <Clock className="w-5 h-5 text-color1 mb-2 group-hover:scale-110 transition-transform" />
                                     <span className="text-2xl font-bold invisible block">&nbsp;</span>
-                                    <span className="text-xs font-bold text-color1 text-center line-clamp-2">Quick<br />Start</span>
+                                    <span className="text-xs font-bold text-color1 text-center leading-tight">Quick<br />Start</span>
                                 </div>
                             ) : (
                                 <div data-dev-id="student-widget-quickstart-disabled" className="bg-color3 backdrop-blur-sm border border-color3/30 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm">
                                     <Clock className="w-5 h-5 text-color1 mb-2" />
                                     <span className="text-2xl font-bold invisible block">&nbsp;</span>
-                                    <span className="text-xs font-bold text-color1 text-center line-clamp-2">Quick<br/>Start</span>
+                                    <span className="text-xs font-bold text-color1 text-center leading-tight">Quick<br/>Start</span>
                                 </div>
                             )}
                         </div>

@@ -376,16 +376,21 @@
 [data-dev-id="tutor-widget-active-students"] > span:nth-of-type(2) {
   color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
   font-weight: 700 !important;
+  font-size: 1rem !important;
 }
 [data-dev-id="tutor-widget-messages"] > span:nth-of-type(2) {
   color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
   font-weight: 700 !important;
+  font-size: 1rem !important;
 }
 [data-dev-id="tutor-widget-create-flashcards"] > svg:nth-of-type(1) {
-  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+  font-weight: 700 !important;
 }
 [data-dev-id="tutor-tile-quickstart"] {
   background-color: color-mix(in srgb, hsl(var(--color-8)) 100%, transparent) !important;
+  border-color: color-mix(in srgb, hsl(var(--color-8)) 100%, transparent) !important;
+  border-width: 2px !important;
 }
 [data-dev-id="student-tile-study"] {
   background-color: color-mix(in srgb, hsl(var(--color-8)) 100%, transparent) !important;
@@ -505,6 +510,7 @@
 }
 [data-dev-id="app-main-column"] > main:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(5) {
   background-color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
 }
 [data-dev-id="app-main-column"] > main:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(3) {
   color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
@@ -531,4 +537,322 @@
 [data-dev-id="app-main-column"] > main:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > button:nth-of-type(1) {
   background-color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
   color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="app-main-column"] > main:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(5) > div:nth-of-type(1) > div:nth-of-type(1) > svg:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="app-main-column"] > main:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(5) > div:nth-of-type(1) > div:nth-of-type(2) > svg:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+  border-color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="app-main-column"] > main:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(5) > div:nth-of-type(1) > div:nth-of-type(1) {
+  border-color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="app-main-column"] > main:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(1) > svg:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="app-main-column"] > main:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > svg:nth-of-type(1) > path:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="app-main-column"] > main:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > svg:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="app-main-column"] > main:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > svg:nth-of-type(1) > path:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="app-main-column"] > main:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > svg:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="app-main-column"] > main:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(2) > svg:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="app-main-column"] > main:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(2) > svg:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="app-main-column"] > main:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(2) {
+  border-color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="app-main-column"] > main:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(2) > svg:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="app-main-column"] > main:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > svg:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-widget-lesson-mode"] {
+  background-color: color-mix(in srgb, hsl(var(--color-8)) 100%, transparent) !important;
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-widget-lesson-mode"] > span:nth-of-type(2) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+  font-size: 1rem !important;
+}
+[data-dev-id="tutor-widget-messages"] > span:nth-of-type(1) {
+}
+[data-dev-id="tutor-widget-active-students"] > span:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-widget-active-students"] > svg:nth-of-type(1) > path:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-widget-active-students"] > svg:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+  font-size: 1.25rem !important;
+  border-color: transparent !important;
+  font-weight: 700 !important;
+  border-width: 2px !important;
+  background-color: transparent !important;
+}
+[data-dev-id="tutor-widget-messages"] > svg:nth-of-type(1) > path:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-widget-messages"] > svg:nth-of-type(1) > path:nth-of-type(2) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-widget-lesson-mode"] > svg:nth-of-type(1) > path:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-widget-lesson-mode"] > svg:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-widget-create-flashcards"] > svg:nth-of-type(1) > path:nth-of-type(2) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="app-main-column"] > main:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(1) {
+  background-color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="app-main-column"] > main:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > button:nth-of-type(1) {
+  background-color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="app-main-column"] > main:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > button:nth-of-type(1) {
+  background-color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="app-main-column"] > main:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(4) > div:nth-of-type(1) > button:nth-of-type(1) {
+  background-color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="app-main-column"] > main:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(1) > svg:nth-of-type(1) {
+}
+[data-dev-id="tutor-main-content"] > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(2) {
+  background-color: color-mix(in srgb, hsl(var(--color-7)) 75%, transparent) !important;
+}
+[data-dev-id="tutor-main-content"] > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) {
+  background-color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-main-content"] > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(1) {
+  background-color: color-mix(in srgb, hsl(var(--color-6)) 75%, transparent) !important;
+}
+[data-dev-id="tutor-main-content"] > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(1) > svg:nth-of-type(1) {
+  background-color: color-mix(in srgb, hsl(var(--color-6)) 75%, transparent) !important;
+  border-color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-main-content"] > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(3) {
+  background-color: color-mix(in srgb, hsl(var(--color-3)) 75%, transparent) !important;
+}
+[data-dev-id="tutor-main-content"] > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(4) {
+  background-color: color-mix(in srgb, hsl(var(--color-5)) 75%, transparent) !important;
+}
+[data-dev-id="tutor-main-content"] > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(2) > svg:nth-of-type(1) > circle:nth-of-type(1) {
+}
+[data-dev-id="tutor-main-content"] > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(2) > svg:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-main-content"] > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(3) > svg:nth-of-type(1) > circle:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-main-content"] > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(3) > svg:nth-of-type(1) > path:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-main-content"] > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(3) > svg:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-main-content"] > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(4) > svg:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-main-content"] > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(1) > p:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+  font-weight: 700 !important;
+}
+[data-dev-id="tutor-main-content"] > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(2) > p:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+  font-weight: 700 !important;
+}
+[data-dev-id="tutor-main-content"] > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(3) > p:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+  font-weight: 700 !important;
+}
+[data-dev-id="tutor-main-content"] > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > button:nth-of-type(4) > p:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+  font-weight: 700 !important;
+}
+[data-dev-id="student-profile-hero-tile"] > div:nth-of-type(4) > button:nth-of-type(1) {
+  background-color: color-mix(in srgb, hsl(var(--color-6)) 100%, transparent) !important;
+  color: color-mix(in srgb, #10f914 100%, transparent) !important;
+}
+[data-dev-id="btn-quick-add"] {
+  background-color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="student-profile-hero-tile"] > div:nth-of-type(3) > button:nth-of-type(3) > span:nth-of-type(1) {
+}
+[data-dev-id="student-profile-hero-tile"] > div:nth-of-type(3) > button:nth-of-type(3) {
+  background-color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+  font-weight: 700 !important;
+}
+[data-dev-id="student-profile-hero-tile"] > div:nth-of-type(3) > button:nth-of-type(4) {
+  background-color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+  font-weight: 700 !important;
+}
+[data-dev-id="tutor-tile-all-content"] > div:nth-of-type(2) {
+  border-color: color-mix(in srgb, hsl(var(--color-2)) 100%, transparent) !important;
+  border-width: 4px !important;
+}
+[data-dev-id="tutor-tile-all-content"] > div:nth-of-type(3) {
+}
+[data-dev-id="tutor-tile-all-content"] > div:nth-of-type(1) {
+  border-color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+  border-width: 4px !important;
+}
+[data-dev-id="tutor-tile-all-content"] {
+  border-color: color-mix(in srgb, #979595 100%, transparent) !important;
+  border-width: 2px !important;
+  background-color: color-mix(in srgb, hsl(var(--color-2)) 75%, transparent) !important;
+}
+[data-dev-id="tutor-tile-students"] {
+  border-color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+  border-width: 2px !important;
+}
+[data-dev-id="tutor-tile-content"] {
+  background-color: color-mix(in srgb, hsl(var(--color-10)) 100%, transparent) !important;
+  border-color: color-mix(in srgb, hsl(var(--color-3)) 100%, transparent) !important;
+  border-width: 2px !important;
+}
+[data-dev-id="tutor-tile-messages"] {
+  background-color: color-mix(in srgb, #979595 100%, transparent) !important;
+  border-color: color-mix(in srgb, #979595 100%, transparent) !important;
+  border-width: 2px !important;
+}
+[data-dev-id="tutor-tile-todo"] {
+  border-color: color-mix(in srgb, hsl(var(--color-4)) 100%, transparent) !important;
+  border-width: 2px !important;
+}
+[data-dev-id="tutor-tile-all-content"] > div:nth-of-type(3) > h2:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-tile-all-content"] > div:nth-of-type(3) > p:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+  font-weight: 400 !important;
+}
+[data-dev-id="tutor-tile-quickstart"] > div:nth-of-type(3) > h2:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-tile-quickstart"] > div:nth-of-type(3) > p:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+  font-weight: 400 !important;
+}
+[data-dev-id="tutor-tile-students"] > div:nth-of-type(3) > h2:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-tile-students"] > div:nth-of-type(3) > p:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+  font-weight: 400 !important;
+}
+[data-dev-id="tutor-tile-content"] > div:nth-of-type(3) > h2:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-tile-content"] > div:nth-of-type(3) > p:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+  font-weight: 400 !important;
+}
+[data-dev-id="tutor-tile-messages"] > div:nth-of-type(3) > h2:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-tile-messages"] > div:nth-of-type(3) > p:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+  font-weight: 400 !important;
+}
+[data-dev-id="tutor-tile-todo"] > div:nth-of-type(3) > h2:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-tile-todo"] > div:nth-of-type(3) > p:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+  font-weight: 400 !important;
+}
+[data-dev-id="tutor-tile-all-content"] > div:nth-of-type(2) > svg:nth-of-type(1) > path:nth-of-type(3) {
+  background-color: transparent !important;
+  border-color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-tile-all-content"] > div:nth-of-type(2) > svg:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-tile-quickstart"] > div:nth-of-type(2) {
+  border-color: color-mix(in srgb, hsl(var(--color-8)) 50%, transparent) !important;
+  border-width: 4px !important;
+}
+[data-dev-id="tutor-tile-quickstart"] > div:nth-of-type(2) > svg:nth-of-type(1) > polygon:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-tile-students"] > div:nth-of-type(2) {
+  border-color: color-mix(in srgb, hsl(var(--color-5)) 50%, transparent) !important;
+  border-width: 4px !important;
+}
+[data-dev-id="tutor-tile-content"] > div:nth-of-type(2) {
+  border-color: color-mix(in srgb, hsl(var(--color-10)) 50%, transparent) !important;
+  border-width: 4px !important;
+}
+[data-dev-id="tutor-tile-content"] > div:nth-of-type(2) > svg:nth-of-type(1) > path:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-tile-content"] > div:nth-of-type(2) > svg:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-tile-messages"] > div:nth-of-type(2) {
+  border-width: 4px !important;
+  border-color: color-mix(in srgb, #979595 50%, transparent) !important;
+}
+[data-dev-id="tutor-tile-messages"] > div:nth-of-type(2) > svg:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-tile-todo"] > div:nth-of-type(2) {
+  border-color: color-mix(in srgb, hsl(var(--color-4)) 50%, transparent) !important;
+  border-width: 4px !important;
+}
+[data-dev-id="tutor-tile-todo"] > div:nth-of-type(2) > svg:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-widget-active-students"] {
+  border-color: color-mix(in srgb, hsl(var(--color-4)) 50%, transparent) !important;
+  border-width: 2px !important;
+}
+[data-dev-id="tutor-widget-messages"] {
+  border-color: color-mix(in srgb, hsl(var(--color-2)) 25%, transparent) !important;
+  border-width: 2px !important;
+}
+[data-dev-id="tutor-main-content"] > div:nth-of-type(2) > div:nth-of-type(2) > h3:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-5)) 100%, transparent) !important;
+  font-weight: 900 !important;
+  font-size: 2.25rem !important;
+}
+[data-dev-id="tutor-hero-tile"] > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > span:nth-of-type(2) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-hero-tile"] > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > span:nth-of-type(3) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-hero-tile"] > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > span:nth-of-type(4) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+}
+[data-dev-id="tutor-hero-tile"] > div:nth-of-type(1) > div:nth-of-type(2) > h2:nth-of-type(1) {
+  color: color-mix(in srgb, hsl(var(--color-1)) 100%, transparent) !important;
+  font-weight: 700 !important;
+}
+[data-dev-id="tutor-widget-create-flashcards"] > span:nth-of-type(2) {
+  font-size: 1rem !important;
+}
+[data-dev-id="tutor-header-title"] > h1:nth-of-type(1) {
+  font-size: 2.25rem !important;
 }
