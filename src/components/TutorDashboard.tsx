@@ -1802,7 +1802,7 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                             </div>
                         </div>
                     );
-                })}
+                })()}
             </main>
 
             {/* Global Add Content Modal */}
