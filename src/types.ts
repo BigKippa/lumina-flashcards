@@ -177,6 +177,7 @@ export interface UserProfile {
     role?: UserRole;
     password?: string; // Optional for backward compatibility, but recommended
     forcePasswordReset?: boolean; // Forces user to reset password/username on next login
+    todos?: TodoItem[]; // Track tutor to-do items
 
     // Expanded Profile Fields
     // Expanded Profile Fields - Contact & Location
@@ -239,6 +240,17 @@ export interface StudentRequest {
     content: string;
     status: 'pending' | 'resolved';
     timestamp: number;
+}
+
+export interface TodoItem {
+    id: string;
+    title: string;
+    description: string;
+    createdAt: number;
+    completedAt?: number;
+    status: 'pending' | 'completed';
+    relatedStudentId?: string;
+    type: 'profile_completion' | 'other';
 }
 
 export interface Student {

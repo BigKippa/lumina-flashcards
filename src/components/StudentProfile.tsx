@@ -154,7 +154,12 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({ student, onClose
                                 <button 
                                     data-dev-id="btn-quick-add"
                                     onClick={() => {
-                                        const finalName = (!formData.name || formData.name.trim() === '' || formData.name === 'New Student') ? 'Unnamed Student' : formData.name;
+                                        let finalName = formData.name;
+                                        if (!finalName || finalName.trim() === '' || finalName === 'New Student') {
+                                            const promptedName = window.prompt("Please enter a name for the student:");
+                                            if (!promptedName || promptedName.trim() === '') return;
+                                            finalName = promptedName.trim();
+                                        }
                                         onSave({...formData, name: finalName, isUncompletedProfile: true});
                                         onClose();
                                     }}

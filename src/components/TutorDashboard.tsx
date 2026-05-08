@@ -33,8 +33,8 @@ interface TutorDashboardProps {
     decks: Deck[];
     onUpdateStudent: (student: Student) => void;
     onAddStudent: (student: Student) => void;
-    view: 'dashboard' | 'students' | 'flashcards' | 'learning-content' | 'manage-flashcards' | 'review-new-flashcards';
-    onViewChange: (view: 'dashboard' | 'students' | 'flashcards' | 'learning-content' | 'manage-flashcards' | 'review-new-flashcards') => void;
+    view: 'dashboard' | 'students' | 'flashcards' | 'learning-content' | 'manage-flashcards' | 'review-new-flashcards' | 'todo';
+    onViewChange: (view: 'dashboard' | 'students' | 'flashcards' | 'learning-content' | 'manage-flashcards' | 'review-new-flashcards' | 'todo') => void;
     onAddDeck: (deck: Deck) => void;
     onAddCard: (card: Word, deckId: string) => void;
     onEditCard: (card: Word, additionalCards?: {card: Word, deckId: string}[]) => void;
@@ -829,7 +829,7 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                                 tileContent = (
                                                     <div
                                                         data-dev-id="tutor-tile-todo"
-                                                        onClick={() => alert('To-Do List Navigation - Coming Soon')}
+                                                        onClick={() => onViewChange('todo')}
                                                         className="bg-color4 hover:bg-color4/30 border border-color4/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
                                                     >
                                                         {uncompletedProfilesCount > 0 && (
@@ -1708,6 +1708,81 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                         )}
                     </div>
                 )}
+
+                {/* To-Do List View */}
+                {view === 'todo' && (
+                    <div className="max-w-4xl mx-auto mt-6 animate-in fade-in slide-in-from-bottom-4">
+                        <div className="flex items-center justify-between mb-6">
+                            <div>
+                                <h1 className="text-3xl font-extrabold flex items-center gap-3">
+                                    <CheckSquare className="w-8 h-8 text-primary" /> To-Do List
+                                </h1>
+                                <p className="text-muted-foreground mt-2">Track administrative tasks and profile completion statuses.</p>
+                            </div>
+                            <button
+                                onClick={() => onViewChange('dashboard')}
+                                className="px-4 py-2 bg-secondary text-secondary-foreground font-bold rounded-xl shadow-sm hover:bg-secondary/80 transition-colors flex items-center gap-2"
+                            >
+                                <ArrowLeft className="w-4 h-4" /> Back
+                            </button>
+                        </div>
+
+                        <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
+                            {(!user.todos || user.todos.length === 0) ? (
+                                <div className="p-12 text-center text-muted-foreground">
+                                    <Check className="w-12 h-12 mx-auto mb-4 opacity-20" />
+                                    <h3 className="text-xl font-bold mb-2">You're all caught up!</h3>
+                                    <p>There are currently no tasks on your to-do list.</p>
+                                </div>
+                            ) : (
+                                <div className="divide-y divide-border">
+                                    {user.todos.map(todo => (
+                                        <div key={todo.id} className={`p-6 flex items-start gap-4 transition-colors ${todo.status === 'completed' ? 'bg-secondary/30' : 'hover:bg-muted/50'}`}>
+                                            <div className="mt-1">
+                                                {todo.status === 'completed' ? (
+                                                    <CheckCircle className="w-6 h-6 text-green-500" />
+                                                ) : (
+                                                    <div className="w-6 h-6 rounded-full border-2 border-primary/50 flex items-center justify-center">
+                                                        <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse"></div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="flex-1">
+                                                <h3 className={`text-lg font-bold ${todo.status === 'completed' ? 'text-muted-foreground line-through decoration-muted-foreground/30' : 'text-foreground'}`}>
+                                                    {todo.title}
+                                                </h3>
+                                                <p className="text-sm text-muted-foreground mt-1">{todo.description}</p>
+                                                
+                                                <div className="flex flex-wrap items-center gap-4 mt-3 text-xs text-muted-foreground font-medium">
+                                                    <span className="flex items-center gap-1.5 bg-background border border-border px-2.5 py-1 rounded-md">
+                                                        <Clock className="w-3.5 h-3.5" /> Added: {new Date(todo.createdAt).toLocaleString()}
+                                                    </span>
+                                                    {todo.completedAt && (
+                                                        <span className="flex items-center gap-1.5 bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/20 px-2.5 py-1 rounded-md">
+                                                            <Check className="w-3.5 h-3.5" /> Completed: {new Date(todo.completedAt).toLocaleString()}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            
+                                            {todo.status === 'pending' && todo.relatedStudentId && (
+                                                <button
+                                                    onClick={() => {
+                                                        const student = students.find(s => s.id === todo.relatedStudentId);
+                                                        if (student) setSelectedStudentId(student.id);
+                                                    }}
+                                                    className="px-4 py-2 bg-primary/10 text-primary hover:bg-primary/20 transition-colors rounded-lg font-bold text-sm whitespace-nowrap border border-primary/20"
+                                                >
+                                                    Complete Now
+                                                </button>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
             </main>
 
             {/* Global Add Content Modal */}
@@ -1728,7 +1803,47 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                 <StudentProfile
                     student={students.find(s => s.id === selectedStudentId)!}
                     onClose={() => setSelectedStudentId(null)}
-                    onSave={onUpdateStudent}
+                    onSave={(updatedStudent) => {
+                        const existingStudent = students.find(s => s.id === updatedStudent.id);
+                        const isComplete = Boolean(updatedStudent.name && updatedStudent.name !== 'New Student' && updatedStudent.name !== 'Unnamed Student' && updatedStudent.nativeLanguage && updatedStudent.learningPlatform);
+                        
+                        if (updatedStudent.isUncompletedProfile && isComplete) {
+                            updatedStudent.isUncompletedProfile = false;
+                        }
+
+                        onUpdateStudent(updatedStudent);
+
+                        if (updatedStudent.isUncompletedProfile) {
+                            const existingTodos = user.todos || [];
+                            const hasPending = existingTodos.some(t => t.relatedStudentId === updatedStudent.id && t.status === 'pending');
+                            
+                            if (!hasPending) {
+                                const newTodo: import('../types').TodoItem = {
+                                    id: crypto.randomUUID(),
+                                    title: `Complete profile for ${updatedStudent.name}`,
+                                    description: 'Missing mandatory fields',
+                                    createdAt: Date.now(),
+                                    status: 'pending',
+                                    type: 'profile_completion',
+                                    relatedStudentId: updatedStudent.id
+                                };
+                                onUpdateProfile(user.username, { todos: [newTodo, ...existingTodos] });
+                            }
+                            
+                            setQuickAddInitialParams({ audience: 'specific_student', studentId: updatedStudent.id });
+                            setIsQuickAddOpen(true);
+                            
+                        } else if (isComplete && existingStudent?.isUncompletedProfile) {
+                            const existingTodos = user.todos || [];
+                            const updatedTodos = existingTodos.map(t => {
+                                if (t.relatedStudentId === updatedStudent.id && t.status === 'pending') {
+                                    return { ...t, status: 'completed' as const, completedAt: Date.now() };
+                                }
+                                return t;
+                            });
+                            onUpdateProfile(user.username, { todos: updatedTodos });
+                        }
+                    }}
                     onDeleteStudent={onDeleteStudent}
                     decks={decks}
                     onAddCard={onAddCard}

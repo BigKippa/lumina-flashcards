@@ -213,7 +213,7 @@ function App() {
         mode: AppMode;
         activeDeckId: string | null;
         adminTab: string;
-        tutorView: 'dashboard' | 'students' | 'flashcards' | 'learning-content' | 'manage-flashcards' | 'review-new-flashcards';
+        tutorView: 'dashboard' | 'students' | 'flashcards' | 'learning-content' | 'manage-flashcards' | 'review-new-flashcards' | 'todo';
         topicGroupId: string | null;
     };
 
@@ -238,7 +238,7 @@ function App() {
     const setActiveDeckId = (id: string | null) => setCurrentRoute(prev => ({ ...prev, activeDeckId: id }));
     const setTopicGroupId = (id: string | null) => setCurrentRoute(prev => ({ ...prev, topicGroupId: id }));
 
-    const navigate = (newMode: AppMode, newDeckId: string | null = null, newAdminTab?: string, newTutorView?: 'dashboard' | 'students' | 'flashcards' | 'learning-content' | 'manage-flashcards' | 'review-new-flashcards') => {
+    const navigate = (newMode: AppMode, newDeckId: string | null = null, newAdminTab?: string, newTutorView?: 'dashboard' | 'students' | 'flashcards' | 'learning-content' | 'manage-flashcards' | 'review-new-flashcards' | 'todo') => {
         // Build the new explicitly strict route object
         const routeObj: RouteState = {
             mode: newMode,
