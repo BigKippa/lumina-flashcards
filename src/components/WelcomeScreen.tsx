@@ -120,7 +120,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, onSelect, la
                             {/* Quick Start Widget */}
                             <div
                                 onClick={onQuickStart}
-                                className={`bg-color3 hover:bg-color3/80 cursor-pointer transition-colors border border-color3/50 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm group text-color5 ${!lastSession ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                className="bg-color3 hover:bg-color3/80 cursor-pointer transition-colors border border-color3/50 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm group text-color5"
                                 title={lastSession ? `Resume ${lastSession.label}` : 'No recent session'}
                             >
                                 <Clock className="w-5 h-5 mb-2 group-hover:scale-110 transition-transform" />
@@ -133,9 +133,9 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, onSelect, la
                                 onClick={() => setIsFavoritesModalOpen(true)}
                                 className="bg-color3 hover:bg-color3/30 cursor-pointer transition-colors backdrop-blur-sm border border-amber-500/30 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm group text-color1"
                             >
-                                <Heart className="w-5 h-5 text-amber-400 mb-2 group-hover:scale-110 transition-transform fill-current" />
+                                <Heart className="w-5 h-5 text-amber-400 mb-2 group-hover:scale-110 transition-transform" />
                                 <span className="text-2xl font-bold invisible block">&nbsp;</span>
-                                <span className="text-xs font-bold text-center leading-tight">Favorites</span>
+                                <span className="text-xs font-bold text-center leading-tight">My<br />Favorites</span>
                             </div>
                         </div>
                     </div>
