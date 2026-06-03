@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Student, Deck, AppSettings, UserProfile } from '../types';
 import { Word } from '../data/vocabulary';
-import { Search, Plus, UserCircle, ChevronDown, SortAsc, Clock, GraduationCap, Users, Layout, Zap, MessageSquare, CheckSquare, ArrowLeft, MapPin, Bell, Library, ChevronUp, Pencil, Filter, ArrowDownAZ, ArrowUpAZ, X, AlertTriangle, Send, Settings, Check, Move, Eye, Archive, Trash2, Sparkles, MoreVertical } from 'lucide-react';
+import { Search, Plus, UserCircle, ChevronDown, SortAsc, Clock, GraduationCap, Users, Layout, Zap, MessageSquare, CheckSquare, ArrowLeft, MapPin, Bell, Library, ChevronUp, Pencil, Filter, ArrowDownAZ, ArrowUpAZ, X, AlertTriangle, Send, Check, Eye, Archive, Trash2, Sparkles, MoreVertical, CheckCircle } from 'lucide-react';
 import { StudentProfile } from './StudentProfile';
 import { AddContentModal } from './AddContentModal';
 import { EditCardModal } from './EditCardModal';
@@ -9,23 +9,6 @@ import { QuickAddFlashcardsModal } from './QuickAddFlashcardsModal';
 import Flashcard from './Flashcard';
 import { LibraryDiagnosticsModal } from './LibraryDiagnosticsModal';
 import { DuplicateResolverModal } from './DuplicateResolverModal';
-import {
-    DndContext,
-    closestCenter,
-    KeyboardSensor,
-    PointerSensor,
-    useSensor,
-    useSensors,
-    DragEndEvent
-} from '@dnd-kit/core';
-import {
-    arrayMove,
-    SortableContext,
-    sortableKeyboardCoordinates,
-    rectSortingStrategy,
-    useSortable
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 
 interface TutorDashboardProps {
     user: UserProfile;
@@ -49,59 +32,12 @@ interface TutorDashboardProps {
     onSelectDeck?: (deckId: string) => void;
 }
 
-const DEFAULT_TILES = [
-    'all-content',
-    'quickstart',
-    'students',
-    'manage-learning-content',
-    'messages',
-    'to-do'
-];
 
-function SortableDashboardTile({ id, children, isCustomizeMode }: { id: string, children: React.ReactNode, isCustomizeMode: boolean }) {
-    const {
-        attributes,
-        listeners,
-        setNodeRef,
-        transform,
-        transition,
-        isDragging
-    } = useSortable({ id });
-
-    const style = {
-        transform: CSS.Transform.toString(transform),
-        transition,
-        zIndex: isDragging ? 10 : 1,
-        position: 'relative' as const,
-    };
-
-    return (
-        <div ref={setNodeRef} style={style} className={`h-full ${isDragging ? 'opacity-50 ring-2 ring-primary rounded-xl scale-[1.02] shadow-2xl transition-all' : ''}`}>
-            <div className="relative h-full">
-                {isCustomizeMode && (
-                    <div
-                        {...attributes}
-                        {...listeners}
-                        className="absolute top-3 right-3 p-2 bg-black/40 hover:bg-black/60 rounded-lg cursor-grab active:cursor-grabbing backdrop-blur-md z-20 text-color1 shadow-sm transition-colors border border-white/10"
-                        title="Drag to reorder"
-                    >
-                        <Move className="w-5 h-5" />
-                    </div>
-                )}
-                <div className={`h-full ${isCustomizeMode ? 'pointer-events-none' : ''}`}>
-                    {children}
-                </div>
-            </div>
-        </div>
-    );
-}
 
 export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, decks, onUpdateStudent, onAddStudent, onDeleteStudent, view, onViewChange, onAddDeck, onAddCard, onEditCard, apiKey, settings, onNavigateToProfile, onUpdateProfile, onDeleteCard, onBulkDeleteCards, onBulkArchiveCards, onSelectDeck }) => {
     const [currentTime, setCurrentTime] = useState(new Date());
-    const [isCustomizeMode, setIsCustomizeMode] = useState(false);
     const [isDiagnosticsModalOpen, setIsDiagnosticsModalOpen] = useState(false);
     const [resolvingDuplicates, setResolvingDuplicates] = useState<(Word & { deckId: string })[] | null>(null);
-    const [tileOrder, setTileOrder] = useState<string[]>([]);
     const [studentMenuOpenId, setStudentMenuOpenId] = useState<string | null>(null);
     
     // Quick Add Flashcards State
@@ -188,41 +124,7 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
         commitCardsToLibrary(pendingQuickAddCards, true);
     };
 
-    React.useEffect(() => {
-        const savedOrder = user.tutorDashboardTileOrder;
-        if (savedOrder && savedOrder.length > 0) {
-            const merged = [...savedOrder];
-            DEFAULT_TILES.forEach(id => {
-                if (!merged.includes(id)) merged.push(id);
-            });
-            setTileOrder(merged);
-        } else {
-            setTileOrder(DEFAULT_TILES);
-        }
-    }, [user.tutorDashboardTileOrder]);
 
-    const sensors = useSensors(
-        useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-        useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
-    );
-
-    const handleDragEnd = (event: DragEndEvent) => {
-        const { active, over } = event;
-        if (over && active.id !== over.id) {
-            setTileOrder((items) => {
-                const oldIndex = items.indexOf(active.id as string);
-                const newIndex = items.indexOf(over.id as string);
-                return arrayMove(items, oldIndex, newIndex);
-            });
-        }
-    };
-
-    const toggleCustomizeMode = () => {
-        if (isCustomizeMode && onUpdateProfile) {
-            onUpdateProfile(user.username, { tutorDashboardTileOrder: tileOrder });
-        }
-        setIsCustomizeMode(!isCustomizeMode);
-    };
 
     const [activeTab, setActiveTab] = useState<'active' | 'archived'>('active');
     const [searchQuery, setSearchQuery] = useState('');
@@ -702,173 +604,129 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                     <span className="text-xs font-bold text-color1 text-center leading-tight">Create<br />Flashcards</span>
                                 </div>
                             </div>
-                        </div>
-
-                        {/* Dashboard Header Elements */}
+                        </div>                        {/* Dashboard Header Elements */}
                         <div className="flex items-center justify-between mb-2">
                             <h3 className="text-xl font-bold text-foreground opacity-80 pl-2">Dashboard Actions</h3>
-                            <button
-                                onClick={toggleCustomizeMode}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition-all focus:ring-2 focus:ring-offset-2 focus:ring-offset-background border ${isCustomizeMode ? 'bg-primary text-primary-foreground border-primary hover:bg-primary/90' : 'bg-secondary text-secondary-foreground border-border hover:bg-secondary/80'}`}
-                            >
-                                {isCustomizeMode ? (
-                                    <>
-                                        <Check className="w-4 h-4" /> Save Layout
-                                    </>
-                                ) : (
-                                    <>
-                                        <Settings className="w-4 h-4" /> Customize Layout
-                                    </>
-                                )}
-                            </button>
                         </div>
 
-                        {/* Control Dashboard Grid - Draggable */}
-                        <DndContext
-                            sensors={sensors}
-                            collisionDetection={closestCenter}
-                            onDragEnd={handleDragEnd}
-                        >
-                            <SortableContext items={tileOrder} strategy={rectSortingStrategy}>
-                                <div data-dev-id="tutor-tiles-grid" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {tileOrder.map(id => {
-                                        let tileContent = null;
-                                        switch (id) {
-                                            case 'all-content':
-                                                tileContent = (
-                                                    <div
-                                                        data-dev-id="tutor-tile-all-content"
-                                                        onClick={() => onViewChange('flashcards')}
-                                                        className="bg-color2 hover:bg-color2/30 border border-color2/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
-                                                    >
-                                                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color2 transition-colors"></div>
-                                                        <div className="w-12 h-12 rounded-xl bg-color1 text-color2 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
-                                                            <Library className="w-6 h-6" />
-                                                        </div>
-                                                        <div className="relative z-10 font-medium flex-1">
-                                                            <h2 className="text-xl font-bold mb-1">Get New Material</h2>
-                                                            <p className="text-sm text-color1/80 line-clamp-2">Browse the complete library of global flashcards and decks.</p>
-                                                        </div>
-                                                    </div>
-                                                );
-                                                break;
-                                            case 'quickstart':
-                                                tileContent = (
-                                                    <div
-                                                        data-dev-id="tutor-tile-quickstart"
-                                                        onClick={() => alert('Quickstart Navigation - Coming Soon')}
-                                                        className="bg-color4 hover:bg-color4/30 border border-color4/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
-                                                    >
-                                                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color4 transition-colors"></div>
-                                                        <div className="w-12 h-12 rounded-xl bg-color1 text-color4 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
-                                                            <Zap className="w-6 h-6" />
-                                                        </div>
-                                                        <div className="relative z-10 font-medium flex-1">
-                                                            <h2 className="text-xl font-bold mb-1">Quickstart</h2>
-                                                            <p className="text-sm text-color1/80 line-clamp-2">Jump straight into your next scheduled session or lesson plan.</p>
-                                                        </div>
-                                                    </div>
-                                                );
-                                                break;
-                                            case 'students':
-                                                tileContent = (
-                                                    <div
-                                                        data-dev-id="tutor-tile-students"
-                                                        onClick={() => onViewChange('students')}
-                                                        className="bg-color5 hover:bg-color5/30 border border-color5/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
-                                                    >
-                                                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color5 transition-colors"></div>
-                                                        <div className="w-12 h-12 rounded-xl bg-color1 text-color5 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
-                                                            <Users className="w-6 h-6" />
-                                                        </div>
-                                                        <div className="relative z-10 font-medium flex-1">
-                                                            <h2 className="text-xl font-bold mb-1 flex items-center gap-2">Students <span className="bg-color1 text-color5 text-xs py-0.5 px-2 rounded-full font-bold">{students.length}</span></h2>
-                                                            <p className="text-sm text-color1/80 line-clamp-2">View progress, assign homework, and manage student profiles.</p>
-                                                        </div>
-                                                    </div>
-                                                );
-                                                break;
-                                            case 'manage-learning-content':
-                                                tileContent = (
-                                                    <div
-                                                        data-dev-id="tutor-tile-content"
-                                                        onClick={() => onViewChange('learning-content')}
-                                                        className="bg-color3 hover:bg-color3/30 border border-color3/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
-                                                    >
-                                                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color3 transition-colors"></div>
-                                                        <div className="w-12 h-12 rounded-xl bg-color1 text-color3 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
-                                                            <Layout className="w-6 h-6" />
-                                                        </div>
-                                                        <div className="relative z-10 font-medium flex-1">
-                                                            <h2 className="text-xl font-bold mb-1 flex items-center gap-2">Manage Learning Content</h2>
-                                                            <p className="text-sm text-color1/80 line-clamp-2">Create, edit, and organize flashcard decks for your students.</p>
-                                                        </div>
-                                                    </div>
-                                                );
-                                                break;
-                                            case 'messages':
-                                                tileContent = (
-                                                    <div
-                                                        data-dev-id="tutor-tile-messages"
-                                                        onClick={() => alert('Messages Navigation - Coming Soon')}
-                                                        className="bg-color2 hover:bg-color2/30 border border-color2/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
-                                                    >
-                                                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color2 transition-colors"></div>
-                                                        <div className="w-12 h-12 rounded-xl bg-color1 text-color2 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
-                                                            <MessageSquare className="w-6 h-6" />
-                                                        </div>
-                                                        <div className="relative z-10 font-medium flex-1">
-                                                            <h2 className="text-xl font-bold mb-1">Messages</h2>
-                                                            <p className="text-sm text-color1/80 line-clamp-2">Communicate directly with your students and review feedback.</p>
-                                                        </div>
-                                                    </div>
-                                                );
-                                                break;
-                                            case 'to-do':
-                                                const uncompletedProfilesCount = students.filter(s => s.isUncompletedProfile).length;
-                                                tileContent = (
-                                                    <div
-                                                        data-dev-id="tutor-tile-todo"
-                                                        onClick={() => onViewChange('todo')}
-                                                        className="bg-color4 hover:bg-color4/30 border border-color4/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
-                                                    >
-                                                        {uncompletedProfilesCount > 0 && (
-                                                            <div className="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-md z-20 animate-pulse flex items-center gap-1.5 border border-red-400">
-                                                                <span className="w-1.5 h-1.5 bg-white rounded-full block animate-ping"></span>
-                                                                {uncompletedProfilesCount} Action{uncompletedProfilesCount !== 1 ? 's' : ''} Needed
-                                                            </div>
-                                                        )}
-                                                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color4 transition-colors"></div>
-                                                        
-                                                        {uncompletedProfilesCount > 0 && (
-                                                            <div className="absolute inset-0 bg-color4/95 backdrop-blur-sm z-30 flex items-center justify-center p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                                                                <p className="text-sm text-color1 font-bold text-center leading-relaxed">
-                                                                    You have {uncompletedProfilesCount} uncompleted student profile{uncompletedProfilesCount !== 1 ? 's' : ''} to finish setting up.
-                                                                </p>
-                                                            </div>
-                                                        )}
-                                                        
-                                                        <div className="w-12 h-12 rounded-xl bg-color1 text-color4 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
-                                                            <CheckSquare className="w-6 h-6" />
-                                                        </div>
-                                                        <div className="relative z-10 font-medium flex-1">
-                                                            <h2 className="text-xl font-bold mb-1">To Do List</h2>
-                                                            <p className="text-sm text-color1/80 line-clamp-2">Track your administrative tasks, grading, and upcoming goals.</p>
-                                                        </div>
-                                                    </div>
-                                                );
-                                                break;
-                                        }
-
-                                        return (
-                                            <SortableDashboardTile key={id} id={id} isCustomizeMode={isCustomizeMode}>
-                                                {tileContent}
-                                            </SortableDashboardTile>
-                                        );
-                                    })}
+                        {/* Control Dashboard Grid */}
+                        <div data-dev-id="tutor-tiles-grid" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {/* All Content Tile */}
+                            <div
+                                data-dev-id="tutor-tile-all-content"
+                                onClick={() => onViewChange('flashcards')}
+                                className="bg-color2 hover:bg-color2/30 border border-color2/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
+                            >
+                                <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color2 transition-colors"></div>
+                                <div className="w-12 h-12 rounded-xl bg-color1 text-color2 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
+                                    <Library className="w-6 h-6" />
                                 </div>
-                            </SortableContext>
-                        </DndContext>
+                                <div className="relative z-10 font-medium flex-1">
+                                    <h2 className="text-xl font-bold mb-1">Get New Material</h2>
+                                    <p className="text-sm text-color1/80 line-clamp-2">Browse the complete library of global flashcards and decks.</p>
+                                </div>
+                            </div>
+
+                            {/* Quickstart Tile */}
+                            <div
+                                data-dev-id="tutor-tile-quickstart"
+                                onClick={() => alert('Quickstart Navigation - Coming Soon')}
+                                className="bg-color4 hover:bg-color4/30 border border-color4/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
+                            >
+                                <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color4 transition-colors"></div>
+                                <div className="w-12 h-12 rounded-xl bg-color1 text-color4 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
+                                    <Zap className="w-6 h-6" />
+                                </div>
+                                <div className="relative z-10 font-medium flex-1">
+                                    <h2 className="text-xl font-bold mb-1">Quickstart</h2>
+                                    <p className="text-sm text-color1/80 line-clamp-2">Jump straight into your next scheduled session or lesson plan.</p>
+                                </div>
+                            </div>
+
+                            {/* Students Tile */}
+                            <div
+                                data-dev-id="tutor-tile-students"
+                                onClick={() => onViewChange('students')}
+                                className="bg-color5 hover:bg-color5/30 border border-color5/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
+                            >
+                                <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color5 transition-colors"></div>
+                                <div className="w-12 h-12 rounded-xl bg-color1 text-color5 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
+                                    <Users className="w-6 h-6" />
+                                </div>
+                                <div className="relative z-10 font-medium flex-1">
+                                    <h2 className="text-xl font-bold mb-1 flex items-center gap-2">Students <span className="bg-color1 text-color5 text-xs py-0.5 px-2 rounded-full font-bold">{students.length}</span></h2>
+                                    <p className="text-sm text-color1/80 line-clamp-2">View progress, assign homework, and manage student profiles.</p>
+                                </div>
+                            </div>
+
+                            {/* Manage Learning Content Tile */}
+                            <div
+                                data-dev-id="tutor-tile-content"
+                                onClick={() => onViewChange('learning-content')}
+                                className="bg-color3 hover:bg-color3/30 border border-color3/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
+                            >
+                                <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color3 transition-colors"></div>
+                                <div className="w-12 h-12 rounded-xl bg-color1 text-color3 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
+                                    <Layout className="w-6 h-6" />
+                                </div>
+                                <div className="relative z-10 font-medium flex-1">
+                                    <h2 className="text-xl font-bold mb-1 flex items-center gap-2">Manage Learning Content</h2>
+                                    <p className="text-sm text-color1/80 line-clamp-2">Create, edit, and organize flashcard decks for your students.</p>
+                                </div>
+                            </div>
+
+                            {/* Messages Tile */}
+                            <div
+                                data-dev-id="tutor-tile-messages"
+                                onClick={() => alert('Messages Navigation - Coming Soon')}
+                                className="bg-color2 hover:bg-color2/30 border border-color2/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
+                            >
+                                <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color2 transition-colors"></div>
+                                <div className="w-12 h-12 rounded-xl bg-color1 text-color2 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
+                                    <MessageSquare className="w-6 h-6" />
+                                </div>
+                                <div className="relative z-10 font-medium flex-1">
+                                    <h2 className="text-xl font-bold mb-1">Messages</h2>
+                                    <p className="text-sm text-color1/80 line-clamp-2">Communicate directly with your students and review feedback.</p>
+                                </div>
+                            </div>
+
+                            {/* To Do List Tile */}
+                            {(() => {
+                                const uncompletedProfilesCount = students.filter(s => s.isUncompletedProfile).length;
+                                return (
+                                    <div
+                                        data-dev-id="tutor-tile-todo"
+                                        onClick={() => onViewChange('todo')}
+                                        className="bg-color4 hover:bg-color4/30 border border-color4/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
+                                    >
+                                        {uncompletedProfilesCount > 0 && (
+                                            <div className="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-md z-20 animate-pulse flex items-center gap-1.5 border border-red-400">
+                                                <span className="w-1.5 h-1.5 bg-white rounded-full block animate-ping"></span>
+                                                {uncompletedProfilesCount} Action{uncompletedProfilesCount !== 1 ? 's' : ''} Needed
+                                            </div>
+                                        )}
+                                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color4 transition-colors"></div>
+                                        
+                                        {uncompletedProfilesCount > 0 && (
+                                            <div className="absolute inset-0 bg-color4/95 backdrop-blur-sm z-30 flex items-center justify-center p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                                                <p className="text-sm text-color1 font-bold text-center leading-relaxed">
+                                                    You have {uncompletedProfilesCount} uncompleted student profile{uncompletedProfilesCount !== 1 ? 's' : ''} to finish setting up.
+                                                </p>
+                                            </div>
+                                        )}
+                                        
+                                        <div className="w-12 h-12 rounded-xl bg-color1 text-color4 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
+                                            <CheckSquare className="w-6 h-6" />
+                                        </div>
+                                        <div className="relative z-10 font-medium flex-1">
+                                            <h2 className="text-xl font-bold mb-1">To Do List</h2>
+                                            <p className="text-sm text-color1/80 line-clamp-2">Track your administrative tasks, grading, and upcoming goals.</p>
+                                        </div>
+                                    </div>
+                                );
+                            })()}
+                        </div>
                     </div>
                 )}
 
@@ -1847,7 +1705,7 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                     type: 'profile_completion',
                                     relatedStudentId: updatedStudent.id
                                 };
-                                onUpdateProfile(user.username, { todos: [newTodo, ...existingTodos] });
+                                onUpdateProfile?.(user.username, { todos: [newTodo, ...existingTodos] });
                             }
                             
                             setQuickAddInitialParams({ audience: 'specific_student', studentId: updatedStudent.id });
@@ -1861,7 +1719,7 @@ export const TutorDashboard: React.FC<TutorDashboardProps> = ({ user, students, 
                                 }
                                 return t;
                             });
-                            onUpdateProfile(user.username, { todos: updatedTodos });
+                            onUpdateProfile?.(user.username, { todos: updatedTodos });
                         }
                     }}
                     onDeleteStudent={onDeleteStudent}

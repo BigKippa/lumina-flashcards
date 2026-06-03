@@ -1,384 +1,186 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { BookOpen, MapPin, Clock, Heart, UserCircle, Bell, Sparkles, Library, MessageSquare, CheckSquare, Move, Settings, Check } from 'lucide-react';
-import { FavoriteItem, SessionInfo, UserProfile, AppMode } from '../types';
-import {
-    DndContext,
-    closestCenter,
-    KeyboardSensor,
-    PointerSensor,
-    useSensor,
-    useSensors,
-    DragEndEvent
-} from '@dnd-kit/core';
-import {
-    arrayMove,
-    SortableContext,
-    sortableKeyboardCoordinates,
-    rectSortingStrategy,
-    useSortable
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+import { BookOpen, MessageCircle, GitMerge, Users, MapPin, Shuffle, Clock, Heart } from 'lucide-react';
+import { FavoriteItem, SessionInfo, UserProfile } from '../types';
 
 interface WelcomeScreenProps {
     user: UserProfile;
+    onSelect: (category: string) => void;
     lastSession?: SessionInfo;
     favorites: FavoriteItem[];
     onQuickStart: () => void;
     onSelectFavorite: (fav: FavoriteItem) => void;
-    onNavigate: (mode: AppMode, deckId: string | null) => void;
-    onUpdateProfile: (oldUsername: string, newUserData: Partial<UserProfile>) => void;
+    onToggleFavorite: (id: string, type: 'deck' | 'mode', label: string, modeName?: string) => void;
+    onNavigate?: (mode: any, deckId?: string | null) => void;
+    onUpdateProfile?: (oldUsername: string, newUserData: Partial<UserProfile>) => void;
 }
 
-const DEFAULT_TILES = [
-    'study-topics',
-    'manage-flashcards',
-    'favorites',
-    'search-library',
-    'messages',
-    'assignments'
+const CATEGORIES = [
+    { id: 'random', label: 'Random Mix', icon: Shuffle, color: 'bg-gradient-to-br from-gray-800 to-gray-600 text-white border-none' },
+    { id: 'vocabulary', label: 'Vocabulary', icon: BookOpen, color: 'bg-blue-100 text-blue-600' },
+    { id: 'idioms', label: 'Idioms & Sayings', icon: MessageCircle, color: 'bg-purple-100 text-purple-600' },
+    { id: 'phrasal-verbs', label: 'Phrasal Verbs', icon: GitMerge, color: 'bg-green-100 text-green-600' },
+    { id: 'collocations', label: 'Phrases & Collocations', icon: Users, color: 'bg-orange-100 text-orange-600' },
+    { id: 'prepositions', label: 'Prepositions', icon: MapPin, color: 'bg-red-100 text-red-600' },
 ];
 
-function SortableDashboardTile({ id, children, isCustomizeMode }: { id: string, children: React.ReactNode, isCustomizeMode: boolean }) {
-    const {
-        attributes,
-        listeners,
-        setNodeRef,
-        transform,
-        transition,
-        isDragging
-    } = useSortable({ id });
+export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, onSelect, lastSession, favorites, onQuickStart, onSelectFavorite, onToggleFavorite }) => {
+    const { t } = useTranslation();
 
-    const style = {
-        transform: CSS.Transform.toString(transform),
-        transition,
-        zIndex: isDragging ? 10 : 1,
-        position: 'relative' as const,
-    };
+    // Get time of day for greeting
+    const hour = new Date().getHours();
+    const timeOfDay = hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening';
+
+    const userName = user.preferredName || user.firstName || user.username;
+
+    // Helper for consistency
+    const tileClass = "group relative overflow-hidden p-6 rounded-2xl bg-card border border-border hover:border-primary/50 shadow-sm hover:shadow-xl transition-all duration-300 text-left h-full flex flex-col justify-between";
 
     return (
-        <div ref={setNodeRef} style={style} className={`h-full ${isDragging ? 'opacity-50 ring-2 ring-primary rounded-xl scale-[1.02] shadow-2xl transition-all' : ''}`}>
-            <div className="relative h-full">
-                {isCustomizeMode && (
-                    <div
-                        {...attributes}
-                        {...listeners}
-                        className="absolute top-3 right-3 p-2 bg-black/40 hover:bg-black/60 rounded-lg cursor-grab active:cursor-grabbing backdrop-blur-md z-20 text-color1 shadow-sm transition-colors border border-white/10"
-                        title="Drag to reorder"
+        <div className="flex flex-col items-center min-h-[60vh] animate-in fade-in slide-in-from-bottom-4 duration-700 w-full py-8">
+            <div className="text-center mb-8">
+                <h1 className="text-4xl font-bold text-foreground mb-4">
+                    {t(`welcome.greeting.${timeOfDay}`)}, <span className="text-primary">{userName}</span>
+                </h1>
+                <p className="text-xl text-muted-foreground">
+                    {t('welcome.subtitle')}
+                </p>
+            </div>
+
+            {/* Categories Grid (Top) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-4xl mb-6">
+                {CATEGORIES.map((cat) => (
+                    <button
+                        key={cat.id}
+                        onClick={() => onSelect(cat.id)}
+                        className={tileClass}
                     >
-                        <Move className="w-5 h-5" />
+                        <div className={`absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity ${cat.color}`}>
+                            <cat.icon className="w-24 h-24 transform translate-x-4 -translate-y-4" />
+                        </div>
+
+                        <div className="relative z-10 flex items-center gap-4">
+                            <div className={`p-4 rounded-xl ${cat.color} group-hover:scale-110 transition-transform duration-300`}>
+                                <cat.icon className="w-8 h-8" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">
+                                    {t(`welcome.categories.${cat.id.replace(/-/g, '_')}`)}
+                                </h3>
+                                <p className="text-xs text-muted-foreground mt-1">{t('welcome.start_session')}</p>
+                            </div>
+                        </div>
+                    </button>
+                ))}
+            </div>
+
+            {/* Bottom Split: Quick Start & Favorites */}
+            <div className="w-full max-w-4xl grid grid-cols-2 gap-6 animate-in slide-in-from-bottom-6 duration-700 delay-200">
+
+                {/* Left: Quick Start - Styled exactly like a category tile */}
+                <div className="h-full">
+                    {lastSession ? (
+                        <button
+                            onClick={onQuickStart}
+                            className={tileClass}
+                        >
+                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity text-primary">
+                                <Clock className="w-24 h-24 transform translate-x-4 -translate-y-4" />
+                            </div>
+
+                            <div className="relative z-10 flex items-center gap-4">
+                                <div className="p-4 rounded-xl bg-primary/10 text-primary group-hover:scale-110 transition-transform duration-300">
+                                    <Clock className="w-8 h-8 fill-current" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">
+                                        {t('welcome.quick_start')}
+                                    </h3>
+                                    <p className="text-xs text-muted-foreground mt-1 capitalize">{t('welcome.resume', { deck: lastSession.label })}</p>
+                                </div>
+                            </div>
+                        </button>
+                    ) : (
+                        <div className="relative overflow-hidden p-6 rounded-2xl bg-card border border-border shadow-sm text-left h-full flex flex-col justify-between opacity-80">
+                            <div className="absolute top-0 right-0 p-4 opacity-10 text-primary">
+                                <Clock className="w-24 h-24 transform translate-x-4 -translate-y-4" />
+                            </div>
+
+                            <div className="relative z-10 flex items-center gap-4">
+                                <div className="p-4 rounded-xl bg-primary/10 text-primary">
+                                    <Clock className="w-8 h-8 fill-current" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-bold text-foreground">
+                                        {t('welcome.quick_start_title')}
+                                    </h3>
+                                    <p className="text-xs text-muted-foreground mt-1">{t('welcome.no_recent_session')}</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* Right: Favorites Tile - Container looks like a tile */}
+                <div className="h-full relative overflow-hidden rounded-2xl bg-card border border-border shadow-sm p-6 flex flex-col justify-between">
+                    {/* Background Icon Effect */}
+                    <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none text-red-500">
+                        <Heart className="w-24 h-24 transform translate-x-4 -translate-y-4" />
                     </div>
-                )}
-                <div className={`h-full ${isCustomizeMode ? 'pointer-events-none' : ''}`}>
-                    {children}
+
+                    <div className="relative z-10">
+                        <div className="flex items-center gap-4 mb-4">
+                            <div className="p-4 rounded-xl bg-red-100/50 text-red-500">
+                                <Heart className="w-8 h-8 fill-current" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-foreground">{t('welcome.favorites')}</h3>
+                                <p className="text-xs text-muted-foreground mt-1">{t('welcome.favorites_subtitle')}</p>
+                            </div>
+                        </div>
+
+                        {/* List embedded in the tile */}
+                        {favorites.length > 0 ? (
+                            <div className="space-y-2 max-h-[160px] overflow-y-auto pr-2 custom-scrollbar">
+                                {favorites.map((fav) => (
+                                    <div
+                                        key={fav.id}
+                                        className="w-full flex items-center justify-between gap-2 p-2 rounded-lg bg-secondary/30 hover:bg-secondary/60 transition-colors group/item"
+                                    >
+                                        <button
+                                            onClick={() => onSelectFavorite(fav)}
+                                            className="flex items-center gap-3 flex-1 text-left min-w-0"
+                                        >
+                                            <div className="p-1.5 rounded-md bg-white/50 dark:bg-black/20 text-muted-foreground group-hover/item:text-primary transition-colors">
+                                                {fav.type === 'mode' ? <Clock className="w-4 h-4" /> : <BookOpen className="w-4 h-4" />}
+                                            </div>
+                                            <div className="flex flex-col min-w-0">
+                                                <span className="text-sm font-semibold truncate text-foreground/90">{fav.label}</span>
+                                                {fav.mode && <span className="text-[10px] text-muted-foreground uppercase tracking-wider">{fav.mode}</span>}
+                                            </div>
+                                        </button>
+
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onToggleFavorite(fav.deckId, fav.type, fav.label, fav.mode);
+                                            }}
+                                            className="p-2 text-red-500 hover:scale-110 active:scale-95 transition-transform"
+                                            title="Remove from favorites"
+                                        >
+                                            <Heart className="w-4 h-4 fill-current" />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-2">
+                                <p className="text-sm text-muted-foreground">{t('welcome.no_favorites')}</p>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>
     );
-}
-
-export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, lastSession, favorites, onQuickStart, onSelectFavorite, onNavigate, onUpdateProfile }) => {
-    const { t } = useTranslation();
-    const [currentTime, setCurrentTime] = React.useState(new Date());
-    
-    // Layout Customization State
-    const [isCustomizeMode, setIsCustomizeMode] = useState(false);
-    const [tileOrder, setTileOrder] = useState<string[]>([]);
-
-    useEffect(() => {
-        const savedOrder = user.studentDashboardTileOrder;
-        if (savedOrder && savedOrder.length > 0) {
-            // Merge defaults in case new tiles were added since last save
-            const merged = [...savedOrder];
-            DEFAULT_TILES.forEach(id => {
-                if (!merged.includes(id)) merged.push(id);
-            });
-            setTileOrder(merged);
-        } else {
-            setTileOrder(DEFAULT_TILES);
-        }
-    }, [user.studentDashboardTileOrder]);
-
-    const sensors = useSensors(
-        useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-        useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
-    );
-
-    const handleDragEnd = (event: DragEndEvent) => {
-        const { active, over } = event;
-        if (over && active.id !== over.id) {
-            setTileOrder((items) => {
-                const oldIndex = items.indexOf(active.id as string);
-                const newIndex = items.indexOf(over.id as string);
-                return arrayMove(items, oldIndex, newIndex);
-            });
-        }
-    };
-
-    const toggleCustomizeMode = () => {
-        if (isCustomizeMode) {
-            // Save on exit
-            onUpdateProfile(user.username, { studentDashboardTileOrder: tileOrder });
-        }
-        setIsCustomizeMode(!isCustomizeMode);
-    };
-
-    // Live Clock Timer
-    React.useEffect(() => {
-        const timer = setInterval(() => setCurrentTime(new Date()), 60000);
-        return () => clearInterval(timer);
-    }, []);
-
-    // Get time of day for greeting
-    const hour = currentTime.getHours();
-    const timeOfDay = hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening';
-
-    // Tile Render Map
-    const renderTileContent = (id: string) => {
-        switch (id) {
-            case 'study-topics':
-                return (
-                    <div
-                        data-dev-id="student-tile-study"
-                        onClick={() => onNavigate('topic-selection', null)}
-                        className="bg-color2 hover:bg-color2/30 border border-color2/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
-                    >
-                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color2 transition-colors"></div>
-                        <div className="w-12 h-12 rounded-xl bg-color1 text-color2 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
-                            <BookOpen className="w-6 h-6" />
-                        </div>
-                        <div className="relative z-10 font-medium flex-1">
-                            <h2 className="text-xl font-bold mb-1">{t('welcome.study', 'Study Topics')}</h2>
-                            <p className="text-sm text-color1/80 line-clamp-2">{t('welcome.studyDesc', 'Explore vocabulary, grammar, reading comprehension, and more.')}</p>
-                        </div>
-                    </div>
-                );
-            case 'manage-flashcards':
-                return (
-                    <div
-                        data-dev-id="student-tile-manage"
-                        onClick={() => onNavigate('admin', null)}
-                        className="bg-color4 hover:bg-color4/30 border border-color4/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
-                    >
-                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color4 transition-colors"></div>
-                        <div className="w-12 h-12 rounded-xl bg-color1 text-color4 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
-                            <Sparkles className="w-6 h-6" />
-                        </div>
-                        <div className="relative z-10 font-medium flex-1">
-                            <h2 className="text-xl font-bold mb-1">{t('welcome.manageFlashcards', 'Manage Flashcards')}</h2>
-                            <p className="text-sm text-color1/80 line-clamp-2">{t('welcome.manageFlashcardsDesc', 'Create, edit, and use AI to generate cards.')}</p>
-                        </div>
-                    </div>
-                );
-            case 'favorites':
-                return (
-                    <div data-dev-id="student-tile-favorites" className="bg-color5 hover:bg-color5/30 border border-color5/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1">
-                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color5 transition-colors"></div>
-                        <div className="w-12 h-12 rounded-xl bg-color1 text-color5 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
-                            <Heart className="w-6 h-6" />
-                        </div>
-                        <div className="relative z-10 font-medium flex-1 flex flex-col gap-2">
-                            <h2 className="text-xl font-bold mb-1">Favorites</h2>
-                            <div className="overflow-y-auto custom-scrollbar max-h-[100px] flex flex-col gap-2">
-                            {favorites.length > 0 ? (
-                                favorites.map((fav) => (
-                                    <button
-                                        key={fav.id}
-                                        onClick={() => onSelectFavorite(fav)}
-                                        className="w-full text-left truncate text-sm px-3 py-2 bg-color5/50 hover:bg-color5 border border-color1/20 rounded-lg transition-colors flex items-center gap-2"
-                                    >
-                                        <span className="opacity-70 shrink-0">{fav.type === 'mode' ? <Clock className="w-4 h-4" /> : <BookOpen className="w-4 h-4" />}</span>
-                                        <span className="truncate">{fav.label}</span>
-                                    </button>
-                                ))
-                            ) : (
-                                <p className="text-sm text-color1/70 mt-2">No favorites saved yet.</p>
-                            )}
-                            </div>
-                        </div>
-                    </div>
-                );
-            case 'search-library':
-                return (
-                    <div
-                        data-dev-id="student-tile-search"
-                        onClick={() => alert('Search Library Navigation - Coming Soon')}
-                        className="bg-color3 hover:bg-color3/30 border border-color3/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
-                    >
-                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color3 transition-colors"></div>
-                        <div className="w-12 h-12 rounded-xl bg-color1 text-color3 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
-                            <Library className="w-6 h-6" />
-                        </div>
-                        <div className="relative z-10 font-medium flex-1">
-                            <h2 className="text-xl font-bold mb-1">Search Library</h2>
-                            <p className="text-sm text-color1/80 line-clamp-2">Browse community flashcards and decks to add to your collection.</p>
-                        </div>
-                    </div>
-                );
-            case 'messages':
-                return (
-                    <div
-                        data-dev-id="student-tile-messages"
-                        onClick={() => alert('Messages Navigation - Coming Soon')}
-                        className="bg-color2 hover:bg-color2/30 border border-color2/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
-                    >
-                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color2 transition-colors"></div>
-                        <div className="w-12 h-12 rounded-xl bg-color1 text-color2 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
-                            <MessageSquare className="w-6 h-6" />
-                        </div>
-                        <div className="relative z-10 font-medium flex-1">
-                            <h2 className="text-xl font-bold mb-1">Messages</h2>
-                            <p className="text-sm text-color1/80 line-clamp-2">Communicate with your tutors and review feedback.</p>
-                        </div>
-                    </div>
-                );
-            case 'assignments':
-                return (
-                    <div
-                        data-dev-id="student-tile-assignments"
-                        onClick={() => alert('Assignments Navigation - Coming Soon')}
-                        className="bg-color4 hover:bg-color4/30 border border-color4/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
-                    >
-                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color4 transition-colors"></div>
-                        <div className="w-12 h-12 rounded-xl bg-color1 text-color4 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
-                            <CheckSquare className="w-6 h-6" />
-                        </div>
-                        <div className="relative z-10 font-medium flex-1">
-                            <h2 className="text-xl font-bold mb-1">Assignments</h2>
-                            <p className="text-sm text-color1/80 line-clamp-2">Track homework, upcoming tests, and administrative tasks.</p>
-                        </div>
-                    </div>
-                );
-            default:
-                return null;
-        }
-    };
-
-    return (
-        <div data-dev-id="student-dashboard-root" className="w-full h-full bg-background text-foreground flex flex-col">
-            <main data-dev-id="student-dashboard-main" className="flex-1 w-full max-w-7xl mx-auto p-6 animate-in fade-in duration-500">
-                <div className="flex flex-col gap-6 max-w-6xl mx-auto mt-6">
-                    
-                    {/* Student Hero Tile */}
-                    <div data-dev-id="student-hero-tile" className="lumina-glow lumina-glow-hero hover-glow-5 bg-color5 border border-color5/50 rounded-3xl p-8 flex flex-col md:flex-row gap-8 items-center shadow-md text-color1">
-
-                        {/* Profile Info (Left) */}
-                        <div className="flex items-center gap-6 relative z-10 w-full md:w-auto md:min-w-[320px] shrink-0">
-                            <div className="w-24 h-24 rounded-2xl bg-color1/20 flex items-center justify-center text-color1 shadow-inner border border-color1/20 flex-shrink-0 overflow-hidden">
-                                {user.avatarUrl ? (
-                                    <img src={user.avatarUrl} alt="Student avatar" className="w-full h-full object-cover" />
-                                ) : (
-                                    <UserCircle className="w-12 h-12" />
-                                )}
-                            </div>
-                            <div className="flex-1 z-10">
-                                <h2 className="text-3xl font-bold mb-2 text-color1">
-                                    {t(`welcome.greeting.${timeOfDay}`)}, <span className="text-color1">{user.preferredName || user.firstName || user.username}</span>
-                                </h2>
-                                <div className="flex flex-col gap-y-1.5 mt-3 text-sm text-color1/70 font-medium">
-                                    <span className="flex items-center gap-2"><BookOpen className="w-4 h-4 text-color1" /> <span className="text-color1 pointer-events-none">Language Student</span></span>
-                                    <span className="flex items-center gap-2 hover:text-color1 transition-colors">
-                                        <MapPin className="w-4 h-4" />
-                                        {user.currentCity ? `${user.currentCity}, ${user.currentCountry}` : (user.currentCountry || 'Location Not Set')}
-                                    </span>
-                                    <span className="flex items-center gap-2 hover:text-color1 transition-colors">
-                                        <Clock className="w-4 h-4" />
-                                        {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', timeZone: user.timeZone || undefined })} ({user.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'Local Time'})
-                                    </span>
-                                    <span className="flex items-center gap-2">
-                                        <span className="w-4 h-4 flex items-center justify-center text-[10px] bg-color5/50 rounded-sm border border-zinc-500/50">📅</span>
-                                        {currentTime.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric', timeZone: user.timeZone || undefined })}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Stats & Time (Right) */}
-                        <div className="flex flex-wrap md:flex-nowrap justify-center gap-4 relative z-10 w-full md:flex-1">
-                            {/* Active Decks Widget */}
-                            <div
-                                data-dev-id="student-widget-active-decks"
-                                onClick={() => onNavigate('topic-selection', null)}
-                                className="bg-color4 hover:bg-color4/30 cursor-pointer transition-colors backdrop-blur-sm border border-color4/30 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm"
-                            >
-                                <BookOpen className="w-5 h-5 text-color4 mb-2" />
-                                <span className="text-2xl font-bold text-color1">{user.activeDeckIds?.length || 0}</span>
-                                <span className="text-xs text-color1 text-center leading-tight">Active<br />Decks</span>
-                            </div>
-
-                            {/* Inbox/Pending Widget */}
-                            <div
-                                data-dev-id="student-widget-messages"
-                                onClick={() => alert('Messages Navigation - Coming Soon')}
-                                className="bg-color2 hover:bg-color2/30 cursor-pointer transition-colors backdrop-blur-sm border border-color2/30 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm relative group"
-                            >
-                                <div className="absolute top-3 right-3 w-2.5 h-2.5 bg-color5 rounded-full animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.6)]"></div>
-                                <Bell className="w-5 h-5 text-color2 mb-2 group-hover:scale-110 transition-transform" />
-                                <span className="text-2xl font-bold text-color1">1</span>
-                                <span className="text-xs text-color1 text-center leading-tight">New<br />Messages</span>
-                            </div>
-
-                            {/* Quick Start Widget */}
-                            {lastSession ? (
-                                <div
-                                    data-dev-id="student-widget-quickstart"
-                                    onClick={onQuickStart}
-                                    className="bg-color3 hover:bg-color3/30 cursor-pointer transition-colors backdrop-blur-sm border border-color3/30 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm group"
-                                    title={`Resume ${lastSession.label}`}
-                                >
-                                    <Clock className="w-5 h-5 text-color1 mb-2 group-hover:scale-110 transition-transform" />
-                                    <span className="text-2xl font-bold invisible block">&nbsp;</span>
-                                    <span className="text-xs font-bold text-color1 text-center leading-tight">Quick<br />Start</span>
-                                </div>
-                            ) : (
-                                <div data-dev-id="student-widget-quickstart-disabled" className="bg-color3 backdrop-blur-sm border border-color3/30 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm">
-                                    <Clock className="w-5 h-5 text-color1 mb-2" />
-                                    <span className="text-2xl font-bold invisible block">&nbsp;</span>
-                                    <span className="text-xs font-bold text-color1 text-center leading-tight">Quick<br/>Start</span>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Dashboard Header Elements */}
-                    <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-xl font-bold text-foreground opacity-80 pl-2">Dashboard</h3>
-                        <button
-                            onClick={toggleCustomizeMode}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition-all focus:ring-2 focus:ring-offset-2 focus:ring-offset-background border ${isCustomizeMode ? 'bg-primary text-primary-foreground border-primary hover:bg-primary/90' : 'bg-secondary text-secondary-foreground border-border hover:bg-secondary/80'}`}
-                        >
-                            {isCustomizeMode ? (
-                                <>
-                                    <Check className="w-4 h-4" /> Save Layout
-                                </>
-                            ) : (
-                                <>
-                                    <Settings className="w-4 h-4" /> Customize Layout
-                                </>
-                            )}
-                        </button>
-                    </div>
-
-                    {/* Dashboard Grid - Draggable */}
-                    <DndContext
-                        sensors={sensors}
-                        collisionDetection={closestCenter}
-                        onDragEnd={handleDragEnd}
-                    >
-                        <SortableContext items={tileOrder} strategy={rectSortingStrategy}>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {tileOrder.map(id => (
-                                    <SortableDashboardTile key={id} id={id} isCustomizeMode={isCustomizeMode}>
-                                        {renderTileContent(id)}
-                                    </SortableDashboardTile>
-                                ))}
-                            </div>
-                        </SortableContext>
-                    </DndContext>
-
-                </div>
-            </main>
-        </div>
-    );
 };
-

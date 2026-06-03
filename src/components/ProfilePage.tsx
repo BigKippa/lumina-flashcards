@@ -1,27 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { UserProfile, ContactDetail, TutorProfileData } from '../types';
 import {
     Book, Pencil, Check, X, AlertCircle, Eye, EyeOff, Mail, RefreshCcw, Lock, KeyRound,
-    User, MapPin, Briefcase, Heart, Globe, Clock, Activity, Settings, Shield, UserSquare2, Upload, Trash2, Phone, Locate, Loader2, Camera, CheckCircle2, XCircle, Move, UserCircle, BookOpen
+    User, MapPin, Briefcase, Heart, Globe, Clock, Activity, Settings, Shield, UserSquare2, Upload, Trash2, Phone, Locate, Loader2, Camera
 } from 'lucide-react';
-import {
-    DndContext,
-    closestCenter,
-    KeyboardSensor,
-    PointerSensor,
-    useSensor,
-    useSensors,
-    DragEndEvent
-} from '@dnd-kit/core';
-import {
-    arrayMove,
-    SortableContext,
-    sortableKeyboardCoordinates,
-    verticalListSortingStrategy,
-    rectSortingStrategy,
-    useSortable
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import { generateVerificationCode, simulateSendEmail, simulateSendSMS } from '../utils/mockEmailService';
 import { countryCodes, findCountryByCode, getDefaultCountryCode } from '../utils/countryCodes';
 
@@ -33,8 +15,8 @@ interface ProfilePageProps {
     showToast: (message: string, type: 'success' | 'error') => void;
     initialEditMode?: boolean;
     onLogout?: () => void;
-    onDeleteAccount?: () => void;
     onOpenSettings?: () => void;
+    onDeleteAccount?: () => void;
     initialScrollTarget?: string | null;
 }
 
@@ -54,9 +36,6 @@ interface SectionProps {
     colorTheme?: 'default' | 'primary' | 'secondary' | 'accent' | 'muted';
     isEditing?: boolean;
     onSave?: () => void;
-    id?: string; // Add id for sortable
-    dragHandleProps?: any; // Allow injecting drag listeners
-    isCustomizeMode?: boolean;
 }
 
 interface FieldProps {
@@ -121,7 +100,7 @@ const TabButton = ({ id, activeTab, setActiveTab, label, icon: Icon }: TabButton
     </button>
 );
 
-const Section = ({ title, icon: Icon, children, colorTheme = 'default', isEditing, onSave, dragHandleProps, isCustomizeMode }: SectionProps) => {
+const Section = ({ title, icon: Icon, children, colorTheme = 'default', isEditing, onSave }: SectionProps) => {
     let bgClass = "bg-color1 text-color1-foreground";
     let borderClass = "border-color2 shadow-sm";
     let iconClass = "text-color1-foreground opacity-70";
@@ -150,22 +129,11 @@ const Section = ({ title, icon: Icon, children, colorTheme = 'default', isEditin
     }
 
     return (
-        <div className={`${bgClass} p-6 rounded-xl border-2 ${borderClass} mb-6 transition-colors h-full flex flex-col relative`}>
-             {/* Drag Handle Layer - Absolute position top right if in customize mode */}
-             {isCustomizeMode && dragHandleProps && (
-                <div 
-                    {...dragHandleProps}
-                    className="absolute top-4 right-4 p-2 cursor-grab active:cursor-grabbing hover:bg-black/10 rounded-md transition-colors z-20 text-inherit opacity-50 hover:opacity-100"
-                    title="Drag to reorder"
-                >
-                    <Move className="w-5 h-5" />
-                </div>
-            )}
-
-            <h3 className={`text-lg font-bold mb-4 flex items-center gap-2 ${isCustomizeMode ? 'pr-10' : ''}`}>
+        <div className={`${bgClass} p-6 rounded-xl border-2 ${borderClass} mb-6 transition-colors`}>
+            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
                 <Icon className={`w-5 h-5 ${iconClass}`} /> {title}
             </h3>
-            <div className={`space-y-4 flex-1`}>
+            <div className={`space-y-4`}>
                 {children}
             </div>
             {isEditing && onSave && (
@@ -179,49 +147,11 @@ const Section = ({ title, icon: Icon, children, colorTheme = 'default', isEditin
     );
 };
 
-// Sortable Wrapper wrapper for Section components
-function SortableSection({ id, children, isCustomizeMode }: { id: string, children: React.ReactElement, isCustomizeMode: boolean }) {
-    const {
-        attributes,
-        listeners,
-        setNodeRef,
-        transform,
-        transition,
-        isDragging
-    } = useSortable({ id });
-
-    const style = {
-        transform: CSS.Transform.toString(transform),
-        transition,
-        zIndex: isDragging ? 10 : 1,
-        position: 'relative' as const,
-    };
-
-    // Inject the dragHandleProps into the child Section
-    const enhancedChild = React.cloneElement(children, {
-        dragHandleProps: { ...attributes, ...listeners },
-        isCustomizeMode
-    });
-
-    return (
-        <div ref={setNodeRef} style={style} className={`h-full ${isDragging ? 'opacity-50 ring-2 ring-primary rounded-xl scale-[1.02] shadow-2xl transition-all' : ''}`}>
-            {enhancedChild}
-        </div>
-    );
-}
-
-const SelectField = ({ label, value, fieldKey, options, icon: Icon, placeholder, isEditing, setEditForm, required = false, stepNumber, helperText }: SelectFieldProps & { required?: boolean; stepNumber?: number; helperText?: string }) => (
+const SelectField = ({ label, value, fieldKey, options, icon: Icon, placeholder, isEditing, setEditForm, required = false, stepNumber }: SelectFieldProps & { required?: boolean; stepNumber?: number }) => (
     <div className="w-full">
-        <label className="text-xs font-bold text-muted-foreground uppercase mb-1 flex items-center gap-1">
+        <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">
             {stepNumber && <span className="text-primary mr-1">Step {stepNumber}:</span>}
-            {label.replace(/^\*\s*/, '')}
-            {isEditing && required && (
-                !value ? (
-                    <XCircle className="w-3.5 h-3.5 text-destructive" />
-                ) : (
-                    <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
-                )
-            )}
+            {label.replace(/^\*\s*/, '')} {isEditing && <span className={required ? "text-destructive lowercase font-normal" : "lowercase font-normal"}>({required ? 'required' : 'optional'})</span>}
         </label>
         {isEditing ? (
             <div className="relative">
@@ -236,17 +166,13 @@ const SelectField = ({ label, value, fieldKey, options, icon: Icon, placeholder,
                         <option key={opt.value} value={opt.value}>{opt.label}</option>
                     ))}
                 </select>
-                {helperText && <p className="text-[10px] text-muted-foreground mt-1.5 leading-tight">{helperText}</p>}
             </div>
         ) : (
-            <div className="flex flex-col gap-1">
-                <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-md min-h-[38px] text-sm">
-                    {Icon && <Icon className="w-4 h-4 text-muted-foreground" />}
-                    <span className={!value ? 'text-muted-foreground italic' : ''}>{
-                        options.find(o => o.value === value)?.label || value || 'Not set'
-                    }</span>
-                </div>
-                {helperText && <p className="text-[10px] text-muted-foreground/70 leading-tight">{helperText}</p>}
+            <div className="flex items-center gap-2 p-2 bg-muted/50 rounded-md min-h-[38px] text-sm">
+                {Icon && <Icon className="w-4 h-4 text-muted-foreground" />}
+                <span className={!value ? 'text-muted-foreground italic' : ''}>{
+                    options.find(o => o.value === value)?.label || value || 'Not set'
+                }</span>
             </div>
         )}
     </div>
@@ -254,16 +180,9 @@ const SelectField = ({ label, value, fieldKey, options, icon: Icon, placeholder,
 
 const Field = ({ label, value, fieldKey, icon: Icon, placeholder, helperText, isEditing, setEditForm, required = false, stepNumber }: FieldProps & { required?: boolean; stepNumber?: number }) => (
     <div className="w-full">
-        <label className="text-xs font-bold text-muted-foreground uppercase mb-1 flex items-center gap-1">
+        <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">
             {stepNumber && <span className="text-primary mr-1">Step {stepNumber}:</span>}
-            {label.replace(/^\*\s*/, '')}
-            {isEditing && required && (
-                !value ? (
-                    <XCircle className="w-3.5 h-3.5 text-destructive" />
-                ) : (
-                    <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
-                )
-            )}
+            {label.replace(/^\*\s*/, '')} {isEditing && <span className={required ? "text-destructive lowercase font-normal" : "lowercase font-normal"}>({required ? 'required' : 'optional'})</span>}
         </label>
         {isEditing ? (
             <div className="relative">
@@ -291,16 +210,9 @@ const Field = ({ label, value, fieldKey, icon: Icon, placeholder, helperText, is
 
 const TextArea = ({ label, value, fieldKey, placeholder, isEditing, setEditForm, required = false, stepNumber }: TextAreaProps & { required?: boolean; stepNumber?: number }) => (
     <div className="w-full">
-        <label className="text-xs font-bold text-muted-foreground uppercase mb-1 flex items-center gap-1">
+        <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">
             {stepNumber && <span className="text-primary mr-1">Step {stepNumber}:</span>}
-            {label.replace(/^\*\s*/, '')}
-            {isEditing && required && (
-                !value ? (
-                    <XCircle className="w-3.5 h-3.5 text-destructive" />
-                ) : (
-                    <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
-                )
-            )}
+            {label.replace(/^\*\s*/, '')} {isEditing && <span className={required ? "text-destructive lowercase font-normal" : "lowercase font-normal"}>({required ? 'required' : 'optional'})</span>}
         </label>
         {isEditing ? (
             <textarea
@@ -331,14 +243,7 @@ const ContactListEditor = ({ type, contacts, setContacts, isEditing, icon: Icon 
         : ['Personal', 'Work', 'SMS', 'Other', 'Custom'];
 
     const handleAdd = () => {
-        setContacts([...contacts, { 
-            id: Date.now().toString(), 
-            value: '', 
-            label: labelOptions[0], 
-            isCustomLabel: false, 
-            isRecovery: contacts.length === 0,
-            ...(type === 'email' ? { allCommunications: true, essentialOnly: false } : {})
-        }]);
+        setContacts([...contacts, { id: Date.now().toString(), value: '', label: labelOptions[0], isCustomLabel: false, isRecovery: contacts.length === 0 }]);
     };
 
     const handleUpdate = (id: string, updates: Partial<ContactDetail>) => {
@@ -398,7 +303,7 @@ const ContactListEditor = ({ type, contacts, setContacts, isEditing, icon: Icon 
                             {isPhone && (
                                 <div className="relative flex items-center">
                                     <span className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none z-10">
-                                        {currentCountry?.flag || '🌐'}
+                                        {currentCountry?.flag || '≡ƒîÉ'}
                                     </span>
                                     <select
                                         value={currentCountry?.code || ''}
@@ -481,65 +386,21 @@ const ContactListEditor = ({ type, contacts, setContacts, isEditing, icon: Icon 
                             )}
                         </div>
 
-                        <div className="flex flex-col gap-2 w-full mt-3">
-
-                            {contacts.length > 1 && (
-                                <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer group/label w-fit">
-                                    <input
-                                        type="radio"
-                                        name={`recovery-${type}`}
-                                        checked={c.isRecovery}
-                                        onChange={() => handleSetRecovery(c.id)}
-                                        className="accent-primary"
-                                    />
-                                    <span className="group-hover/label:text-foreground transition-colors">Set as Recovery {type === 'email' ? 'Email' : 'Phone'}</span>
-                                </label>
-                            )}
-
-                            {type === 'phone' && (
-                                <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer group/label w-fit mt-1">
-                                    <input
-                                        type="checkbox"
-                                        checked={!!c.canReceiveSms}
-                                        onChange={(e) => handleUpdate(c.id, { canReceiveSms: e.target.checked })}
-                                        className="accent-primary rounded"
-                                    />
-                                    <span className="group-hover/label:text-foreground transition-colors">Can receive SMS messages</span>
-                                </label>
-                            )}
-                            
-                            {type === 'email' && (
-                                <>
-                                    <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer group/label w-fit mt-1">
-                                        <input
-                                            type="checkbox"
-                                            checked={!!c.allCommunications}
-                                            onChange={(e) => handleUpdate(c.id, { allCommunications: e.target.checked, essentialOnly: e.target.checked ? false : c.essentialOnly })}
-                                            className="accent-primary rounded"
-                                        />
-                                        <span className="group-hover/label:text-foreground transition-colors max-w-[280px] sm:max-w-none leading-tight">All Communications (account recovery, marketing, user communications, etc.)</span>
-                                    </label>
-                                    <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer group/label w-fit mt-1">
-                                        <input
-                                            type="checkbox"
-                                            checked={!!c.essentialOnly}
-                                            onChange={(e) => handleUpdate(c.id, { essentialOnly: e.target.checked, allCommunications: e.target.checked ? false : c.allCommunications })}
-                                            className="accent-primary rounded"
-                                        />
-                                        <span className="group-hover/label:text-foreground transition-colors leading-tight">Essential Only (Account recovery)</span>
-                                    </label>
-                                </>
-                            )}
-                        </div>
+                        {contacts.length > 1 && (
+                            <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer group/label w-fit">
+                                <input
+                                    type="radio"
+                                    name={`recovery-${type}`}
+                                    checked={c.isRecovery}
+                                    onChange={() => handleSetRecovery(c.id)}
+                                    className="accent-primary"
+                                />
+                                <span className="group-hover/label:text-foreground transition-colors">Set as Recovery {type === 'email' ? 'Email' : 'Phone'}</span>
+                            </label>
+                        )}
                     </div>
                 );
             })}
-
-            {type === 'phone' && (
-                <div className="text-[10px] text-muted-foreground/70 leading-tight italic px-1">
-                    *Some service providers may charge for SMS messages. Lumina is not responsible for any charges incurred for SMS messages by the user.
-                </div>
-            )}
 
             <button
                 onClick={handleAdd}
@@ -781,20 +642,6 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
         }
     }, [initialScrollTarget]);
 
-    useEffect(() => {
-        // Auto-populate timezone if it's empty and we're editing (or creating)
-        if (isEditing && !editForm.timeZone) {
-            try {
-                const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-                if (tz) {
-                    setEditForm(prev => ({ ...prev, timeZone: tz }));
-                }
-            } catch (e) {
-                console.warn("Could not auto-detect timezone", e);
-            }
-        }
-    }, [isEditing]);
-
     // Expanded Edit Form State
 
     const calculateAge = (dobString: string | undefined): string => {
@@ -815,14 +662,8 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
 
     // Helper to migrate legacy single strings to arrays silently during initial edit form load
     const initializeEmails = (): ContactDetail[] => {
-        if (user.emails && user.emails.length > 0) {
-            return user.emails.map(e => ({
-                ...e, 
-                allCommunications: e.allCommunications !== undefined ? e.allCommunications : true, 
-                essentialOnly: e.essentialOnly !== undefined ? e.essentialOnly : false
-            }));
-        }
-        if (user.email) return [{ id: 'legacy-email', value: user.email, label: 'Personal', isCustomLabel: false, isRecovery: true, allCommunications: true, essentialOnly: false }];
+        if (user.emails && user.emails.length > 0) return user.emails;
+        if (user.email) return [{ id: 'legacy-email', value: user.email, label: 'Personal', isCustomLabel: false, isRecovery: true }];
         return [];
     };
 
@@ -841,7 +682,6 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
 
         // Unified Basic Info
         title: user.title || '',
-        previousLocations: user.previousLocations || [],
         firstName: user.firstName || '',
         preferredName: user.preferredName || '',
         middleName: user.middleName || '',
@@ -889,52 +729,6 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
 
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState<string | null>(null);
-
-    // --- State: Drag and Drop Personalization ---
-    const [isCustomizeMode, setIsCustomizeMode] = useState(false);
-    
-    // Default order configurations for each tab
-    const DEFAULT_ORDER_BASIC = ['section-identity', 'section-contact', 'section-location', 'section-personal'];
-    const DEFAULT_ORDER_LEARNING = ['section-languages', 'section-level', 'section-experience', 'section-preferences'];
-    const DEFAULT_ORDER_ACCOUNT = ['section-security', 'section-flashcards', 'section-appsettings', 'section-danger'];
-
-    // Map order configuration from user profile or fall back to default    // Helper to merge saved order with potentially new default tiles
-    const mergeOrders = (savedOrder: string[] | undefined, defaultOrder: string[]) => {
-        if (!savedOrder) return defaultOrder;
-        const missing = defaultOrder.filter(id => !savedOrder.includes(id));
-        return [...savedOrder, ...missing];
-    };
-
-    const [tileOrder, setTileOrder] = useState<Record<string, string[]>>({
-        'basic': mergeOrders(user.profileTileOrder?.['basic'], DEFAULT_ORDER_BASIC),
-        'learning': mergeOrders(user.profileTileOrder?.['learning'], DEFAULT_ORDER_LEARNING),
-        'account': mergeOrders(user.profileTileOrder?.['account'], DEFAULT_ORDER_ACCOUNT)
-    });
-
-    const sensors = useSensors(
-        useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-        useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
-    );
-
-    const handleDragEnd = (event: DragEndEvent) => {
-        const { active, over } = event;
-        
-        if (over && active.id !== over.id) {
-            setTileOrder((prev) => {
-                const currentTabOrder = [...(prev[activeTab as keyof typeof prev] || [])];
-                const oldIndex = currentTabOrder.indexOf(active.id as string);
-                const newIndex = currentTabOrder.indexOf(over.id as string);
-                
-                const newOrder = arrayMove(currentTabOrder, oldIndex, newIndex);
-                const updatedOrders = { ...prev, [activeTab]: newOrder };
-                
-                // Instantly save to profile
-                 onUpdateProfile(user.username, { profileTileOrder: updatedOrders });
-                 
-                return updatedOrders;
-            });
-        }
-    };
 
     // Email Verification State
     const [emailStep, setEmailStep] = useState<'idle' | 'verify-current' | 'enter-new' | 'verify-new'>('idle');
@@ -996,7 +790,6 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
             originCountry: editForm.originCountry,
             currentCity: editForm.currentCity,
             currentCountry: editForm.currentCountry,
-            previousLocations: editForm.previousLocations,
             profession: editForm.profession,
             interests: editForm.interests,
             // Learning
@@ -1036,7 +829,6 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
             originCountry: user.originCountry || '',
             currentCity: user.currentCity || '',
             currentCountry: user.currentCountry || '',
-            previousLocations: user.previousLocations || [],
             profession: user.profession || '',
             interests: user.interests || '',
             targetLanguage: user.targetLanguage || 'English',
@@ -1308,20 +1100,19 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
                 </button>
             </div>
 
-            {/* Main Profile Header Card (Hero Tile Standardized) */}
-            <div data-dev-id="profile-hero-tile" className="bg-color5 border border-color5/50 rounded-3xl p-8 flex flex-col md:flex-row gap-8 items-center shadow-md relative overflow-hidden text-color1">
-                <div className="absolute right-0 top-0 w-64 h-64 bg-color1/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
-
-                {/* Profile Info (Left) */}
-                <div className="flex items-center gap-6 relative z-10 w-full md:w-auto md:min-w-[320px] shrink-0">
+            {/* Main Profile Header Card */}
+            <div className="bg-card border border-border rounded-xl p-6 shadow-lg">
+                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
                     <div className="relative group shrink-0">
-                        <div className="w-24 h-24 rounded-2xl bg-color1/20 flex items-center justify-center text-color1 shadow-inner border border-color1/20 flex-shrink-0 overflow-hidden">
-                            {editForm.avatarUrl || user.avatarUrl ? (
+                        {editForm.avatarUrl || user.avatarUrl ? (
+                            <div className="w-24 h-24 rounded-full overflow-hidden bg-secondary flex items-center justify-center border-4 border-background shadow-md">
                                 <img src={isEditing ? editForm.avatarUrl : (user.avatarUrl || '')} alt={`${user.username} profile`} className="w-full h-full object-cover" />
-                            ) : (
-                                user.role === 'admin' ? <Shield className="w-12 h-12" /> : user.role === 'tutor' ? <UserSquare2 className="w-12 h-12" /> : <UserCircle className="w-12 h-12" />
-                            )}
-                        </div>
+                            </div>
+                        ) : (
+                            <div className="w-24 h-24 rounded-full bg-primary/20 flex items-center justify-center text-primary border-4 border-background shadow-md">
+                                {user.role === 'admin' ? <Shield className="w-10 h-10" /> : user.role === 'tutor' ? <UserSquare2 className="w-10 h-10" /> : <User className="w-10 h-10" />}
+                            </div>
+                        )}
 
                         {isEditing && (
                             <>
@@ -1345,15 +1136,15 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
                                         }
                                     }}
                                 />
-                                <div className="absolute inset-0 rounded-2xl bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1">
+                                <div className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1">
                                     <div className="flex gap-2">
-                                        <label htmlFor="profile-picture-upload" className="cursor-pointer text-white hover:text-color5 transition-colors p-1" title="Upload Picture">
+                                        <label htmlFor="profile-picture-upload" className="cursor-pointer text-white hover:text-primary transition-colors p-1" title="Upload Picture">
                                             <Upload className="w-5 h-5" />
                                         </label>
                                         <button
                                             type="button"
                                             onClick={startCamera}
-                                            className="text-white hover:text-color5 transition-colors p-1"
+                                            className="text-white hover:text-primary transition-colors p-1"
                                             title="Take Photo"
                                         >
                                             <Camera className="w-5 h-5" />
@@ -1363,7 +1154,7 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
                                         <button
                                             type="button"
                                             onClick={() => setEditForm(prev => ({ ...prev, avatarUrl: '' }))}
-                                            className="text-white hover:text-red-400 transition-colors p-1 mt-1"
+                                            className="text-white hover:text-destructive transition-colors p-1 mt-1"
                                             title="Remove Picture"
                                         >
                                             <Trash2 className="w-4 h-4" />
@@ -1373,78 +1164,66 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
                             </>
                         )}
                     </div>
-                    {isEditing && (
-                        <div className="text-sm text-color1/70 mt-3 font-bold text-center w-full animate-pulse transition-all absolute -bottom-6">Upload Photo</div>
-                    )}
-                </div>
-
-                <div className="flex-1 text-center sm:text-left space-y-2 w-full mt-2 relative z-10">
-                    {isEditing ? (
-                        <div className="space-y-4 max-w-sm mx-auto sm:mx-0">
-                            <div>
-                                <label className="text-xs font-semibold text-color1/70 uppercase">Username</label>
-                                <input
-                                    value={editForm.username}
-                                    onChange={e => setEditForm(prev => ({ ...prev, username: e.target.value }))}
-                                    className="w-full p-2 mb-2 rounded bg-color1/20 border border-color1/30 text-color1 focus:border-color1 outline-none text-sm placeholder:text-color1/50"
-                                />
-                                <label className="text-xs font-semibold text-color1/70 uppercase">Role</label>
-                                <select
-                                    value={editForm.role}
-                                    onChange={e => setEditForm(prev => ({ ...prev, role: e.target.value as 'user' | 'tutor' | 'admin' }))}
-                                    className="w-full p-2 rounded bg-color1/20 border border-color1/30 text-color1 focus:border-color1 outline-none text-sm"
-                                >
-                                    <option value="user" className="text-foreground bg-background">Student</option>
-                                    <option value="tutor" className="text-foreground bg-background">Tutor</option>
-                                    <option value="admin" className="text-foreground bg-background">Admin</option>
-                                </select>
+                    <div className="flex-1 text-center sm:text-left space-y-2 w-full">
+                        {isEditing ? (
+                            <div className="space-y-4 max-w-sm mx-auto sm:mx-0">
+                                <div>
+                                    <label className="text-xs font-semibold text-muted-foreground uppercase">Username</label>
+                                    <input
+                                        value={editForm.username}
+                                        onChange={e => setEditForm({ ...editForm, username: e.target.value })}
+                                        className="w-full p-2 mb-2 rounded bg-secondary/50 border border-border focus:border-primary outline-none text-sm"
+                                    />
+                                    <label className="text-xs font-semibold text-muted-foreground uppercase">Role</label>
+                                    <select
+                                        value={editForm.role}
+                                        onChange={e => setEditForm({ ...editForm, role: e.target.value as 'user' | 'tutor' | 'admin' })}
+                                        className="w-full p-2 rounded bg-secondary/50 border border-border focus:border-primary outline-none text-sm"
+                                    >
+                                        <option value="user">Learner</option>
+                                        <option value="tutor">Tutor</option>
+                                        <option value="admin">Admin</option>
+                                    </select>
+                                </div>
+                                <div className="flex gap-2 justify-center sm:justify-start mt-2">
+                                    <button onClick={handleSaveProfile} className="flex items-center gap-1 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90">
+                                        <Check className="w-4 h-4" /> Save
+                                    </button>
+                                    <button onClick={handleCancel} className="flex items-center gap-1 px-4 py-2 rounded-lg bg-secondary text-secondary-foreground text-sm font-bold hover:bg-secondary/80">
+                                        <X className="w-4 h-4" /> Cancel
+                                    </button>
+                                </div>
                             </div>
-                            <div className="flex gap-2 justify-center sm:justify-start mt-2">
-                                <button onClick={handleSaveProfile} className="flex items-center gap-1 px-4 py-2 rounded-lg bg-color1 text-color5 text-sm font-bold shadow-sm hover:bg-color1/90 transition-all">
-                                    <Check className="w-4 h-4" /> Save
-                                </button>
-                                <button onClick={handleCancel} className="flex items-center gap-1 px-4 py-2 rounded-lg bg-color5/50 border border-color1/20 text-color1 text-sm font-bold hover:bg-color5/70 transition-all">
-                                    <X className="w-4 h-4" /> Cancel
-                                </button>
-                            </div>
-                        </div>
-                    ) : (
-                        <>
-                            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
-                                <h3 className="text-3xl font-bold text-color1">{user.username}</h3>
-                                <div className="flex flex-col gap-y-1.5 mt-2 sm:mt-0 text-sm text-color1/70 font-medium">
-                                    <span className="flex items-center gap-2">
-                                        {user.role === 'admin' ? <Shield className="w-4 h-4 text-color1" /> : user.role === 'tutor' ? <BookOpen className="w-4 h-4 text-color1" /> : <User className="w-4 h-4 text-color1" />}
-                                        <span className="text-color1 capitalize">{user.role === 'user' ? 'Learner' : user.role || 'Learner'}</span>
+                        ) : (
+                            <>
+                                <div className="flex flex-col sm:flex-row items-center gap-3">
+                                    <h3 className="text-2xl font-bold text-foreground">{user.username}</h3>
+                                    <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border border-primary/20">
+                                        {user.role === 'user' ? 'learner' : user.role || 'learner'}
                                     </span>
-                                    {user.email && (
-                                        <span className="flex items-center gap-2">
-                                            <Mail className="w-4 h-4 text-color1" />
-                                            {maskEmail(user.email)}
+                                </div>
+                                <p className="text-muted-foreground">{user.email ? maskEmail(user.email) : 'No email linked'}</p>
+                                <div className="flex flex-wrap justify-center sm:justify-start gap-2">
+                                    {user.nativeLanguage && (
+                                        <span className="bg-secondary px-3 py-1 rounded-full text-xs font-medium text-muted-foreground border border-border flex items-center gap-1">
+                                            <Globe className="w-3 h-3" /> {user.nativeLanguage}
+                                        </span>
+                                    )}
+                                    {user.currentCountry && (
+                                        <span className="bg-secondary px-3 py-1 rounded-full text-xs font-medium text-muted-foreground border border-border flex items-center gap-1">
+                                            <MapPin className="w-3 h-3" /> {user.currentCountry}
                                         </span>
                                     )}
                                 </div>
-                            </div>
-                            <div className="flex flex-wrap justify-center sm:justify-start gap-2 mt-4">
-                                {user.nativeLanguage && (
-                                    <span className="bg-color1/20 px-3 py-1 rounded-full text-xs font-medium text-color1 border border-color1/20 flex items-center gap-1">
-                                        <Globe className="w-3 h-3" /> {user.nativeLanguage}
-                                    </span>
-                                )}
-                                {user.currentCountry && (
-                                    <span className="bg-color1/20 px-3 py-1 rounded-full text-xs font-medium text-color1 border border-color1/20 flex items-center gap-1">
-                                        <MapPin className="w-3 h-3" /> {user.currentCountry}
-                                    </span>
-                                )}
-                            </div>
-                            <button
-                                onClick={() => setIsEditing(true)}
-                                className="mt-4 text-color1 hover:text-white transition-colors flex items-center justify-center sm:justify-start gap-1 mx-auto sm:mx-0 opacity-80 hover:opacity-100"
-                            >
-                                <Pencil className="w-4 h-4" /> Edit Profile
-                            </button>
-                        </>
-                    )}
+                                <button
+                                    onClick={() => setIsEditing(true)}
+                                    className="mt-4 text-primary hover:underline flex items-center justify-center sm:justify-start gap-1 mx-auto sm:mx-0"
+                                >
+                                    <Pencil className="w-4 h-4" /> Edit Profile
+                                </button>
+                            </>
+                        )}
+                    </div>
                 </div>
             </div>
 
@@ -1455,8 +1234,64 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
                 </div>
             )}
 
-            {/* Unified Basic Info Tile - Removed to prevent huge size, moved fields to draggable grid */}
-            {/* Static fields removed from here and moved down to section-identity grid tile */}
+            {/* Unified Basic Info Tile */}
+            <Section isEditing={isEditing} onSave={handleSaveProfile} title="Basic Info" icon={User} colorTheme="primary">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {isEditing ? (
+                        <>
+                            <SelectField label="Title" value={editForm.title} fieldKey="title" options={[{ label: 'Mr.', value: 'Mr.' }, { label: 'Ms.', value: 'Ms.' }, { label: 'Mrs.', value: 'Mrs.' }, { label: 'Dr.', value: 'Dr.' }]} isEditing={isEditing} setEditForm={setEditForm} />
+                            <Field label="First Name" stepNumber={1} helperText="Must match your government-issued ID (verification required later)." value={editForm.firstName} fieldKey="firstName" isEditing={isEditing} setEditForm={setEditForm} placeholder="Mandatory" required={true} />
+                            <Field label="Preferred Name" helperText="This name will be visible to other users on the site." value={editForm.preferredName} fieldKey="preferredName" isEditing={isEditing} setEditForm={setEditForm} />
+                            <Field label="Middle Name" value={editForm.middleName} fieldKey="middleName" isEditing={isEditing} setEditForm={setEditForm} />
+                            <Field label="Last Name" stepNumber={2} helperText="Must match your government-issued ID (verification required later)." value={editForm.lastName} fieldKey="lastName" isEditing={isEditing} setEditForm={setEditForm} placeholder="Mandatory" required={true} />
+                            <SelectField label="Gender" stepNumber={3} value={editForm.gender} fieldKey="gender" options={[{ label: 'Male', value: 'Male' }, { label: 'Female', value: 'Female' }, { label: 'Prefer not to answer', value: 'Prefer not to answer' }, { label: 'Other', value: 'Other' }]} isEditing={isEditing} setEditForm={setEditForm} required={true} />
+
+                            <div className="w-full">
+                                <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">
+                                    <span className="text-primary mr-1">Step 4:</span>
+                                    Date of Birth {isEditing && <span className="text-destructive lowercase font-normal">(required)</span>}
+                                </label>
+                                <input type="date" value={editForm.dateOfBirth} onChange={e => setEditForm({ ...editForm, dateOfBirth: e.target.value })} className={`w-full pl-3 pr-4 py-3 rounded-xl bg-input border ${!editForm.dateOfBirth ? 'border-primary ring-1 ring-primary' : 'border-border'} text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all`} />
+                                <p className="text-[10px] text-muted-foreground mt-1.5 leading-tight">Must match your government-issued ID (verification required later).</p>
+                            </div>
+
+                            <Field label="Native Spoken Language" stepNumber={5} value={editForm.nativeLanguage} fieldKey="nativeLanguage" isEditing={isEditing} setEditForm={setEditForm} placeholder="Mandatory" required={true} />
+                        </>
+                    ) : (
+                        <>
+                            <div className="flex flex-col gap-1">
+                                <label className="text-xs font-bold text-muted-foreground uppercase">Full Name</label>
+                                <div className="font-medium text-foreground">
+                                    {user.title ? user.title + ' ' : ''}
+                                    {user.firstName || 'Not set'}
+                                    {user.preferredName ? ` (${user.preferredName})` : ''}
+                                    {' '}{user.middleName ? user.middleName + ' ' : ''}{user.lastName || ''}
+                                </div>
+                            </div>
+                            <div className="flex flex-col gap-1">
+                                <label className="text-xs font-bold text-muted-foreground uppercase">Gender</label>
+                                <div className="font-medium text-foreground">{user.gender || 'Not set'}</div>
+                            </div>
+                            <div className="flex flex-col gap-1">
+                                <label className="text-xs font-bold text-muted-foreground uppercase">Age / DOB</label>
+                                <div className="font-medium text-foreground">{calculateAge(user.dateOfBirth) ? `${calculateAge(user.dateOfBirth)} years` : 'Not set'}</div>
+                            </div>
+                            <div className="flex flex-col gap-1">
+                                <label className="text-xs font-bold text-muted-foreground uppercase">Native Spoken Language</label>
+                                <div className="font-medium text-foreground">{user.nativeLanguage || 'Not set'}</div>
+                            </div>
+                        </>
+                    )}
+                    <div className="flex flex-col gap-1">
+                        <label className="text-xs font-bold text-muted-foreground uppercase">Current Location</label>
+                        <div className="font-medium text-foreground">{(editForm.currentCity || editForm.currentCountry) ? `${editForm.currentCity ? editForm.currentCity + ', ' : ''}${editForm.currentCountry}` : 'Not set'}</div>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-xs font-bold text-muted-foreground uppercase">Member Since</label>
+                        <div className="font-medium text-foreground">{calculateMemberSince(user.createdAt)}</div>
+                    </div>
+                </div>
+            </Section>
 
             {/* Tabs */}
             <div className="flex border-b border-border mb-6 overflow-x-auto">
@@ -1468,354 +1303,149 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
                 )}
             </div>
 
-            {/* Layout Customization Toggle */}
-            <div className="flex justify-between items-center mb-6 px-2">
-                <h3 className="font-semibold text-lg">{activeTab === 'basic' ? 'Basic Info' : activeTab === 'learning' ? 'Learning Profile' : activeTab === 'account' ? 'Account & Settings' : 'Tutor Dashboard'}</h3>
-                
-                {activeTab !== 'tutor' && (
-                    <button
-                        onClick={() => setIsCustomizeMode(!isCustomizeMode)}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm ${
-                            isCustomizeMode 
-                            ? 'bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2 ring-offset-background' 
-                            : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-                        }`}
-                    >
-                        {isCustomizeMode ? <Check className="w-4 h-4" /> : <Move className="w-4 h-4" />}
-                        {isCustomizeMode ? 'Finish Customizing' : 'Customize Layout'}
-                    </button>
-                )}
-            </div>
-
             {/* Tab Content */}
             <div className="animate-in fade-in duration-300">
-                <DndContext 
-                    sensors={sensors}
-                    collisionDetection={closestCenter}
-                    onDragEnd={handleDragEnd}
-                >
-                    {activeTab === 'basic' && (
-                        <SortableContext 
-                            items={tileOrder['basic'] || DEFAULT_ORDER_BASIC}
-                            strategy={rectSortingStrategy}
-                        >
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
-                                {/* Map sections based on sorted state */}
-                                {(tileOrder['basic'] || DEFAULT_ORDER_BASIC).map(sectionId => {
-                                    if (sectionId === 'section-identity') return (
-                                        <SortableSection key="section-identity" id="section-identity" isCustomizeMode={isCustomizeMode}>
-                                            <Section id="section-identity" isEditing={isEditing} onSave={handleSaveProfile} title="Identity Details" icon={User} colorTheme="primary">
-                                                <div className="flex flex-col gap-4">
-                                                    {isEditing ? (
-                                                        <>
-                                                            <SelectField label="Title (Optional)" value={editForm.title} fieldKey="title" options={[{ label: 'Mr.', value: 'Mr.' }, { label: 'Ms.', value: 'Ms.' }, { label: 'Mrs.', value: 'Mrs.' }, { label: 'Dr.', value: 'Dr.' }]} isEditing={isEditing} setEditForm={setEditForm} />
-                                                            <Field label="First Name" stepNumber={1} helperText="Must match your government-issued ID (verification required later)." value={editForm.firstName} fieldKey="firstName" isEditing={isEditing} setEditForm={setEditForm} placeholder="Mandatory" required={true} />
-                                                            <Field label="Preferred Name (Recommended)" helperText="What you prefer to be called" value={editForm.preferredName} fieldKey="preferredName" isEditing={isEditing} setEditForm={setEditForm} />
-                                                            <Field label="Middle Name (Optional)" value={editForm.middleName} fieldKey="middleName" isEditing={isEditing} setEditForm={setEditForm} />
-                                                            <Field label="Last Name" stepNumber={2} helperText="Must match your government-issued ID (verification required later)." value={editForm.lastName} fieldKey="lastName" isEditing={isEditing} setEditForm={setEditForm} placeholder="Mandatory" required={true} />
-                                                            <SelectField label="Gender" stepNumber={3} helperText="Mandatory. Must match your government-issued ID (verification required later)." value={editForm.gender} fieldKey="gender" options={[{ label: 'Male', value: 'Male' }, { label: 'Female', value: 'Female' }, { label: 'Prefer not to answer', value: 'Prefer not to answer' }, { label: 'Other', value: 'Other' }]} isEditing={isEditing} setEditForm={setEditForm} required={true} />
+                {activeTab === 'basic' && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <Section isEditing={isEditing} onSave={handleSaveProfile} title="Contact Info" icon={Mail} colorTheme="primary">
+                            <label className="text-xs font-bold text-muted-foreground uppercase mb-2 block">
+                                Emails {isEditing && <span className="text-destructive lowercase font-normal">(required)</span>}
+                            </label>
+                            <ContactListEditor type="email" contacts={editForm.emails} setContacts={(c) => setEditForm(prev => ({ ...prev, emails: c }))} isEditing={isEditing} icon={Mail} />
 
-                                                            <div className="w-full">
-                                                                <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">
-                                                                    <span className="text-primary mr-1">Step 4:</span>
-                                                                    Date of Birth {isEditing && <span className="text-destructive lowercase font-normal">(required)</span>}
-                                                                </label>
-                                                                <input type="date" value={editForm.dateOfBirth} onChange={e => setEditForm(prev => ({ ...prev, dateOfBirth: e.target.value }))} className={`w-full pl-3 pr-4 py-3 rounded-xl bg-input border ${!editForm.dateOfBirth ? 'border-primary ring-1 ring-primary' : 'border-border'} text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all`} />
-                                                                <p className="text-[10px] text-muted-foreground mt-1.5 leading-tight">Must match your government-issued ID (verification required later).</p>
-                                                            </div>
+                            <label className="text-xs font-bold text-muted-foreground uppercase mt-4 mb-2 block">
+                                Phone Numbers {isEditing && <span className="lowercase font-normal">(optional)</span>}
+                            </label>
+                            <ContactListEditor type="phone" contacts={editForm.phones} setContacts={(c) => setEditForm(prev => ({ ...prev, phones: c }))} isEditing={isEditing} icon={Phone} />
 
-                                                            <div className="w-full">
-                                                                <label className="text-xs font-bold text-muted-foreground uppercase mb-1 flex items-center gap-1">
-                                                                    <span className="text-primary mr-1">Step 5:</span>
-                                                                    Native Spoken Language
-                                                                    {!editForm.nativeLanguage ? <XCircle className="w-3.5 h-3.5 text-destructive" /> : <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />}
-                                                                </label>
-                                                                <div className="flex flex-col gap-2">
-                                                                    <select
-                                                                        value={
-                                                                            ["English", "Spanish", "French", "German", "Mandarin", "Japanese", "Korean", "Portuguese", "Italian", "Russian", "Arabic", "Hindi", "Bengali", "Urdu", "Indonesian", "Turkish"].includes(editForm.nativeLanguage)
-                                                                                ? editForm.nativeLanguage
-                                                                                : (editForm.nativeLanguage ? 'Other' : '')
-                                                                        }
-                                                                        onChange={e => {
-                                                                            if (e.target.value === 'Other') {
-                                                                                setEditForm(prev => ({ ...prev, nativeLanguage: ' ' })); // space to trigger custom input
-                                                                            } else {
-                                                                                setEditForm(prev => ({ ...prev, nativeLanguage: e.target.value }));
-                                                                            }
-                                                                        }}
-                                                                        className={`w-full p-2 rounded-md border ${!editForm.nativeLanguage ? 'border-destructive ring-1 ring-destructive/50' : 'border-input'} bg-background text-sm transition-all`}
-                                                                    >
-                                                                        <option value="" disabled>Select Language (Mandatory)</option>
-                                                                        {["English", "Spanish", "French", "German", "Mandarin", "Japanese", "Korean", "Portuguese", "Italian", "Russian", "Arabic", "Hindi", "Bengali", "Urdu", "Indonesian", "Turkish"].map(lang => (
-                                                                            <option key={lang} value={lang}>{lang}</option>
-                                                                        ))}
-                                                                        <option value="Other">Other (Type custom)</option>
-                                                                    </select>
-                                                                    {editForm.nativeLanguage && !["English", "Spanish", "French", "German", "Mandarin", "Japanese", "Korean", "Portuguese", "Italian", "Russian", "Arabic", "Hindi", "Bengali", "Urdu", "Indonesian", "Turkish"].includes(editForm.nativeLanguage) && (
-                                                                        <input
-                                                                            type="text"
-                                                                            placeholder="Type your language"
-                                                                            value={editForm.nativeLanguage.trim()}
-                                                                            onChange={e => setEditForm(prev => ({ ...prev, nativeLanguage: e.target.value }))}
-                                                                            className="w-full p-2 rounded-md border border-input bg-background text-sm focus:border-primary transition-all animate-in slide-in-from-top-1"
-                                                                            autoFocus
-                                                                        />
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <div className="flex flex-col gap-1">
-                                                                <label className="text-xs font-bold text-muted-foreground uppercase">Full Name</label>
-                                                                <div className="font-medium text-foreground">
-                                                                    {user.title ? user.title + ' ' : ''}
-                                                                    {user.firstName || 'Not set'}
-                                                                    {user.preferredName ? ` (${user.preferredName})` : ''}
-                                                                    {' '}{user.middleName ? user.middleName + ' ' : ''}{user.lastName || ''}
-                                                                </div>
-                                                            </div>
-                                                            <div className="flex flex-col gap-1">
-                                                                <label className="text-xs font-bold text-muted-foreground uppercase">Gender</label>
-                                                                <div className="font-medium text-foreground">{user.gender || 'Not set'}</div>
-                                                            </div>
-                                                            <div className="flex flex-col gap-1">
-                                                                <label className="text-xs font-bold text-muted-foreground uppercase">Age / DOB</label>
-                                                                <div className="font-medium text-foreground">{calculateAge(user.dateOfBirth) ? `${calculateAge(user.dateOfBirth)} years` : 'Not set'}</div>
-                                                            </div>
-                                                            <div className="flex flex-col gap-1">
-                                                                <label className="text-xs font-bold text-muted-foreground uppercase">Native Spoken Language</label>
-                                                                <div className="font-medium text-foreground">{user.nativeLanguage || 'Not set'}</div>
-                                                            </div>
-                                                            <div className="flex flex-col gap-1">
-                                                                <label className="text-xs font-bold text-muted-foreground uppercase">Member Since</label>
-                                                                <div className="font-medium text-foreground">{calculateMemberSince(user.createdAt)}</div>
-                                                            </div>
-                                                        </>
-                                                    )}
-                                                </div>
-                                            </Section>
-                                        </SortableSection>
-                                    );
-
-                                    if (sectionId === 'section-contact') return (
-                                        <SortableSection key="section-contact" id="section-contact" isCustomizeMode={isCustomizeMode}>
-                                            <Section id="section-contact" isEditing={isEditing} onSave={handleSaveProfile} title="Contact Info" icon={Mail} colorTheme="primary">
-                                                <div>
-                                                    <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">
-                                                        Emails {isEditing && <span className="text-destructive lowercase font-normal">(required)</span>}
-                                                    </label>
-                                                    <p className="text-[10px] text-muted-foreground mb-3 leading-tight">Your primary email will be used for communications and account recovery.</p>
-                                                    <ContactListEditor type="email" contacts={editForm.emails} setContacts={(c) => setEditForm(prev => ({ ...prev, emails: c }))} isEditing={isEditing} icon={Mail} />
-                                                </div>
-
-                                                <div className="mt-6">
-                                                    <label className="text-xs font-bold text-muted-foreground uppercase mb-1 block">
-                                                        Phone Numbers (Recommended)
-                                                    </label>
-                                                    <p className="text-[10px] text-muted-foreground mb-3 leading-tight">Phone numbers can be used as a primary or backup method for account recovery.</p>
-                                                    <ContactListEditor type="phone" contacts={editForm.phones} setContacts={(c) => setEditForm(prev => ({ ...prev, phones: c }))} isEditing={isEditing} icon={Phone} />
-                                                </div>
-                                            </Section>
-                                        </SortableSection>
-                                    );
-
-                                    if (sectionId === 'section-location') return (
-                                        <SortableSection key="section-location" id="section-location" isCustomizeMode={isCustomizeMode}>
-                                            <div id="section-location" className="scroll-mt-6 h-full">
-                                                <Section id="section-location" isEditing={isEditing} onSave={handleSaveProfile} title="Location" icon={MapPin} colorTheme="secondary">
-                                                    {isEditing && (
-                                                        <div className="mb-4">
-                                                            <button
-                                                                onClick={handleDetectLocation}
-                                                                disabled={isDetectingLocation}
-                                                                className="flex items-center gap-2 px-4 py-2 bg-secondary text-secondary-foreground rounded-lg text-sm font-semibold hover:bg-secondary/80 disabled:opacity-50 transition-colors w-full sm:w-auto justify-center"
-                                                            >
-                                                                {isDetectingLocation ? (
-                                                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                                                ) : (
-                                                                    <Locate className="w-4 h-4" />
-                                                                )}
-                                                                {isDetectingLocation ? 'Detecting...' : 'Detect Current Location & Time Zone'}
-                                                            </button>
-                                                        </div>
-                                                    )}
-                                                    <div className="grid grid-cols-2 gap-4">
-                                                        <Field label="Origin City" value={editForm.originCity} fieldKey="originCity" isEditing={isEditing} setEditForm={setEditForm} />
-                                                        <Field label="Origin Country" value={editForm.originCountry} fieldKey="originCountry" isEditing={isEditing} setEditForm={setEditForm} />
-                                                    </div>
-                                                    <div className="grid grid-cols-2 gap-4">
-                                                        <Field label="Current City" value={editForm.currentCity} fieldKey="currentCity" isEditing={isEditing} setEditForm={setEditForm} />
-                                                        <Field label="Current Country" value={editForm.currentCountry} fieldKey="currentCountry" isEditing={isEditing} setEditForm={setEditForm} />
-                                                    </div>
-                                                    <div id="section-timezone" className="scroll-mt-24 mt-6">
-                                                        <SelectField
-                                                            label="Time Zone"
-                                                            value={editForm.timeZone}
-                                                            fieldKey="timeZone"
-                                                            icon={Clock}
-                                                            options={
-                                                                editForm.timeZone && !TIMEZONE_OPTIONS.some(o => o.value === editForm.timeZone)
-                                                                    ? [...TIMEZONE_OPTIONS, { label: editForm.timeZone, value: editForm.timeZone }]
-                                                                    : TIMEZONE_OPTIONS
-                                                            }
-                                                            isEditing={isEditing}
-                                                            setEditForm={setEditForm}
-                                                        />
-                                                    </div>
-                                                    <div className="mt-6">
-                                                        <TagsInput
-                                                            label="Previous Locations (Optional)"
-                                                            tags={editForm.previousLocations || []}
-                                                            setTags={(tags) => setEditForm(prev => ({ ...prev, previousLocations: tags }))}
-                                                            isEditing={isEditing}
-                                                            placeholder="Add a previous location..."
-                                                        />
-                                                    </div>
-                                                </Section>
-                                            </div>
-                                        </SortableSection>
-                                    );
-
-                                    if (sectionId === 'section-personal') return (
-                                        <SortableSection key="section-personal" id="section-personal" isCustomizeMode={isCustomizeMode}>
-                                            <Section id="section-personal" isEditing={isEditing} onSave={handleSaveProfile} title="Personal" icon={User} colorTheme="accent">
-                                                <Field label="Profession (Recommended)" value={editForm.profession} helperText="This information is used to recommend learning material." fieldKey="profession" icon={Briefcase} isEditing={isEditing} setEditForm={setEditForm} />
-                                                <Field label="Interests & Hobbies (Recommended)" value={editForm.interests} helperText="This information is used to recommend learning material." fieldKey="interests" icon={Heart} placeholder="Travel, Tech, Cooking..." isEditing={isEditing} setEditForm={setEditForm} />
-                                            </Section>
-                                        </SortableSection>
-                                    );
-                                    
-                                    return null;
-                                })}
+                            <div id="section-timezone" className="scroll-mt-24 mt-4">
+                                <SelectField
+                                    label="Time Zone"
+                                    value={editForm.timeZone}
+                                    fieldKey="timeZone"
+                                    icon={Clock}
+                                    options={
+                                        editForm.timeZone && !TIMEZONE_OPTIONS.some(o => o.value === editForm.timeZone)
+                                            ? [...TIMEZONE_OPTIONS, { label: editForm.timeZone, value: editForm.timeZone }]
+                                            : TIMEZONE_OPTIONS
+                                    }
+                                    isEditing={isEditing}
+                                    setEditForm={setEditForm}
+                                />
                             </div>
-                        </SortableContext>
-                    )}
+                        </Section>
 
-                    {activeTab === 'learning' && (
-                        <SortableContext 
-                            items={tileOrder['learning'] || DEFAULT_ORDER_LEARNING}
-                            strategy={rectSortingStrategy}
-                        >
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
-                                {(tileOrder['learning'] || DEFAULT_ORDER_LEARNING).map(sectionId => {
-                                    if (sectionId === 'section-languages') return (
-                                        <SortableSection key="section-languages" id="section-languages" isCustomizeMode={isCustomizeMode}>
-                                            <Section id="section-languages" isEditing={isEditing} onSave={handleSaveProfile} title="Languages" icon={Globe} colorTheme="primary">
-                                                <Field label="Target Language" stepNumber={6} value={editForm.targetLanguage} fieldKey="targetLanguage" isEditing={isEditing} setEditForm={setEditForm} required={true} />
-                                            </Section>
-                                        </SortableSection>
-                                    );
+                        <div id="section-location" className="scroll-mt-6">
+                            <Section isEditing={isEditing} onSave={handleSaveProfile} title="Location" icon={MapPin} colorTheme="secondary">
+                                {isEditing && (
+                                    <div className="mb-4">
+                                        <button
+                                            onClick={handleDetectLocation}
+                                            disabled={isDetectingLocation}
+                                            className="flex items-center gap-2 px-4 py-2 bg-secondary text-secondary-foreground rounded-lg text-sm font-semibold hover:bg-secondary/80 disabled:opacity-50 transition-colors w-full sm:w-auto justify-center"
+                                        >
+                                            {isDetectingLocation ? (
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                            ) : (
+                                                <Locate className="w-4 h-4" />
+                                            )}
+                                            {isDetectingLocation ? 'Detecting...' : 'Detect Current Location & Time Zone'}
+                                        </button>
+                                    </div>
+                                )}
+                                <div className="grid grid-cols-2 gap-4">
+                                    <Field label="Origin City" value={editForm.originCity} fieldKey="originCity" isEditing={isEditing} setEditForm={setEditForm} />
+                                    <Field label="Origin Country" value={editForm.originCountry} fieldKey="originCountry" isEditing={isEditing} setEditForm={setEditForm} />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <Field label="Current City" value={editForm.currentCity} fieldKey="currentCity" isEditing={isEditing} setEditForm={setEditForm} />
+                                    <Field label="Current Country" value={editForm.currentCountry} fieldKey="currentCountry" isEditing={isEditing} setEditForm={setEditForm} />
+                                </div>
+                            </Section>
+                        </div>
 
-                                    if (sectionId === 'section-level') return (
-                                        <SortableSection key="section-level" id="section-level" isCustomizeMode={isCustomizeMode}>
-                                            <Section id="section-level" isEditing={isEditing} onSave={handleSaveProfile} title="Level & Goals" icon={Activity} colorTheme="secondary">
-                                                <Field label="English Level" value={editForm.englishLevel} fieldKey="englishLevel" placeholder="e.g. Intermediate (B1)" isEditing={isEditing} setEditForm={setEditForm} />
-                                                <TextArea label="Goals" value={editForm.goals} fieldKey="goals" placeholder="Why are you learning?" isEditing={isEditing} setEditForm={setEditForm} />
-                                            </Section>
-                                        </SortableSection>
-                                    );
+                        <Section isEditing={isEditing} onSave={handleSaveProfile} title="Personal" icon={User} colorTheme="accent">
+                            <Field label="Profession" value={editForm.profession} fieldKey="profession" icon={Briefcase} isEditing={isEditing} setEditForm={setEditForm} />
+                            <Field label="Interests & Hobbies" value={editForm.interests} fieldKey="interests" icon={Heart} placeholder="Travel, Tech, Cooking..." isEditing={isEditing} setEditForm={setEditForm} />
+                        </Section>
+                    </div>
+                )}
 
-                                    if (sectionId === 'section-experience') return (
-                                        <SortableSection key="section-experience" id="section-experience" isCustomizeMode={isCustomizeMode}>
-                                            <Section id="section-experience" isEditing={isEditing} onSave={handleSaveProfile} title="Experience" icon={Book} colorTheme="accent">
-                                                <TextArea label="Environment" value={editForm.englishEnvironment} fieldKey="englishEnvironment" placeholder="Where do you use English?" isEditing={isEditing} setEditForm={setEditForm} />
-                                                <TextArea label="Schedule & Availability" value={editForm.schedule} fieldKey="schedule" placeholder="Mon/Wed evenings..." isEditing={isEditing} setEditForm={setEditForm} />
-                                            </Section>
-                                        </SortableSection>
-                                    );
+                {activeTab === 'learning' && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <Section isEditing={isEditing} onSave={handleSaveProfile} title="Languages" icon={Globe} colorTheme="primary">
+                            <Field label="Target Language" stepNumber={6} value={editForm.targetLanguage} fieldKey="targetLanguage" isEditing={isEditing} setEditForm={setEditForm} required={true} />
+                        </Section>
 
-                                    if (sectionId === 'section-preferences') return (
-                                        <SortableSection key="section-preferences" id="section-preferences" isCustomizeMode={isCustomizeMode}>
-                                            <Section id="section-preferences" isEditing={isEditing} onSave={handleSaveProfile} title="Preferences" icon={Settings} colorTheme="muted">
-                                                <TextArea label="Learning Preferences" value={editForm.preferences} fieldKey="preferences" placeholder="Visual learner, prefers conversation..." isEditing={isEditing} setEditForm={setEditForm} />
-                                            </Section>
-                                        </SortableSection>
-                                    );
-                                    
-                                    return null;
-                                })}
-                            </div>
-                        </SortableContext>
-                    )}
+                        <Section isEditing={isEditing} onSave={handleSaveProfile} title="Level & Goals" icon={Activity} colorTheme="secondary">
+                            <Field label="English Level" value={editForm.englishLevel} fieldKey="englishLevel" placeholder="e.g. Intermediate (B1)" isEditing={isEditing} setEditForm={setEditForm} />
+                            <TextArea label="Goals" value={editForm.goals} fieldKey="goals" placeholder="Why are you learning?" isEditing={isEditing} setEditForm={setEditForm} />
+                        </Section>
 
-                    {activeTab === 'account' && (
-                        <SortableContext 
-                            items={tileOrder['account'] || DEFAULT_ORDER_ACCOUNT}
-                            strategy={verticalListSortingStrategy}
-                        >
-                            <div className="space-y-6">
-                                {(tileOrder['account'] || DEFAULT_ORDER_ACCOUNT).map(sectionId => {
-                                    if (sectionId === 'section-security') return (
-                                        <SortableSection key="section-security" id="section-security" isCustomizeMode={isCustomizeMode}>
-                                            <Section id="section-security" isEditing={isEditing} onSave={handleSaveProfile} title="Security" icon={Lock} colorTheme="default">
-                                                {!isEditing && (
-                                                    <button
-                                                        onClick={startPasswordChange}
-                                                        className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-secondary/50 transition-colors w-full sm:w-auto justify-center"
-                                                    >
-                                                        <KeyRound className="w-4 h-4" /> Change Password
-                                                    </button>
-                                                )}
-                                                {isEditing && <p className="text-muted-foreground text-sm italic">Finish editing profile to change password.</p>}
-                                            </Section>
-                                        </SortableSection>
-                                    );
+                        <Section isEditing={isEditing} onSave={handleSaveProfile} title="Experience" icon={Book} colorTheme="accent">
+                            <TextArea label="Environment" value={editForm.englishEnvironment} fieldKey="englishEnvironment" placeholder="Where do you use English?" isEditing={isEditing} setEditForm={setEditForm} />
+                            <TextArea label="Schedule & Availability" value={editForm.schedule} fieldKey="schedule" placeholder="Mon/Wed evenings..." isEditing={isEditing} setEditForm={setEditForm} />
+                        </Section>
 
-                                    if (sectionId === 'section-flashcards') return (
-                                        <SortableSection key="section-flashcards" id="section-flashcards" isCustomizeMode={isCustomizeMode}>
-                                            <Section id="section-flashcards" isEditing={isEditing} onSave={handleSaveProfile} title="Flashcard Management" icon={Book} colorTheme="default">
-                                                <button
-                                                    onClick={onManageDeck}
-                                                    className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-secondary/50 transition-colors w-full sm:w-auto justify-center"
-                                                >
-                                                    <Book className="w-4 h-4" /> Manage Flashcards
-                                                </button>
-                                            </Section>
-                                        </SortableSection>
-                                    );
+                        <Section isEditing={isEditing} onSave={handleSaveProfile} title="Preferences" icon={Settings} colorTheme="muted">
+                            <TextArea label="Learning Preferences" value={editForm.preferences} fieldKey="preferences" placeholder="Visual learner, prefers conversation..." isEditing={isEditing} setEditForm={setEditForm} />
+                        </Section>
+                    </div>
+                )}
 
-                                    if (sectionId === 'section-appsettings' && onOpenSettings) return (
-                                        <SortableSection key="section-appsettings" id="section-appsettings" isCustomizeMode={isCustomizeMode}>
-                                            <Section id="section-appsettings" isEditing={isEditing} onSave={undefined} title="Application Settings" icon={Settings} colorTheme="secondary">
-                                                <button
-                                                    onClick={onOpenSettings}
-                                                    className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-secondary/50 transition-colors w-full sm:w-auto justify-center"
-                                                >
-                                                    <Settings className="w-4 h-4" /> Open App Settings
-                                                </button>
-                                            </Section>
-                                        </SortableSection>
-                                    );
+                {activeTab === 'account' && (
+                    <div className="space-y-6">
+                        <Section isEditing={isEditing} onSave={handleSaveProfile} title="Security" icon={Lock} colorTheme="default">
+                            {!isEditing && (
+                                <button
+                                    onClick={startPasswordChange}
+                                    className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-secondary/50 transition-colors w-full sm:w-auto justify-center"
+                                >
+                                    <KeyRound className="w-4 h-4" /> Change Password
+                                </button>
+                            )}
+                            {isEditing && <p className="text-muted-foreground text-sm italic">Finish editing profile to change password.</p>}
+                        </Section>
 
-                                    if (sectionId === 'section-danger') return (
-                                        <SortableSection key="section-danger" id="section-danger" isCustomizeMode={isCustomizeMode}>
-                                            <Section id="section-danger" isEditing={isEditing} onSave={undefined} title="Danger Zone" icon={AlertCircle} colorTheme="accent">
-                                                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 border border-destructive/20 bg-destructive/5 rounded-lg">
-                                                    <div>
-                                                        <h4 className="font-bold text-destructive">Delete Account</h4>
-                                                        <p className="text-sm text-foreground mt-1">
-                                                            Permanently remove your account and all associated data. This action cannot be undone. All saved flashcards, study stats, and history will be lost.
-                                                        </p>
-                                                    </div>
-                                                    <button
-                                                        className="px-4 py-2 bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-lg font-bold shrink-0 transition-colors"
-                                                        onClick={() => setShowDeleteConfirm(true)}
-                                                    >
-                                                        Delete Account
-                                                    </button>
-                                                </div>
-                                            </Section>
-                                        </SortableSection>
-                                    );
-                                    
-                                    return null;
-                                })}
-                            </div>
-                        </SortableContext>
-                    )}
-                </DndContext>
+                        <Section isEditing={isEditing} onSave={handleSaveProfile} title="Flashcard Management" icon={Book} colorTheme="default">
+                            <button
+                                onClick={onManageDeck}
+                                className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-secondary/50 transition-colors w-full sm:w-auto justify-center"
+                            >
+                                <Book className="w-4 h-4" /> Manage Flashcards
+                            </button>
+                        </Section>
+
+                        {onOpenSettings && (
+                            <Section isEditing={isEditing} onSave={handleSaveProfile} title="Application Settings" icon={Settings} colorTheme="secondary">
+                                <button
+                                    onClick={onOpenSettings}
+                                    className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-secondary/50 transition-colors w-full sm:w-auto justify-center"
+                                >
+                                    <Settings className="w-4 h-4" /> Open App Settings
+                                </button>
+                            </Section>
+                        )}
+                        {onDeleteAccount && (
+                            <Section isEditing={isEditing} onSave={undefined} title="Danger Zone" icon={AlertCircle} colorTheme="accent">
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 border border-destructive/20 bg-destructive/5 rounded-lg">
+                                    <div>
+                                        <h4 className="font-bold text-destructive">Delete Account</h4>
+                                        <p className="text-sm text-foreground mt-1">
+                                            Permanently remove your account and all associated data. This action cannot be undone. All saved flashcards, study stats, and history will be lost.
+                                        </p>
+                                    </div>
+                                    <button
+                                        className="px-4 py-2 bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-lg font-bold shrink-0 transition-colors"
+                                        onClick={() => setShowDeleteConfirm(true)}
+                                    >
+                                        Delete Account
+                                    </button>
+                                </div>
+                            </Section>
+                        )}
+                    </div>
+                )}
 
                 {activeTab === 'tutor' && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -2168,47 +1798,6 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
                     </div>
                 )
             }
-            {/* Delete Account Confirmation Modal */}
-            {
-                showDeleteConfirm && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4 fade-in duration-200">
-                        <div className="w-full max-w-md bg-card border border-destructive/50 rounded-xl shadow-2xl p-6">
-                            <div className="flex flex-col items-center mb-6">
-                                <div className="w-16 h-16 bg-destructive/20 rounded-full flex items-center justify-center mb-4 text-destructive">
-                                    <AlertCircle className="w-8 h-8" />
-                                </div>
-                                <h3 className="text-2xl font-black text-destructive text-center leading-tight">
-                                    Delete Account
-                                </h3>
-                                <p className="text-lg text-foreground text-center mt-2 font-medium">
-                                    Are you absolutely sure?
-                                </p>
-                                <p className="text-sm text-muted-foreground text-center mt-2">
-                                    This action cannot be undone. All your flashcards, study statistics, and history will be permanently deleted.
-                                </p>
-                            </div>
-                            <div className="flex gap-4">
-                                <button
-                                    onClick={() => setShowDeleteConfirm(false)}
-                                    className="flex-1 py-3 bg-secondary text-secondary-foreground font-bold rounded-lg hover:bg-secondary/80 transition-colors"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        setShowDeleteConfirm(false);
-                                        if (onDeleteAccount) onDeleteAccount();
-                                    }}
-                                    className="flex-1 py-3 bg-destructive text-destructive-foreground font-bold rounded-lg hover:bg-destructive/90 transition-colors"
-                                >
-                                    Yes, Delete Account
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )
-            }
-
             {
                 isCameraActive && (
                     <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-[100] p-4 animate-in fade-in duration-200">
@@ -2244,6 +1833,46 @@ export function ProfilePage({ user, onManageDeck, onBack, onUpdateProfile, showT
                                         Capture
                                     </button>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+            {/* Delete Account Confirmation Modal */}
+            {
+                showDeleteConfirm && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4 fade-in duration-200">
+                        <div className="w-full max-w-md bg-card border border-destructive/50 rounded-xl shadow-2xl p-6">
+                            <div className="flex flex-col items-center mb-6">
+                                <div className="w-16 h-16 bg-destructive/20 rounded-full flex items-center justify-center mb-4 text-destructive">
+                                    <AlertCircle className="w-8 h-8" />
+                                </div>
+                                <h3 className="text-2xl font-black text-destructive text-center leading-tight">
+                                    Delete Account
+                                </h3>
+                                <p className="text-lg text-foreground text-center mt-2 font-medium">
+                                    Are you absolutely sure?
+                                </p>
+                                <p className="text-sm text-muted-foreground text-center mt-2">
+                                    This action cannot be undone. All your flashcards, study statistics, and history will be permanently deleted.
+                                </p>
+                            </div>
+                            <div className="flex gap-4">
+                                <button
+                                    onClick={() => setShowDeleteConfirm(false)}
+                                    className="flex-1 py-3 bg-secondary text-secondary-foreground font-bold rounded-lg hover:bg-secondary/80 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setShowDeleteConfirm(false);
+                                        if (onDeleteAccount) onDeleteAccount();
+                                    }}
+                                    className="flex-1 py-3 bg-destructive text-destructive-foreground font-bold rounded-lg hover:bg-destructive/90 transition-colors"
+                                >
+                                    Yes, Delete Account
+                                </button>
                             </div>
                         </div>
                     </div>

@@ -944,6 +944,56 @@ function App() {
         // Ignore fav.mode, always go to options
     };
 
+    const handleCategorySelect = (category: string) => {
+        if (!user) return;
+        if (category === 'random') {
+            const allCards = decks.flatMap(d => d.cards);
+            if (allCards.length === 0) {
+                alert("No cards available for random mix!");
+                return;
+            }
+            setActiveDeckId('random-mix');
+            setMode('deck');
+            return;
+        }
+
+        if (category === 'vocabulary') {
+            setMode('topic-selection');
+            return;
+        }
+
+        const subjectMap: Record<string, string> = {
+            'vocabulary': 'Vocabulary',
+            'idioms': 'Idioms',
+            'phrasal-verbs': 'Phrasal Verbs',
+            'collocations': 'Collocations',
+            'prepositions': 'Prepositions'
+        };
+
+        const targetSubject = subjectMap[category];
+        if (targetSubject) {
+            const matchingDecks = decks.filter(d => d.subject === targetSubject);
+            if (matchingDecks.length === 0) {
+                alert(`No decks found for ${targetSubject}`);
+                return;
+            }
+            const sessionDeckId = `session-${category}`;
+            setActiveDeckId(sessionDeckId);
+            setMode('deck');
+
+            // Save Last Session
+            const updatedUser = { ...user };
+            updatedUser.lastSession = {
+                deckId: sessionDeckId,
+                mode: 'deck',
+                timestamp: Date.now(),
+                label: targetSubject
+            };
+            handleUpdateProfile(user.username, { lastSession: updatedUser.lastSession });
+            return;
+        }
+    };
+
     // Helper to get active cards
     const getActiveCards = () => {
         if (!activeDeckId) return decks[0].cards;
@@ -1289,6 +1339,8 @@ function App() {
                                     favorites={user.favorites || []}
                                     onQuickStart={handleQuickStart}
                                     onSelectFavorite={handleSelectFavorite}
+                                    onToggleFavorite={handleToggleFavorite}
+                                    onSelect={handleCategorySelect}
                                     onNavigate={navigate}
                                     onUpdateProfile={handleUpdateProfile}
                                 />

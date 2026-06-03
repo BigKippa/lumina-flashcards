@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Word } from '../data/vocabulary';
 import { Student } from '../types';
-import { X, ArrowRight, CheckCircle, Users, Globe, UserPlus, User } from 'lucide-react';
+import { X, CheckCircle, Users, Globe, UserPlus, User } from 'lucide-react';
 
 interface QuickAddFlashcardsModalProps {
     onClose: () => void;
@@ -43,16 +43,7 @@ export const QuickAddFlashcardsModal: React.FC<QuickAddFlashcardsModalProps> = (
         }
     }, [initialAudience, initialSpecificStudentId]);
 
-    const handleNextStep = () => {
-        if (!audience) return;
-        if (audience === 'specific_student' && !specificStudentId) return;
-        if (audience === 'new_student' && onNavigateToCreateStudent) {
-            onNavigateToCreateStudent();
-            onClose();
-            return;
-        }
-        setStep(2);
-    };
+
 
     const handleAudienceClick = (type: 'specific_student' | 'new_student' | 'all_students' | 'public') => {
         setAudience(type);
