@@ -99,43 +99,43 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, onSelect, la
                             {/* Active Decks Widget */}
                             <div
                                 onClick={() => onNavigate && onNavigate('topic-selection', null)}
-                                className="bg-color4 hover:bg-color4/80 cursor-pointer transition-colors border border-color4/50 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm"
+                                className="bg-color4 hover:bg-color4/80 cursor-pointer transition-colors border border-color4/50 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm text-color5"
                             >
-                                <BookOpen className="w-5 h-5 text-color5 mb-2" />
-                                <span className="text-2xl font-bold text-color1">{user.activeDeckIds?.length || 0}</span>
-                                <span className="text-xs text-color1 text-center leading-tight">Active<br />Decks</span>
+                                <BookOpen className="w-5 h-5 mb-2" />
+                                <span className="text-2xl font-bold">{user.activeDeckIds?.length || 0}</span>
+                                <span className="text-xs text-center leading-tight">Active<br />Decks</span>
                             </div>
 
                             {/* Inbox/Pending Widget */}
                             <div
                                 onClick={() => alert('Messages Navigation - Coming Soon')}
-                                className="bg-color2 hover:bg-color2/80 cursor-pointer transition-colors border border-color2/50 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm relative"
+                                className="bg-color2 hover:bg-color2/80 cursor-pointer transition-colors border border-color2/50 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm relative text-color5"
                             >
                                 <div className="absolute top-3 right-3 w-2.5 h-2.5 bg-color5 rounded-full animate-pulse shadow-sm border border-color1/20"></div>
-                                <Bell className="w-5 h-5 text-color5 mb-2" />
-                                <span className="text-2xl font-bold text-color5">1</span>
-                                <span className="text-xs text-color5 text-center leading-tight font-medium">New<br />Messages</span>
+                                <Bell className="w-5 h-5 mb-2" />
+                                <span className="text-2xl font-bold">1</span>
+                                <span className="text-xs text-center leading-tight font-medium">New<br />Messages</span>
                             </div>
 
                             {/* Quick Start Widget */}
                             <div
                                 onClick={onQuickStart}
-                                className={`bg-color3 hover:bg-color3/80 cursor-pointer transition-colors border border-color3/50 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm group ${!lastSession ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                className={`bg-color3 hover:bg-color3/80 cursor-pointer transition-colors border border-color3/50 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm group text-color5 ${!lastSession ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 title={lastSession ? `Resume ${lastSession.label}` : 'No recent session'}
                             >
-                                <Clock className="w-5 h-5 text-color5 mb-2 group-hover:scale-110 transition-transform" />
+                                <Clock className="w-5 h-5 mb-2 group-hover:scale-110 transition-transform" />
                                 <span className="text-2xl font-bold invisible block">&nbsp;</span>
-                                <span className="text-xs font-bold text-color5 text-center leading-tight">Quick<br />Start</span>
+                                <span className="text-xs font-bold text-center leading-tight">Quick<br />Start</span>
                             </div>
 
                             {/* Favorites Widget */}
                             <div
                                 onClick={() => setIsFavoritesModalOpen(true)}
-                                className="bg-color3 hover:bg-color3/30 cursor-pointer transition-colors backdrop-blur-sm border border-amber-500/30 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm group"
+                                className="bg-color3 hover:bg-color3/30 cursor-pointer transition-colors backdrop-blur-sm border border-amber-500/30 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm group text-color1"
                             >
                                 <Heart className="w-5 h-5 text-amber-400 mb-2 group-hover:scale-110 transition-transform fill-current" />
                                 <span className="text-2xl font-bold invisible block">&nbsp;</span>
-                                <span className="text-xs font-bold text-color1 text-center leading-tight">Favorites</span>
+                                <span className="text-xs font-bold text-center leading-tight">Favorites</span>
                             </div>
                         </div>
                     </div>
@@ -151,90 +151,90 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, onSelect, la
                         {/* Card 1: Random Mix */}
                         <div
                             onClick={() => onSelect('random')}
-                            className="bg-color2 hover:bg-color2/30 border border-color2/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
+                            className="bg-color2 hover:bg-color2/30 border border-color2/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color2-foreground"
                         >
-                            <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color2 transition-colors"></div>
-                            <div className="w-12 h-12 rounded-xl bg-color1 text-color2 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
+                            <div className="absolute -right-6 -top-6 w-24 h-24 bg-color2-foreground rounded-full blur-2xl group-hover:bg-color2 transition-colors opacity-10 group-hover:opacity-20"></div>
+                            <div className="w-12 h-12 rounded-xl bg-color2-foreground/10 text-color2-foreground flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color2-foreground/20 shrink-0">
                                 <Shuffle className="w-6 h-6" />
                             </div>
                             <div className="relative z-10 font-medium flex-1">
                                 <h2 className="text-xl font-bold mb-1">{t('welcome.categories.random')}</h2>
-                                <p className="text-sm text-color1/80 line-clamp-2">{getDesc('random')}</p>
+                                <p className="text-sm opacity-80 line-clamp-2">{getDesc('random')}</p>
                             </div>
                         </div>
 
                         {/* Card 2: Vocabulary */}
                         <div
                             onClick={() => onSelect('vocabulary')}
-                            className="bg-color4 hover:bg-color4/30 border border-color4/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
+                            className="bg-color4 hover:bg-color4/30 border border-color4/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color4-foreground"
                         >
-                            <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color4 transition-colors"></div>
-                            <div className="w-12 h-12 rounded-xl bg-color1 text-color4 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
+                            <div className="absolute -right-6 -top-6 w-24 h-24 bg-color4-foreground rounded-full blur-2xl group-hover:bg-color4 transition-colors opacity-10 group-hover:opacity-20"></div>
+                            <div className="w-12 h-12 rounded-xl bg-color4-foreground/10 text-color4-foreground flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color4-foreground/20 shrink-0">
                                 <BookOpen className="w-6 h-6" />
                             </div>
                             <div className="relative z-10 font-medium flex-1">
                                 <h2 className="text-xl font-bold mb-1">{t('welcome.categories.vocabulary')}</h2>
-                                <p className="text-sm text-color1/80 line-clamp-2">{getDesc('vocabulary')}</p>
+                                <p className="text-sm opacity-80 line-clamp-2">{getDesc('vocabulary')}</p>
                             </div>
                         </div>
 
                         {/* Card 3: Idioms & Sayings */}
                         <div
                             onClick={() => onSelect('idioms')}
-                            className="bg-color5 hover:bg-color5/30 border border-color5/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
+                            className="bg-color5 hover:bg-color5/30 border border-color5/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color5-foreground"
                         >
-                            <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color5 transition-colors"></div>
-                            <div className="w-12 h-12 rounded-xl bg-color1 text-color5 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
+                            <div className="absolute -right-6 -top-6 w-24 h-24 bg-color5-foreground rounded-full blur-2xl group-hover:bg-color5 transition-colors opacity-10 group-hover:opacity-20"></div>
+                            <div className="w-12 h-12 rounded-xl bg-color5-foreground/10 text-color5-foreground flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color5-foreground/20 shrink-0">
                                 <MessageCircle className="w-6 h-6" />
                             </div>
                             <div className="relative z-10 font-medium flex-1">
                                 <h2 className="text-xl font-bold mb-1">{t('welcome.categories.idioms')}</h2>
-                                <p className="text-sm text-color1/80 line-clamp-2">{getDesc('idioms')}</p>
+                                <p className="text-sm opacity-80 line-clamp-2">{getDesc('idioms')}</p>
                             </div>
                         </div>
 
                         {/* Card 4: Phrasal Verbs */}
                         <div
                             onClick={() => onSelect('phrasal-verbs')}
-                            className="bg-color3 hover:bg-color3/30 border border-color3/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
+                            className="bg-color3 hover:bg-color3/30 border border-color3/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color3-foreground"
                         >
-                            <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color3 transition-colors"></div>
-                            <div className="w-12 h-12 rounded-xl bg-color1 text-color3 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
+                            <div className="absolute -right-6 -top-6 w-24 h-24 bg-color3-foreground rounded-full blur-2xl group-hover:bg-color3 transition-colors opacity-10 group-hover:opacity-20"></div>
+                            <div className="w-12 h-12 rounded-xl bg-color3-foreground/10 text-color3-foreground flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color3-foreground/20 shrink-0">
                                 <GitMerge className="w-6 h-6" />
                             </div>
                             <div className="relative z-10 font-medium flex-1">
                                 <h2 className="text-xl font-bold mb-1">{t('welcome.categories.phrasal_verbs')}</h2>
-                                <p className="text-sm text-color1/80 line-clamp-2">{getDesc('phrasal-verbs')}</p>
+                                <p className="text-sm opacity-80 line-clamp-2">{getDesc('phrasal-verbs')}</p>
                             </div>
                         </div>
 
                         {/* Card 5: Phrases & Collocations */}
                         <div
                             onClick={() => onSelect('collocations')}
-                            className="bg-color2 hover:bg-color2/30 border border-color2/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
+                            className="bg-color2 hover:bg-color2/30 border border-color2/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color2-foreground"
                         >
-                            <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color2 transition-colors"></div>
-                            <div className="w-12 h-12 rounded-xl bg-color1 text-color2 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
+                            <div className="absolute -right-6 -top-6 w-24 h-24 bg-color2-foreground rounded-full blur-2xl group-hover:bg-color2 transition-colors opacity-10 group-hover:opacity-20"></div>
+                            <div className="w-12 h-12 rounded-xl bg-color2-foreground/10 text-color2-foreground flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color2-foreground/20 shrink-0">
                                 <Users className="w-6 h-6" />
                             </div>
                             <div className="relative z-10 font-medium flex-1">
                                 <h2 className="text-xl font-bold mb-1">{t('welcome.categories.collocations')}</h2>
-                                <p className="text-sm text-color1/80 line-clamp-2">{getDesc('collocations')}</p>
+                                <p className="text-sm opacity-80 line-clamp-2">{getDesc('collocations')}</p>
                             </div>
                         </div>
 
                         {/* Card 6: Prepositions */}
                         <div
                             onClick={() => onSelect('prepositions')}
-                            className="bg-color4 hover:bg-color4/30 border border-color4/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color1"
+                            className="bg-color4 hover:bg-color4/30 border border-color4/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color4-foreground"
                         >
-                            <div className="absolute -right-6 -top-6 w-24 h-24 bg-color1 rounded-full blur-2xl group-hover:bg-color4 transition-colors"></div>
-                            <div className="w-12 h-12 rounded-xl bg-color1 text-color4 flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
+                            <div className="absolute -right-6 -top-6 w-24 h-24 bg-color4-foreground rounded-full blur-2xl group-hover:bg-color4 transition-colors opacity-10 group-hover:opacity-20"></div>
+                            <div className="w-12 h-12 rounded-xl bg-color4-foreground/10 text-color4-foreground flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color4-foreground/20 shrink-0">
                                 <MapPin className="w-6 h-6" />
                             </div>
                             <div className="relative z-10 font-medium flex-1">
                                 <h2 className="text-xl font-bold mb-1">{t('welcome.categories.prepositions')}</h2>
-                                <p className="text-sm text-color1/80 line-clamp-2">{getDesc('prepositions')}</p>
+                                <p className="text-sm opacity-80 line-clamp-2">{getDesc('prepositions')}</p>
                             </div>
                         </div>
                     </div>
