@@ -61,7 +61,6 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, onSelect, la
 
                     {/* Student Hero Tile */}
                     <div data-dev-id="student-hero-tile" className="lumina-glow lumina-glow-hero hover-glow-5 bg-color5 border border-color5/50 rounded-3xl p-8 flex flex-col md:flex-row gap-8 items-center shadow-md text-color1">
-                        <div className="absolute right-0 top-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
 
                         {/* Profile Info (Left) */}
                         <div className="flex items-center gap-6 relative z-10 w-full md:w-auto md:min-w-[320px] shrink-0">
@@ -100,7 +99,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, onSelect, la
                             {/* Active Decks Widget */}
                             <div
                                 onClick={() => onNavigate && onNavigate('topic-selection', null)}
-                                className="bg-color4 hover:bg-color4/80 cursor-pointer transition-colors border border-color4/50 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm text-color1"
+                                className="bg-color4 hover:bg-color4/80 cursor-pointer transition-colors border border-color4/50 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm"
                             >
                                 <BookOpen className="w-5 h-5 text-color5 mb-2" />
                                 <span className="text-2xl font-bold text-color1">{user.activeDeckIds?.length || 0}</span>
@@ -110,7 +109,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, onSelect, la
                             {/* Inbox/Pending Widget */}
                             <div
                                 onClick={() => alert('Messages Navigation - Coming Soon')}
-                                className="bg-color2 hover:bg-color2/80 cursor-pointer transition-colors border border-color2/50 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm relative text-color5"
+                                className="bg-color2 hover:bg-color2/80 cursor-pointer transition-colors border border-color2/50 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm relative"
                             >
                                 <div className="absolute top-3 right-3 w-2.5 h-2.5 bg-color5 rounded-full animate-pulse shadow-sm border border-color1/20"></div>
                                 <Bell className="w-5 h-5 text-color5 mb-2" />
@@ -121,7 +120,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, onSelect, la
                             {/* Quick Start Widget */}
                             <div
                                 onClick={onQuickStart}
-                                className={`bg-color3 hover:bg-color3/80 cursor-pointer transition-colors border border-color3/50 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm group text-color5 ${!lastSession ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                className={`bg-color3 hover:bg-color3/80 cursor-pointer transition-colors border border-color3/50 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm group ${!lastSession ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 title={lastSession ? `Resume ${lastSession.label}` : 'No recent session'}
                             >
                                 <Clock className="w-5 h-5 text-color5 mb-2 group-hover:scale-110 transition-transform" />
@@ -132,7 +131,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, onSelect, la
                             {/* Favorites Widget */}
                             <div
                                 onClick={() => setIsFavoritesModalOpen(true)}
-                                className="bg-color3 hover:bg-color3/30 cursor-pointer transition-colors backdrop-blur-sm border border-amber-500/30 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm group text-color1"
+                                className="bg-color3 hover:bg-color3/30 cursor-pointer transition-colors backdrop-blur-sm border border-amber-500/30 rounded-2xl p-4 flex flex-col justify-center items-center flex-1 max-w-[12rem] md:w-28 shadow-sm group"
                             >
                                 <Heart className="w-5 h-5 text-amber-400 mb-2 group-hover:scale-110 transition-transform fill-current" />
                                 <span className="text-2xl font-bold invisible block">&nbsp;</span>

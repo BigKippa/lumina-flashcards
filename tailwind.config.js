@@ -7,73 +7,73 @@ export default {
     theme: {
         extend: {
             colors: {
-                background: "hsl(var(--background))",
-                foreground: "hsl(var(--foreground))",
+                background: "hsl(var(--background) / <alpha-value>)",
+                foreground: "hsl(var(--foreground) / <alpha-value>)",
                 primary: {
-                    DEFAULT: "hsl(var(--primary))",
-                    foreground: "hsl(var(--primary-foreground))",
+                    DEFAULT: "hsl(var(--primary) / <alpha-value>)",
+                    foreground: "hsl(var(--primary-foreground) / <alpha-value>)",
                 },
                 secondary: {
-                    DEFAULT: "hsl(var(--secondary))",
-                    foreground: "hsl(var(--secondary-foreground))",
+                    DEFAULT: "hsl(var(--secondary) / <alpha-value>)",
+                    foreground: "hsl(var(--secondary-foreground) / <alpha-value>)",
                 },
                 destructive: {
-                    DEFAULT: "hsl(var(--destructive))",
-                    foreground: "hsl(var(--destructive-foreground))",
+                    DEFAULT: "hsl(var(--destructive) / <alpha-value>)",
+                    foreground: "hsl(var(--destructive-foreground) / <alpha-value>)",
                 },
                 muted: {
-                    DEFAULT: "hsl(var(--muted))",
-                    foreground: "hsl(var(--muted-foreground))",
+                    DEFAULT: "hsl(var(--muted) / <alpha-value>)",
+                    foreground: "hsl(var(--muted-foreground) / <alpha-value>)",
                 },
                 accent: {
-                    DEFAULT: "hsl(var(--accent))",
-                    foreground: "hsl(var(--accent-foreground))",
+                    DEFAULT: "hsl(var(--accent) / <alpha-value>)",
+                    foreground: "hsl(var(--accent-foreground) / <alpha-value>)",
                 },
                 card: {
-                    DEFAULT: "hsl(var(--card))",
-                    foreground: "hsl(var(--card-foreground))",
+                    DEFAULT: "hsl(var(--card) / <alpha-value>)",
+                    foreground: "hsl(var(--card-foreground) / <alpha-value>)",
                 },
                 color1: {
-                    DEFAULT: "hsl(var(--color-1))",
-                    foreground: "hsl(var(--color-1-foreground))",
+                    DEFAULT: "hsl(var(--color-1) / <alpha-value>)",
+                    foreground: "hsl(var(--color-1-foreground) / <alpha-value>)",
                 },
                 color2: {
-                    DEFAULT: "hsl(var(--color-2))",
-                    foreground: "hsl(var(--color-2-foreground))",
+                    DEFAULT: "hsl(var(--color-2) / <alpha-value>)",
+                    foreground: "hsl(var(--color-2-foreground) / <alpha-value>)",
                 },
                 color3: {
-                    DEFAULT: "hsl(var(--color-3))",
-                    foreground: "hsl(var(--color-3-foreground))",
+                    DEFAULT: "hsl(var(--color-3) / <alpha-value>)",
+                    foreground: "hsl(var(--color-3-foreground) / <alpha-value>)",
                 },
                 color4: {
-                    DEFAULT: "hsl(var(--color-4))",
-                    foreground: "hsl(var(--color-4-foreground))",
+                    DEFAULT: "hsl(var(--color-4) / <alpha-value>)",
+                    foreground: "hsl(var(--color-4-foreground) / <alpha-value>)",
                 },
                 color5: {
-                    DEFAULT: "hsl(var(--color-5))",
-                    foreground: "hsl(var(--color-5-foreground))",
+                    DEFAULT: "hsl(var(--color-5) / <alpha-value>)",
+                    foreground: "hsl(var(--color-5-foreground) / <alpha-value>)",
                 },
                 color6: {
-                    DEFAULT: "hsl(var(--color-6))",
-                    foreground: "hsl(var(--color-6-foreground))",
+                    DEFAULT: "hsl(var(--color-6) / <alpha-value>)",
+                    foreground: "hsl(var(--color-6-foreground) / <alpha-value>)",
                 },
                 color7: {
-                    DEFAULT: "hsl(var(--color-7))",
-                    foreground: "hsl(var(--color-7-foreground))",
+                    DEFAULT: "hsl(var(--color-7) / <alpha-value>)",
+                    foreground: "hsl(var(--color-7-foreground) / <alpha-value>)",
                 },
                 color8: {
-                    DEFAULT: "hsl(var(--color-8))",
-                    foreground: "hsl(var(--color-8-foreground))",
+                    DEFAULT: "hsl(var(--color-8) / <alpha-value>)",
+                    foreground: "hsl(var(--color-8-foreground) / <alpha-value>)",
                 },
                 color9: {
-                    DEFAULT: "hsl(var(--color-9))",
-                    foreground: "hsl(var(--color-9-foreground))",
+                    DEFAULT: "hsl(var(--color-9) / <alpha-value>)",
+                    foreground: "hsl(var(--color-9-foreground) / <alpha-value>)",
                 },
                 color10: {
-                    DEFAULT: "hsl(var(--color-10))",
-                    foreground: "hsl(var(--color-10-foreground))",
+                    DEFAULT: "hsl(var(--color-10) / <alpha-value>)",
+                    foreground: "hsl(var(--color-10-foreground) / <alpha-value>)",
                 },
-                border: "hsl(var(--border))",
+                border: "hsl(var(--border) / <alpha-value>)",
                 red: {
                     DEFAULT: "hsl(var(--color-5))",
                     50: "hsl(var(--color-5) / 0.1)",
