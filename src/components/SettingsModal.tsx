@@ -41,7 +41,7 @@ export function SettingsModal({ isOpen, onClose, settings, onSave, onOpenBulkImp
     };
 
     const handleDownloadTemplate = () => {
-        const csvContent = "Word,Definition,Example\nApple,A round fruit with red or green skin,I ate an apple for lunch.\nRun,To move at a speed faster than a walk,I run every morning.";
+        const csvContent = "Word,Definition,Example,Part Of Speech,Category,Phonetic,Notes\nApple,A round fruit with red or green skin,I ate an apple for lunch.,Noun,Fruit,,Common fruit\nRun,To move at a speed faster than a walk,I run every morning.,Verb,Action,,Exercise activity";
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
         if (link.download !== undefined) {

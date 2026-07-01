@@ -8,6 +8,7 @@ export interface Word {
     audioUrl?: string;
     videoUrl?: string;
     category?: string;
+    part_of_speech?: string;
     level?: string;
     isPublic?: boolean; // Deprecated in favor of status
     status?: 'public' | 'private' | 'pending' | 'rejected';

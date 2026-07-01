@@ -187,10 +187,12 @@ export const BulkGeneratorModal: React.FC<BulkGeneratorModalProps> = ({ isOpen, 
         setError(null);
 
         const processRows = (rows: any[]) => {
-            const cards: Word[] = rows.map((row: any) => {
-                const word = typeof row.word === 'string' ? row.word.trim() : (row.Word ? String(row.Word).trim() : (row[0] ? String(row[0]).trim() : ''));
-                
-                let category = typeof row.category === 'string' ? row.category.trim() : (row.Category ? String(row.Category).trim() : (row[4] ? String(row[4]).trim() : ''));
+            const cards: Word[] = (rows.map((row: any): Word | null => {
+                if (!Array.isArray(row) || row.length < 2) return null;
+                const word = typeof row[0] === 'string' ? row[0].trim() : (row[0] ? String(row[0]).trim() : '');
+                if (!word) return null;
+
+                let category = typeof row[4] === 'string' ? row[4].trim() : (row[4] ? String(row[4]).trim() : '');
                 if (category) {
                     const words = category.split(' ');
                     category = words.map((w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
@@ -199,15 +201,17 @@ export const BulkGeneratorModal: React.FC<BulkGeneratorModalProps> = ({ isOpen, 
                 return {
                     id: Date.now() + Math.random(),
                     word: word,
-                    definition: typeof row.definition === 'string' ? row.definition.trim() : (row.Definition ? String(row.Definition).trim() : (row[1] ? String(row[1]).trim() : '')),
-                    example: typeof row.example === 'string' ? row.example.trim() : (row.Example ? String(row.Example).trim() : (row[2] ? String(row[2]).trim() : '')),
-                    phonetic: typeof row.phonetic === 'string' ? row.phonetic.trim() : (row.Phonetic ? String(row.Phonetic).trim() : (row[3] ? String(row[3]).trim() : '')),
-                    category: category
+                    definition: typeof row[1] === 'string' ? row[1].trim() : (row[1] ? String(row[1]).trim() : ''),
+                    example: typeof row[2] === 'string' ? row[2].trim() : (row[2] ? String(row[2]).trim() : ''),
+                    part_of_speech: typeof row[3] === 'string' ? row[3].trim() : (row[3] ? String(row[3]).trim() : ''),
+                    category: category,
+                    phonetic: typeof row[5] === 'string' ? row[5].trim() : (row[5] ? String(row[5]).trim() : ''),
+                    notes: typeof row[6] === 'string' ? row[6].trim() : (row[6] ? String(row[6]).trim() : '')
                 };
-            }).filter(c => c.word && c.definition);
+            }) as (Word | null)[]).filter((c): c is Word => c !== null && !!c.word && !!c.definition);
 
             if (cards.length === 0) {
-                setError("No valid cards found. Ensure headers are Word, Definition, Example.");
+                setError("No valid cards found. Ensure CSV format is Word, Definition, Example, Part of Speech, Category.");
             } else {
                 setGeneratedCards(cards);
             }
@@ -216,10 +220,16 @@ export const BulkGeneratorModal: React.FC<BulkGeneratorModalProps> = ({ isOpen, 
 
         if (file.name.endsWith('.csv')) {
             Papa.parse(file, {
-                header: true,
+                header: false,
                 skipEmptyLines: true,
-                transformHeader: (header) => header.trim().toLowerCase(),
-                complete: (results) => processRows(results.data),
+                complete: (results) => {
+                    const hasHeader = results.data.length > 0 &&
+                        Array.isArray(results.data[0]) &&
+                        typeof results.data[0][0] === 'string' &&
+                        ['word', 'term'].includes(results.data[0][0].trim().toLowerCase());
+                    const dataRows = hasHeader ? results.data.slice(1) : results.data;
+                    processRows(dataRows);
+                },
                 error: (err) => {
                     setError("CSV Parse Error: " + err.message);
                     setIsLoading(false);
@@ -232,8 +242,13 @@ export const BulkGeneratorModal: React.FC<BulkGeneratorModalProps> = ({ isOpen, 
                 const wb = XLSX.read(bstr, { type: 'binary' });
                 const wsname = wb.SheetNames[0];
                 const ws = wb.Sheets[wsname];
-                const data = XLSX.utils.sheet_to_json(ws);
-                processRows(data);
+                const data = XLSX.utils.sheet_to_json(ws, { header: 1 }) as any[][];
+                const hasHeader = data.length > 0 &&
+                    Array.isArray(data[0]) &&
+                    typeof data[0][0] === 'string' &&
+                    ['word', 'term'].includes(data[0][0].trim().toLowerCase());
+                const dataRows = hasHeader ? data.slice(1) : data;
+                processRows(dataRows);
             };
             reader.readAsBinaryString(file);
         } else {
@@ -253,7 +268,7 @@ export const BulkGeneratorModal: React.FC<BulkGeneratorModalProps> = ({ isOpen, 
     };
 
     const handleDownloadTemplate = () => {
-        const csvContent = "Word,Definition,Example\nApple,A round fruit with red or green skin,I ate an apple for lunch.\nRun,To move at a speed faster than a walk,I run every morning.";
+        const csvContent = "Word,Definition,Example,Part Of Speech,Category,Phonetic,Notes\nApple,A round fruit with red or green skin,I ate an apple for lunch.,Noun,Fruit,,Common fruit\nRun,To move at a speed faster than a walk,I run every morning.,Verb,Action,,Exercise activity";
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
         if (link.download !== undefined) {

@@ -299,10 +299,12 @@ function App() {
     useEffect(() => {
         if (user) {
             document.body.setAttribute('data-user-role', user.role || '');
+            localStorage.setItem('currentUser', JSON.stringify(user));
         } else {
             document.body.removeAttribute('data-user-role');
+            localStorage.removeItem('currentUser');
         }
-    }, [user?.role]);
+    }, [user]);
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
@@ -1320,7 +1322,7 @@ function App() {
                 />
 
                 {/* Main Scrollable Content */}
-                <main className={`flex-grow flex flex-col ${!user ? '' : 'py-8 px-4'}`}>
+                <main className={`flex-grow flex flex-col ${!user || mode === 'study' ? '' : 'py-8 px-4'}`}>
                     {!user ? (
                         <div className="flex-grow w-full flex flex-col items-center justify-center">
                             <LoginScreen
@@ -1329,7 +1331,7 @@ function App() {
                             />
                         </div>
                     ) : (
-                        <div className="max-w-5xl w-full mx-auto flex-grow flex flex-col">
+                        <div className={`${mode === 'study' ? 'max-w-6xl px-6' : 'max-w-5xl'} w-full mx-auto flex-grow flex flex-col`}>
                             {mode === 'welcome' && (
                                 <WelcomeScreen
                                     user={user}

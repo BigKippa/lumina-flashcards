@@ -318,8 +318,8 @@ export const AddContentModal: React.FC<AddContentModalProps> = ({
     ];
 
     const handleDownloadCSVTemplate = () => {
-        const headers = "Word,Definition,Example,Phonetic,Category,Notes\n";
-        const exampleRow = "Ephemeral,Lasting for a very short time.,Fashions are ephemeral.,/ɪˈfem.ər.əl/,Adjective,Common in literature.\n";
+        const headers = "Word,Definition,Example,Part Of Speech,Category,Phonetic,Notes\n";
+        const exampleRow = "Ephemeral,Lasting for a very short time.,Fashions are ephemeral.,Adjective,Vocabulary,/ɪˈfem.ər.əl/,Common in literature.\n";
         const bodyContent = headers + exampleRow;
         const blob = new Blob([bodyContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
@@ -364,17 +364,25 @@ export const AddContentModal: React.FC<AddContentModalProps> = ({
         }
 
         Papa.parse(file, {
-            header: true,
+            header: false,
             skipEmptyLines: true,
-            transformHeader: (header) => header.trim().toLowerCase(),
             complete: (results) => {
                 let cardsAdded = 0;
-                results.data.forEach((row: any) => {
-                    const word = typeof row.word === 'string' ? row.word.trim() : '';
+                // Detect header row and skip if present
+                const hasHeader = results.data.length > 0 &&
+                    Array.isArray(results.data[0]) &&
+                    typeof results.data[0][0] === 'string' &&
+                    ['word', 'term'].includes(results.data[0][0].trim().toLowerCase());
+                
+                const dataRows = hasHeader ? results.data.slice(1) : results.data;
+
+                dataRows.forEach((row: any) => {
+                    if (!Array.isArray(row) || row.length < 2) return;
+                    const word = typeof row[0] === 'string' ? row[0].trim() : '';
                     if (!word) return;
 
                     // Normalize category casing (e.g., "verb" -> "Verb", "phrasal verb" -> "Phrasal Verb")
-                    let category = typeof row.category === 'string' ? row.category.trim() : '';
+                    let category = typeof row[4] === 'string' ? row[4].trim() : '';
                     if (category) {
                         const words = category.split(' ');
                         category = words.map((w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
@@ -383,11 +391,12 @@ export const AddContentModal: React.FC<AddContentModalProps> = ({
                     const card: Word = {
                         id: Date.now() + Math.random(),
                         word: word,
-                        definition: typeof row.definition === 'string' ? row.definition.trim() : '',
-                        example: typeof row.example === 'string' ? row.example.trim() : '',
-                        phonetic: typeof row.phonetic === 'string' ? row.phonetic.trim() : '',
+                        definition: typeof row[1] === 'string' ? row[1].trim() : '',
+                        example: typeof row[2] === 'string' ? row[2].trim() : '',
+                        part_of_speech: typeof row[3] === 'string' ? row[3].trim() : '',
                         category: category,
-                        notes: typeof row.notes === 'string' ? row.notes.trim() : '',
+                        phonetic: typeof row[5] === 'string' ? row[5].trim() : '',
+                        notes: typeof row[6] === 'string' ? row[6].trim() : '',
                         status: 'private',
                         authorId: 'tutor'
                     };

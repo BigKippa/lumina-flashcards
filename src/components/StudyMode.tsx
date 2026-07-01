@@ -31,6 +31,69 @@ export enum ExtendedLearningMode {
     THE_CHAOS = 6
 }
 
+export class DistractorEngine {
+    static getDistractors(targetCard: Word, pool: Word[], _mode?: ExtendedLearningMode, count: number = 3): Word[] {
+        const otherCards = pool.filter(c => c.id !== targetCard.id);
+
+        // Filter and prioritize based on double-key matches: card.part_of_speech AND card.category identical to target card.
+        const doubleKeyMatches = otherCards.filter(c => {
+            const partOfSpeechMatches = c.part_of_speech && targetCard.part_of_speech &&
+                c.part_of_speech.trim().toLowerCase() === targetCard.part_of_speech.trim().toLowerCase();
+            const categoryMatches = c.category && targetCard.category &&
+                c.category.trim().toLowerCase() === targetCard.category.trim().toLowerCase();
+            return partOfSpeechMatches && categoryMatches;
+        });
+
+        let selected = [...doubleKeyMatches].sort(() => Math.random() - 0.5);
+
+        if (selected.length < count) {
+            const selectedIds = new Set(selected.map(s => s.id));
+            const remaining = otherCards.filter(c => !selectedIds.has(c.id));
+
+            // Specialized phrasal verb check for fallback (from original _getProximityDistractors)
+            let phrasalMatches: Word[] = [];
+            const subCategory = targetCard.category || '';
+            if (subCategory.toLowerCase().includes("phrasal")) {
+                const rootWord = targetCard.word.split(' ')[0].toLowerCase();
+                phrasalMatches = remaining.filter(c => 
+                    c.category && c.category.toLowerCase() === subCategory.toLowerCase() && 
+                    c.word.toLowerCase().startsWith(rootWord)
+                );
+            }
+
+            // Single key matches
+            const singleKeyMatches = remaining.filter(c => {
+                const matchPOS = c.part_of_speech && targetCard.part_of_speech &&
+                    c.part_of_speech.trim().toLowerCase() === targetCard.part_of_speech.trim().toLowerCase();
+                const matchCat = c.category && targetCard.category &&
+                    c.category.trim().toLowerCase() === targetCard.category.trim().toLowerCase();
+                return matchPOS || matchCat;
+            }).sort(() => Math.random() - 0.5);
+
+            // Combine fallbacks in priority order
+            const fallbackPool = [
+                ...phrasalMatches,
+                ...singleKeyMatches,
+                ...remaining.filter(c => !phrasalMatches.some(p => p.id === c.id))
+            ];
+
+            const uniqueFallback: Word[] = [];
+            const fallbackSet = new Set(selected.map(s => s.id));
+            for (const item of fallbackPool) {
+                if (!fallbackSet.has(item.id)) {
+                    fallbackSet.add(item.id);
+                    uniqueFallback.push(item);
+                }
+            }
+
+            selected = [...selected, ...uniqueFallback];
+        }
+
+        return selected.slice(0, count);
+    }
+}
+
+
 export class AudioModeLayoutController {
     card: Word;
     pool: Word[];
@@ -58,23 +121,8 @@ export class AudioModeLayoutController {
     }
 
     _getProximityDistractors(): string[] {
-        const subCategory = this.card.category || '';
-        const matches = this.pool.filter(c => c.category === subCategory && c.id !== this.card.id);
-        
-        if (subCategory.toLowerCase().includes("phrasal")) {
-            const rootWord = this.card.word.split(' ')[0].toLowerCase();
-            const rootMatches = matches.filter(c => c.word.toLowerCase().startsWith(rootWord));
-            if (rootMatches.length >= 3) {
-                return rootMatches.slice(0, 3).map(r => r.definition);
-            }
-        }
-        
-        if (matches.length >= 3) {
-            return matches.slice(0, 3).map(m => m.definition);
-        }
-        
-        const otherMatches = this.pool.filter(c => c.id !== this.card.id);
-        return otherMatches.slice(0, 3).map(m => m.definition);
+        const distractors = DistractorEngine.getDistractors(this.card, this.pool, 3);
+        return distractors.map(m => m.definition);
     }
 }
 
@@ -381,10 +429,9 @@ const StudyMode: React.FC<StudyModeProps> = ({ cards, onExit, settings, onSaveSe
     };
 
     const generateOptions = (correctWord: Word, allCards: Word[], style: 'def-to-word' | 'word-to-def') => {
-        const otherCards = allCards.filter(w => w.id !== correctWord.id);
-        const shuffledOthers = otherCards.sort(() => Math.random() - 0.5).slice(0, 3);
+        const distractors = DistractorEngine.getDistractors(correctWord, allCards, 3);
 
-        const options = [...shuffledOthers.map(w => style === 'word-to-def' ? w.definition : w.word),
+        const options = [...distractors.map(w => style === 'word-to-def' ? w.definition : w.word),
         style === 'word-to-def' ? correctWord.definition : correctWord.word];
 
         return options.sort(() => Math.random() - 0.5);
@@ -802,78 +849,96 @@ const StudyMode: React.FC<StudyModeProps> = ({ cards, onExit, settings, onSaveSe
                         {t('studyMode.cardsInDeck', { count: cards.length })}
                     </p>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 w-full max-w-4xl mb-12">
+                    <div data-dev-id="student-tiles-grid" className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 w-full max-w-4xl mb-12 animate-in slide-in-from-bottom-3 fade-in duration-500 delay-100">
                         {/* Tile 1: Discovery */}
-                        <button
+                        <div
                             onClick={() => startExtendedSession(ExtendedLearningMode.DISCOVERY)}
-                            className="flex flex-col items-center p-6 rounded-2xl bg-card border border-border hover:border-primary/50 hover:bg-secondary/30 transition-all cursor-pointer group text-center"
+                            className="bg-color2 hover:bg-color2/30 border border-color2/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color2-foreground text-left items-start w-full"
                         >
-                            <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                            <div className="absolute -right-6 -top-6 w-24 h-24 bg-color2-foreground rounded-full blur-2xl group-hover:bg-color2 transition-colors opacity-10 group-hover:opacity-20"></div>
+                            <div className="w-12 h-12 rounded-xl bg-color2-foreground/10 text-color2-foreground flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color2-foreground/20 shrink-0">
                                 <MonitorPlay className="w-6 h-6" />
                             </div>
-                            <h3 className="font-semibold mb-1">Discovery Mode</h3>
-                            <p className="text-xs text-muted-foreground">Self-paced flashcard tap translation (Native to Target)</p>
-                        </button>
+                            <div className="relative z-10 font-medium flex-1">
+                                <h2 className="text-xl font-bold mb-1">Discovery Mode</h2>
+                                <p className="text-sm opacity-80 line-clamp-2">Self-paced flashcard tap translation (Native to Target)</p>
+                            </div>
+                        </div>
 
                         {/* Tile 2: Precision */}
-                        <button
+                        <div
                             onClick={() => startExtendedSession(ExtendedLearningMode.PRECISION)}
-                            className="flex flex-col items-center p-6 rounded-2xl bg-card border border-border hover:border-primary/50 hover:bg-secondary/30 transition-all cursor-pointer group text-center"
+                            className="bg-color4 hover:bg-color4/30 border border-color4/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color4-foreground text-left items-start w-full"
                         >
-                            <div className="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                            <div className="absolute -right-6 -top-6 w-24 h-24 bg-color4-foreground rounded-full blur-2xl group-hover:bg-color4 transition-colors opacity-10 group-hover:opacity-20"></div>
+                            <div className="w-12 h-12 rounded-xl bg-color4-foreground/10 text-color4-foreground flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color4-foreground/20 shrink-0">
                                 <Type className="w-6 h-6" />
                             </div>
-                            <h3 className="font-semibold mb-1">Precision Mode</h3>
-                            <p className="text-xs text-muted-foreground">Strict zero-error typing reset pool (Target to Native)</p>
-                        </button>
+                            <div className="relative z-10 font-medium flex-1">
+                                <h2 className="text-xl font-bold mb-1">Precision Mode</h2>
+                                <p className="text-sm opacity-80 line-clamp-2">Strict zero-error typing reset pool (Target to Native)</p>
+                            </div>
+                        </div>
 
                         {/* Tile 3: The Sprint */}
-                        <button
+                        <div
                             onClick={() => startExtendedSession(ExtendedLearningMode.THE_SPRINT)}
-                            className="flex flex-col items-center p-6 rounded-2xl bg-card border border-border hover:border-primary/50 hover:bg-secondary/30 transition-all cursor-pointer group text-center"
+                            className="bg-color5 hover:bg-color5/30 border border-color5/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color5-foreground text-left items-start w-full"
                         >
-                            <div className="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                            <div className="absolute -right-6 -top-6 w-24 h-24 bg-color5-foreground rounded-full blur-2xl group-hover:bg-color5 transition-colors opacity-10 group-hover:opacity-20"></div>
+                            <div className="w-12 h-12 rounded-xl bg-color5-foreground/10 text-color5-foreground flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color5-foreground/20 shrink-0">
                                 <Timer className="w-6 h-6" />
                             </div>
-                            <h3 className="font-semibold mb-1">The Sprint</h3>
-                            <p className="text-xs text-muted-foreground">3.0s timed multiple choice selection (Target to Native)</p>
-                        </button>
+                            <div className="relative z-10 font-medium flex-1">
+                                <h2 className="text-xl font-bold mb-1">The Sprint</h2>
+                                <p className="text-sm opacity-80 line-clamp-2">3.0s timed multiple choice selection (Target to Native)</p>
+                            </div>
+                        </div>
 
                         {/* Tile 4: The Reflex */}
-                        <button
+                        <div
                             onClick={() => startExtendedSession(ExtendedLearningMode.THE_REFLEX)}
-                            className="flex flex-col items-center p-6 rounded-2xl bg-card border border-border hover:border-primary/50 hover:bg-secondary/30 transition-all cursor-pointer group text-center"
+                            className="bg-color3 hover:bg-color3/30 border border-color3/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color3-foreground text-left items-start w-full"
                         >
-                            <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                            <div className="absolute -right-6 -top-6 w-24 h-24 bg-color3-foreground rounded-full blur-2xl group-hover:bg-color3 transition-colors opacity-10 group-hover:opacity-20"></div>
+                            <div className="w-12 h-12 rounded-xl bg-color3-foreground/10 text-color3-foreground flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color3-foreground/20 shrink-0">
                                 <Mic className="w-6 h-6" />
                             </div>
-                            <h3 className="font-semibold mb-1">The Reflex</h3>
-                            <p className="text-xs text-muted-foreground">4.0s reversal audio production or self-report (Native to Target)</p>
-                        </button>
+                            <div className="relative z-10 font-medium flex-1">
+                                <h2 className="text-xl font-bold mb-1">The Reflex</h2>
+                                <p className="text-sm opacity-80 line-clamp-2">4.0s reversal audio production or self-report (Native to Target)</p>
+                            </div>
+                        </div>
 
                         {/* Tile 5: Echo Race */}
-                        <button
+                        <div
                             onClick={() => startExtendedSession(ExtendedLearningMode.ECHO_RACE)}
-                            className="flex flex-col items-center p-6 rounded-2xl bg-card border border-border hover:border-primary/50 hover:bg-secondary/30 transition-all cursor-pointer group text-center"
+                            className="bg-color2 hover:bg-color2/30 border border-color2/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color2-foreground text-left items-start w-full"
                         >
-                            <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                            <div className="absolute -right-6 -top-6 w-24 h-24 bg-color2-foreground rounded-full blur-2xl group-hover:bg-color2 transition-colors opacity-10 group-hover:opacity-20"></div>
+                            <div className="w-12 h-12 rounded-xl bg-color2-foreground/10 text-color2-foreground flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color2-foreground/20 shrink-0">
                                 <Flame className="w-6 h-6" />
                             </div>
-                            <h3 className="font-semibold mb-1">Echo Race</h3>
-                            <p className="text-xs text-muted-foreground">2.0s auditory match with hidden text prompt (Audio to Native)</p>
-                        </button>
+                            <div className="relative z-10 font-medium flex-1">
+                                <h2 className="text-xl font-bold mb-1">Echo Race</h2>
+                                <p className="text-sm opacity-80 line-clamp-2">2.0s auditory match with hidden text prompt (Audio to Native)</p>
+                            </div>
+                        </div>
 
                         {/* Tile 6: The Chaos */}
-                        <button
+                        <div
                             onClick={() => startExtendedSession(ExtendedLearningMode.THE_CHAOS)}
-                            className="flex flex-col items-center p-6 rounded-2xl bg-card border border-border hover:border-primary/50 hover:bg-secondary/30 transition-all cursor-pointer group text-center"
+                            className="bg-color4 hover:bg-color4/30 border border-color4/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color4-foreground text-left items-start w-full"
                         >
-                            <div className="w-12 h-12 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                            <div className="absolute -right-6 -top-6 w-24 h-24 bg-color4-foreground rounded-full blur-2xl group-hover:bg-color4 transition-colors opacity-10 group-hover:opacity-20"></div>
+                            <div className="w-12 h-12 rounded-xl bg-color4-foreground/10 text-color4-foreground flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color4-foreground/20 shrink-0">
                                 <Shuffle className="w-6 h-6" />
                             </div>
-                            <h3 className="font-semibold mb-1">The Chaos</h3>
-                            <p className="text-xs text-muted-foreground">Interleaved variable context jitter matrix (Random mixture of all modes)</p>
-                        </button>
+                            <div className="relative z-10 font-medium flex-1">
+                                <h2 className="text-xl font-bold mb-1">The Chaos</h2>
+                                <p className="text-sm opacity-80 line-clamp-2">Interleaved variable context jitter matrix (Random mixture of all modes)</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -989,7 +1054,7 @@ const StudyMode: React.FC<StudyModeProps> = ({ cards, onExit, settings, onSaveSe
     // --- Render ---
 
     return (
-        <div className="flex flex-col h-screen bg-background relative">
+        <div className="flex flex-col h-[calc(100vh-5.5rem)] bg-background relative py-6 px-4">
             {/* Pause Overlay */}
             {isPaused && (
                 <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 animate-in fade-in duration-200">
@@ -1038,11 +1103,11 @@ const StudyMode: React.FC<StudyModeProps> = ({ cards, onExit, settings, onSaveSe
             <div className="flex flex-col md:flex-row items-start justify-center w-full h-full gap-4 relative">
 
                 {/* Left Column: Flashcard & Controls */}
-                <div className="flex flex-col items-center w-full max-w-2xl flex-1">
+                <div className="flex flex-col items-center w-full max-w-2xl flex-1 justify-between h-full">
                     {/* Header removed */}
 
                     {/* Main Card Area */}
-                    <div className="w-full flex-grow flex flex-col items-center justify-center mt-1 min-h-[200px] mb-1 relative group-card">
+                    <div className="w-full flex-grow flex flex-col items-center justify-center my-6 relative group-card">
 
 
                         {/* Auto-Advance Timer Control (Floating Left - Lower) */}
@@ -1217,13 +1282,13 @@ const StudyMode: React.FC<StudyModeProps> = ({ cards, onExit, settings, onSaveSe
                     </div>
 
                     {/* Bottom Controls / Input Area */}
-                    <div className="relative flex flex-col items-center justify-center w-full min-h-[0px] mb-2 gap-4">
+                    <div className="relative flex flex-col items-center justify-center w-full min-h-[0px] mt-2 mb-4 gap-6">
                         <div className="flex-1 flex justify-center w-full">
                             {renderInputArea()}
                         </div>
 
                         {/* Session Controls (Large Buttons) */}
-                        <div className="grid grid-cols-4 gap-4 w-full max-w-lg px-4">
+                        <div className="grid grid-cols-4 gap-6 w-full max-w-lg px-4">
                             <button
                                 onClick={handleRestartSession}
                                 className="flex flex-col items-center justify-center gap-1 py-3 px-4 rounded-xl bg-secondary/50 hover:bg-secondary text-secondary-foreground transition-all border border-border/50 hover:border-primary/20"

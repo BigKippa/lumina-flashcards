@@ -61,29 +61,36 @@ const DeckView: React.FC<DeckViewProps> = ({ cards: _cards, title, onStartStudy,
             </div>
 
             {/* Deck Card */}
-            {/* Action Buttons */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 animate-in slide-in-from-bottom-3 fade-in duration-500 delay-100">
-                <button
+            <div data-dev-id="student-tiles-grid" className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full max-w-4xl mb-8 animate-in slide-in-from-bottom-3 fade-in duration-500 delay-100">
+                {/* Tile 1: Study Mode */}
+                <div
                     onClick={onStartStudy}
-                    className="flex flex-col items-center justify-start text-center p-6 border rounded-xl shadow-sm hover:shadow-md transition-all group relative overflow-hidden bg-t-green hover:bg-t-green/30 border-t-green/20 text-color1 lumina-glow hover-glow-t-green"
+                    className="bg-color2 hover:bg-color2/30 border border-color2/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color2-foreground text-left items-start w-full"
                 >
-                    <div className="w-12 h-12 rounded-xl bg-color1 text-t-green flex items-center justify-center mb-3 group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
+                    <div className="absolute -right-6 -top-6 w-24 h-24 bg-color2-foreground rounded-full blur-2xl group-hover:bg-color2 transition-colors opacity-10 group-hover:opacity-20"></div>
+                    <div className="w-12 h-12 rounded-xl bg-color2-foreground/10 text-color2-foreground flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color2-foreground/20 shrink-0">
                         <BookOpen className="w-6 h-6" />
                     </div>
-                    <span className="font-semibold text-lg relative z-10">Study Mode</span>
-                    <span className="text-sm text-color1/80 relative z-10">Standard flashcards</span>
-                </button>
+                    <div className="relative z-10 font-medium flex-1">
+                        <h2 className="text-xl font-bold mb-1">Study Mode</h2>
+                        <p className="text-sm opacity-80 line-clamp-2">Standard flashcards</p>
+                    </div>
+                </div>
 
-                <button
+                {/* Tile 2: Quiz Challenge */}
+                <div
                     onClick={() => setIsQuizOptionsOpen(true)}
-                    className="flex flex-col items-center justify-start text-center p-6 border rounded-xl shadow-sm hover:shadow-md transition-all group relative overflow-hidden bg-t-blue hover:bg-t-blue/30 border-t-blue/20 text-color1 lumina-glow hover-glow-t-blue"
+                    className="bg-color4 hover:bg-color4/30 border border-color4/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color4-foreground text-left items-start w-full"
                 >
-                    <div className="w-12 h-12 rounded-xl bg-color1 text-t-blue flex items-center justify-center mb-3 group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
+                    <div className="absolute -right-6 -top-6 w-24 h-24 bg-color4-foreground rounded-full blur-2xl group-hover:bg-color4 transition-colors opacity-10 group-hover:opacity-20"></div>
+                    <div className="w-12 h-12 rounded-xl bg-color4-foreground/10 text-color4-foreground flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color4-foreground/20 shrink-0">
                         <BrainCircuit className="w-6 h-6" />
                     </div>
-                    <span className="font-semibold text-lg relative z-10">Quiz Challenge</span>
-                    <span className="text-sm text-color1/80 relative z-10">Multiple choice questions</span>
-                </button>
+                    <div className="relative z-10 font-medium flex-1">
+                        <h2 className="text-xl font-bold mb-1">Quiz Challenge</h2>
+                        <p className="text-sm opacity-80 line-clamp-2">Multiple choice questions</p>
+                    </div>
+                </div>
 
                 {/* Quiz Style Modal */}
                 {isQuizOptionsOpen && (
@@ -142,16 +149,20 @@ const DeckView: React.FC<DeckViewProps> = ({ cards: _cards, title, onStartStudy,
                     </div>
                 )}
 
-                <button
+                {/* Tile 3: Timed Mode */}
+                <div
                     onClick={onStartTimedMode}
-                    className="flex flex-col items-center justify-start text-center p-6 border rounded-xl shadow-sm hover:shadow-md transition-all group relative overflow-hidden bg-t-sand hover:bg-t-sand/30 border-t-sand/20 text-color1 lumina-glow hover-glow-t-sand"
+                    className="bg-color5 hover:bg-color5/30 border border-color5/20 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg group flex flex-col gap-4 shadow-sm relative overflow-hidden h-full text-color5-foreground text-left items-start w-full"
                 >
-                    <div className="w-12 h-12 rounded-xl bg-color1 text-t-sand flex items-center justify-center mb-3 group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color1/20 shrink-0">
+                    <div className="absolute -right-6 -top-6 w-24 h-24 bg-color5-foreground rounded-full blur-2xl group-hover:bg-color5 transition-colors opacity-10 group-hover:opacity-20"></div>
+                    <div className="w-12 h-12 rounded-xl bg-color5-foreground/10 text-color5-foreground flex items-center justify-center group-hover:scale-110 transition-transform relative z-10 shadow-sm border border-color5-foreground/20 shrink-0">
                         <Clock className="w-6 h-6" />
                     </div>
-                    <span className="font-semibold text-lg relative z-10">Timed Mode</span>
-                    <span className="text-sm text-color1/80 relative z-10">Speed & Accuracy</span>
-                </button>
+                    <div className="relative z-10 font-medium flex-1">
+                        <h2 className="text-xl font-bold mb-1">Timed Mode</h2>
+                        <p className="text-sm opacity-80 line-clamp-2">Speed & Accuracy</p>
+                    </div>
+                </div>
             </div>
 
             <footer className="mt-16 text-muted-foreground/40 text-sm">
