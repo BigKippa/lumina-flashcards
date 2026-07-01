@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Word } from '../data/vocabulary';
 import Flashcard from './Flashcard';
-import { ChevronRight, ChevronLeft, ChevronUp, ChevronDown, Check, Mic, Shuffle, RotateCcw, Flame, Trophy, Target, Type, List, MonitorPlay, Heart, Timer, Pause, XCircle, Play, Flag, Bookmark } from 'lucide-react';
+import { ChevronRight, ChevronLeft, ChevronUp, ChevronDown, Check, Mic, Shuffle, RotateCcw, Flame, Trophy, Target, Type, MonitorPlay, Heart, Timer, Pause, XCircle, Play, Flag, Bookmark } from 'lucide-react';
 import { AppSettings, SessionActivity } from '../types';
 
 interface StudyModeProps {
@@ -22,18 +22,78 @@ interface StudyModeProps {
     onMarkForReview: (cardId: string) => void;
 }
 
+export enum ExtendedLearningMode {
+    DISCOVERY = 1,
+    PRECISION = 2,
+    THE_SPRINT = 3,
+    THE_REFLEX = 4,
+    ECHO_RACE = 5,
+    THE_CHAOS = 6
+}
+
+export class AudioModeLayoutController {
+    card: Word;
+    pool: Word[];
+    timerLimit: number;
+
+    constructor(currentCard: Word, assetPool: Word[]) {
+        this.card = currentCard;
+        this.pool = assetPool;
+        this.timerLimit = 2.0; // Strict target limit for Stage 5 Echo Race
+    }
+
+    executeAudioModeState() {
+        const distractors = this._getProximityDistractors();
+        const sortedChoices = [...distractors, this.card.definition].sort(() => Math.random() - 0.5);
+        
+        return {
+            display_prompt: "[🔊 AUDIO INCOMING]",
+            blur_text_layer_active: true,
+            trigger_audio_payload_url: `/assets/audio/cards/${this.card.id}.mp3`,
+            choices_labels: sortedChoices,
+            input_mode_architecture: "MULTIPLE_CHOICE",
+            active_countdown_limit: this.timerLimit,
+            error_lifecycle_action: "SKIP_CARD_LOG"
+        };
+    }
+
+    _getProximityDistractors(): string[] {
+        const subCategory = this.card.category || '';
+        const matches = this.pool.filter(c => c.category === subCategory && c.id !== this.card.id);
+        
+        if (subCategory.toLowerCase().includes("phrasal")) {
+            const rootWord = this.card.word.split(' ')[0].toLowerCase();
+            const rootMatches = matches.filter(c => c.word.toLowerCase().startsWith(rootWord));
+            if (rootMatches.length >= 3) {
+                return rootMatches.slice(0, 3).map(r => r.definition);
+            }
+        }
+        
+        if (matches.length >= 3) {
+            return matches.slice(0, 3).map(m => m.definition);
+        }
+        
+        const otherMatches = this.pool.filter(c => c.id !== this.card.id);
+        return otherMatches.slice(0, 3).map(m => m.definition);
+    }
+}
+
 type StudyPhase = 'setup' | 'manual_setup' | 'choice_setup' | 'learning' | 'finished';
 type InputMode = 'manual_self' | 'manual_type' | 'manual_choice' | 'voice';
 
-// const ENCOURAGEMENTS = ["Great Job!", "Keep it Up!", "You're doing great!", "Fantastic!", "Spot on!", "Excellent!", "Awesome!"];
-
-const StudyMode: React.FC<StudyModeProps> = ({ cards, onExit, settings, onSaveSettings, onMarkKnown, isFavorite, onToggleFavorite, onReport, deckId, learningHistory, onSessionUpdate, onInputModeChange, onMarkForReview }) => {
+const StudyMode: React.FC<StudyModeProps> = ({ cards, onExit, settings, onSaveSettings, onMarkKnown, isFavorite, onToggleFavorite, onReport, deckId, learningHistory, onSessionUpdate, onMarkForReview }) => {
     const { t } = useTranslation();
 
     // Session State
     const [phase, setPhase] = useState<StudyPhase>('setup');
     const [inputMode, setInputMode] = useState<InputMode>('manual_self');
     const sessionStartTime = useRef<number>(Date.now());
+
+    // Extended Learning Modes State
+    const [learningMode, setLearningMode] = useState<ExtendedLearningMode>(ExtendedLearningMode.DISCOVERY);
+    const [currentChaosMode, setCurrentChaosMode] = useState<ExtendedLearningMode | null>(null);
+    const [timeLeft, setTimeLeft] = useState<number | null>(null);
+    const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
     // Stop watch / Pause State
     const [isPaused, setIsPaused] = useState(false);
@@ -58,12 +118,10 @@ const StudyMode: React.FC<StudyModeProps> = ({ cards, onExit, settings, onSaveSe
     const [typedAnswer, setTypedAnswer] = useState('');
     const [multipleChoiceOptions, setMultipleChoiceOptions] = useState<string[]>([]);
     const [selectedOption, setSelectedOption] = useState<string | null>(null);
-    const [quizStyle, setQuizStyle] = useState<'def-to-word' | 'word-to-def' | 'mix'>('word-to-def');
     const [currentQuestionType, setCurrentQuestionType] = useState<'def-to-word' | 'word-to-def'>('word-to-def');
 
     // Voice State
     const [isListening, setIsListening] = useState(false);
-    // const [transcript, setTranscript] = useState(''); // Unused
     const [matchStatus, setMatchStatus] = useState<'none' | 'match' | 'nomatch'>('none');
 
     // Retry Logic State
@@ -80,6 +138,154 @@ const StudyMode: React.FC<StudyModeProps> = ({ cards, onExit, settings, onSaveSe
     const recognitionRef = useRef<any>(null);
     const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+
+    // --- Extended Modes Handlers ---
+
+    const resetCardState = React.useCallback(() => {
+        setIsFlipped(false);
+        setMatchStatus('none');
+        setStatusMessage('');
+        setSubMessage('');
+        setAttempts(0);
+        setTypedAnswer('');
+        setSelectedOption(null);
+    }, []);
+
+    const getCurrentActiveMode = React.useCallback((): ExtendedLearningMode => {
+        if (learningMode === ExtendedLearningMode.THE_CHAOS) {
+            return currentChaosMode || ExtendedLearningMode.DISCOVERY;
+        }
+        return learningMode;
+    }, [learningMode, currentChaosMode]);
+
+    const selectRandomChaosMode = React.useCallback(() => {
+        const modes = [
+            ExtendedLearningMode.DISCOVERY,
+            ExtendedLearningMode.PRECISION,
+            ExtendedLearningMode.THE_SPRINT,
+            ExtendedLearningMode.THE_REFLEX,
+            ExtendedLearningMode.ECHO_RACE
+        ];
+        const rand = modes[Math.floor(Math.random() * modes.length)];
+        setCurrentChaosMode(rand);
+    }, []);
+
+    const playAudioForEchoRace = React.useCallback((card: Word) => {
+        window.speechSynthesis.cancel();
+        const audioUrl = `/assets/audio/cards/${card.id}.mp3`;
+        const audio = new Audio(audioUrl);
+        
+        audio.play().catch(() => {
+            const utterance = new SpeechSynthesisUtterance(card.word);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.8;
+            window.speechSynthesis.speak(utterance);
+        });
+    }, []);
+
+    const stopCountdown = React.useCallback(() => {
+        if (timerIntervalRef.current) {
+            clearInterval(timerIntervalRef.current);
+            timerIntervalRef.current = null;
+        }
+        setTimeLeft(null);
+    }, []);
+
+    const handleNext = React.useCallback((markAsKnown: boolean = false) => {
+        if (!currentCard) return;
+        resetCardState();
+        hasAttemptedRef.current = false;
+        stopCountdown();
+
+        // If Chaos mode, select random sub-mode for the next card
+        if (learningMode === ExtendedLearningMode.THE_CHAOS) {
+            selectRandomChaosMode();
+        }
+
+        setQueue(prevQueue => {
+            let nextQueue = [...prevQueue];
+            if (markAsKnown) {
+                nextQueue = nextQueue.filter(c => c.id !== currentCard.id);
+                setKnownCount(prev => prev + 1);
+                onMarkKnown(currentCard);
+            } else {
+                nextQueue = nextQueue.filter(c => c.id !== currentCard.id);
+                nextQueue.push(currentCard);
+            }
+
+            if (nextQueue.length === 0) {
+                setPhase('finished');
+                setCurrentCard(null);
+            } else {
+                setCurrentCard(nextQueue[0]);
+            }
+            return nextQueue;
+        });
+    }, [currentCard, onMarkKnown, learningMode, selectRandomChaosMode, stopCountdown, resetCardState]);
+
+    const handleTimeout = React.useCallback(() => {
+        const activeMode = getCurrentActiveMode();
+        setCurrentStreak(0);
+        
+        if (activeMode === ExtendedLearningMode.ECHO_RACE) {
+            setMatchStatus('nomatch');
+            setStatusMessage('Time Out!');
+            setIncorrectCards(prev => {
+                if (prev.find(c => c.id === currentCard?.id)) return prev;
+                return [...prev, currentCard!];
+            });
+            setTimeout(() => {
+                handleNext(false);
+            }, 1500);
+        } else {
+            setMatchStatus('nomatch');
+            setStatusMessage('Time Out!');
+            setIsFlipped(true);
+            setIncorrectCards(prev => {
+                if (prev.find(c => c.id === currentCard?.id)) return prev;
+                return [...prev, currentCard!];
+            });
+        }
+    }, [getCurrentActiveMode, currentCard, handleNext]);
+
+    const startCountdown = React.useCallback((limit: number) => {
+        if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+        setTimeLeft(limit);
+        
+        timerIntervalRef.current = setInterval(() => {
+            setTimeLeft(prev => {
+                if (prev === null) return null;
+                if (prev <= 0.1) {
+                    clearInterval(timerIntervalRef.current!);
+                    timerIntervalRef.current = null;
+                    handleTimeout();
+                    return 0;
+                }
+                return Math.round((prev - 0.1) * 10) / 10;
+            });
+        }, 100);
+    }, [handleTimeout]);
+
+    const startExtendedSession = (mode: ExtendedLearningMode) => {
+        setLearningMode(mode);
+        setQueue([...cards]);
+        if (mode === ExtendedLearningMode.THE_CHAOS) {
+            const modes = [
+                ExtendedLearningMode.DISCOVERY,
+                ExtendedLearningMode.PRECISION,
+                ExtendedLearningMode.THE_SPRINT,
+                ExtendedLearningMode.THE_REFLEX,
+                ExtendedLearningMode.ECHO_RACE
+            ];
+            const rand = modes[Math.floor(Math.random() * modes.length)];
+            setCurrentChaosMode(rand);
+        } else {
+            setCurrentChaosMode(null);
+        }
+        setCurrentCard(cards[0]);
+        setKnownCount(0);
+        setPhase('learning');
+    };
 
     // --- Session Control Logic ---
 
@@ -234,10 +440,19 @@ const StudyMode: React.FC<StudyModeProps> = ({ cards, onExit, settings, onSaveSe
 
     const checkAnswer = React.useCallback((input: string) => {
         if (!currentCard) return;
+        stopCountdown();
 
+        const activeMode = getCurrentActiveMode();
         let target = currentCard.word;
-        if (inputMode === 'manual_choice' && currentQuestionType === 'word-to-def') {
+
+        if (activeMode === ExtendedLearningMode.PRECISION ||
+            activeMode === ExtendedLearningMode.THE_SPRINT ||
+            activeMode === ExtendedLearningMode.ECHO_RACE) {
             target = currentCard.definition;
+        } else if (activeMode === ExtendedLearningMode.THE_REFLEX) {
+            target = currentCard.word;
+        } else if (activeMode === ExtendedLearningMode.DISCOVERY) {
+            target = currentCard.word;
         }
 
         const cleanInput = input.trim().toLowerCase().replace(/[.,/#!$%^&*;:{ }=\-_`~()]/g, "");
@@ -276,10 +491,32 @@ const StudyMode: React.FC<StudyModeProps> = ({ cards, onExit, settings, onSaveSe
             hasAttemptedRef.current = true;
 
             setMatchStatus('nomatch');
+            setCurrentStreak(0); // Reset streak on error
+
+            // Precision Mode: Zero-Error Reset Pool
+            if (activeMode === ExtendedLearningMode.PRECISION) {
+                setAttempts(0);
+                setTotalAttempts(prev => prev + 1);
+                setStatusMessage("Incorrect! Card returned to pool.");
+                setIsFlipped(true);
+                return;
+            }
+
+            // Echo Race Mode: error_lifecycle_action: "SKIP_CARD_LOG"
+            if (activeMode === ExtendedLearningMode.ECHO_RACE) {
+                setAttempts(0);
+                setTotalAttempts(prev => prev + 1);
+                setStatusMessage(t('studyMode.notQuite') || "Not quite!");
+                setIsFlipped(true);
+                setTimeout(() => {
+                    handleNext(false);
+                }, 1500);
+                return;
+            }
+
             const newAttempts = attempts + 1;
             setAttempts(newAttempts);
             setTotalAttempts(prev => prev + 1); // Count wrong attempts too
-            setCurrentStreak(0); // Reset streak on error
 
             if (newAttempts < 3) {
                 setStatusMessage(t('studyMode.tryAgain', { count: newAttempts }));
@@ -298,7 +535,7 @@ const StudyMode: React.FC<StudyModeProps> = ({ cards, onExit, settings, onSaveSe
                 setIsFlipped(true);
             }
         }
-    }, [currentCard, attempts, playAudioHint, startListening, inputMode, currentQuestionType, isReviewingMissed, t]);
+    }, [currentCard, attempts, playAudioHint, startListening, inputMode, currentQuestionType, isReviewingMissed, t, stopCountdown, getCurrentActiveMode, handleNext]);
 
     // --- Effects ---
 
@@ -328,80 +565,56 @@ const StudyMode: React.FC<StudyModeProps> = ({ cards, onExit, settings, onSaveSe
         };
     }, [checkAnswer]);
 
-    // Reset State helpers
-    const resetCardState = () => {
-        setIsFlipped(false);
-        setMatchStatus('none');
-        setStatusMessage('');
-        setSubMessage('');
-        setAttempts(0);
-        setTypedAnswer('');
-        setSelectedOption(null);
-    };
 
-    // Auto-start Logic per Card
+
+    // Auto-start Logic per Card and Mode
     useEffect(() => {
         if (phase === 'learning' && currentCard && !isFlipped) {
             resetCardState(); // Ensure clean slate visually
+            const activeMode = getCurrentActiveMode();
 
-            if (inputMode === 'voice') {
+            // Dynamically set inputMode and question type
+            if (activeMode === ExtendedLearningMode.DISCOVERY) {
+                setInputMode('manual_self');
+                setCurrentQuestionType('def-to-word');
+                stopCountdown();
+            } else if (activeMode === ExtendedLearningMode.PRECISION) {
+                setInputMode('manual_type');
+                setCurrentQuestionType('word-to-def');
+                stopCountdown();
+                setTimeout(() => inputRef.current?.focus(), 100);
+            } else if (activeMode === ExtendedLearningMode.THE_SPRINT) {
+                setInputMode('manual_choice');
+                setCurrentQuestionType('word-to-def');
+                setMultipleChoiceOptions(generateOptions(currentCard, cards, 'word-to-def'));
+                startCountdown(3.0);
+            } else if (activeMode === ExtendedLearningMode.THE_REFLEX) {
+                setInputMode('voice');
+                setCurrentQuestionType('def-to-word');
                 setStatusMessage(t('studyMode.listening'));
                 const timer = setTimeout(() => startListening(), 500);
-                return () => clearTimeout(timer);
-            } else if (inputMode === 'manual_type') {
-                setTimeout(() => inputRef.current?.focus(), 100);
-            } else if (inputMode === 'manual_choice') {
-                // Determine question type for THIS card if mix
-                let qType = quizStyle;
-                if (quizStyle === 'mix') {
-                    qType = Math.random() > 0.5 ? 'def-to-word' : 'word-to-def';
-                }
-                // Cast to specific type
-                const specificType = qType as 'def-to-word' | 'word-to-def';
-                setCurrentQuestionType(specificType);
-                setMultipleChoiceOptions(generateOptions(currentCard, cards, specificType));
+                startCountdown(4.0);
+                return () => {
+                    clearTimeout(timer);
+                    stopListening();
+                    stopCountdown();
+                };
+            } else if (activeMode === ExtendedLearningMode.ECHO_RACE) {
+                setInputMode('manual_choice');
+                setCurrentQuestionType('def-to-word');
+                playAudioForEchoRace(currentCard);
+                const controller = new AudioModeLayoutController(currentCard, cards);
+                const uiState = controller.executeAudioModeState();
+                setMultipleChoiceOptions(uiState.choices_labels);
+                startCountdown(uiState.active_countdown_limit);
             }
         } else {
             stopListening();
+            stopCountdown();
         }
-    }, [currentCard, phase, inputMode, cards, t]);
-
-    const startSession = (mode: InputMode, style: 'def-to-word' | 'word-to-def' | 'mix' = 'word-to-def') => {
-        setInputMode(mode);
-        setQuizStyle(style);
-        setQueue([...cards]);
-        setCurrentCard(cards[0]);
-        setKnownCount(0);
-        setPhase('learning');
-        if (onInputModeChange) onInputModeChange(mode);
-    };
-
-    const handleNext = React.useCallback((markAsKnown: boolean = false) => {
-        if (!currentCard) return;
-        resetCardState();
-        hasAttemptedRef.current = false;
+    }, [currentCard, phase, isFlipped, learningMode, currentChaosMode, cards, t, startListening, stopListening, startCountdown, stopCountdown, playAudioForEchoRace, getCurrentActiveMode]);
 
 
-        setQueue(prevQueue => {
-            let nextQueue = [...prevQueue];
-            if (markAsKnown) {
-                nextQueue = nextQueue.filter(c => c.id !== currentCard.id);
-                setKnownCount(prev => prev + 1);
-                onMarkKnown(currentCard);
-            } else {
-                nextQueue = nextQueue.filter(c => c.id !== currentCard.id);
-                nextQueue.push(currentCard);
-            }
-
-            if (nextQueue.length === 0) {
-                setPhase('finished');
-                setCurrentCard(null);
-            } else {
-                setCurrentCard(nextQueue[0]);
-            }
-            return nextQueue;
-        });
-    }, [currentCard, onMarkKnown]);
 
     // Session Timer Override
     const [sessionDelay, setSessionDelay] = useState(settings.autoAdvanceDelay || 2000);
@@ -420,6 +633,7 @@ const StudyMode: React.FC<StudyModeProps> = ({ cards, onExit, settings, onSaveSe
     }, [matchStatus, handleNext, settings.autoAdvanceDelay, isAutoAdvanceEnabled, sessionDelay]);
 
     const handleManualSelfCorrect = () => {
+        stopCountdown();
         setMatchStatus('match');
         setStatusMessage(t('studyMode.correct'));
         setSubMessage(t('studyMode.greatJob'));
@@ -573,7 +787,7 @@ const StudyMode: React.FC<StudyModeProps> = ({ cards, onExit, settings, onSaveSe
 
     if (phase === 'setup') {
         return (
-            <div className="flex flex-col h-full w-full max-w-4xl mx-auto p-6 animate-in fade-in zoom-in-95 duration-300">
+            <div className="flex flex-col h-full w-full max-w-5xl mx-auto p-6 animate-in fade-in duration-300">
                 {/* Header */}
                 <div className="w-full flex justify-start mb-4">
                     <button onClick={onExit} className="text-muted-foreground hover:text-foreground transition-colors text-sm flex items-center gap-1">
@@ -582,139 +796,83 @@ const StudyMode: React.FC<StudyModeProps> = ({ cards, onExit, settings, onSaveSe
                     </button>
                 </div>
 
-                <div className="flex-1 flex flex-col items-center justify-center">
-                    <h2 className="text-3xl font-bold mb-2">{t('studyMode.readyToStudy')}</h2>
-                    <p className="text-muted-foreground mb-12 text-center">
+                <div className="flex-grow w-full flex flex-col items-center justify-center">
+                    <h2 className="text-3xl font-bold mb-2">{t('studyMode.readyToStudy') || 'Select Study Mode'}</h2>
+                    <p className="text-muted-foreground mb-8 text-center">
                         {t('studyMode.cardsInDeck', { count: cards.length })}
                     </p>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl mb-12">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 w-full max-w-4xl mb-12">
+                        {/* Tile 1: Discovery */}
                         <button
-                            onClick={() => setPhase('manual_setup')}
-                            className="flex flex-col items-center p-8 rounded-2xl bg-card border border-border hover:border-primary/50 hover:bg-secondary/30 transition-all cursor-pointer group"
-                        >
-                            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
-                                <MonitorPlay className="w-8 h-8" />
-                            </div>
-                            <h3 className="text-xl font-semibold mb-2">{t('studyMode.manualMode')}</h3>
-                            <p className="text-sm text-muted-foreground text-center">{t('studyMode.manualModeDesc')}</p>
-                        </button>
-
-                        <button
-                            onClick={() => startSession('voice')}
-                            className="flex flex-col items-center p-8 rounded-2xl bg-card border border-border hover:border-accent/50 hover:bg-secondary/30 transition-all cursor-pointer group"
-                        >
-                            <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-accent group-hover:text-white transition-colors">
-                                <Mic className="w-8 h-8" />
-                            </div>
-                            <h3 className="text-xl font-semibold mb-2">{t('studyMode.voiceMode')}</h3>
-                            <p className="text-sm text-muted-foreground text-center">{t('studyMode.voiceModeDesc')}</p>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    if (phase === 'manual_setup') {
-        return (
-            <div className="flex flex-col h-full w-full max-w-4xl mx-auto p-6 animate-in fade-in zoom-in-95 duration-300">
-                {/* Header */}
-                <div className="w-full flex justify-start mb-4">
-                    <button onClick={() => setPhase('setup')} className="text-muted-foreground hover:text-foreground transition-colors text-sm flex items-center gap-1">
-                        <ChevronLeft className="w-4 h-4" />
-                        {t('common.back')}
-                    </button>
-                </div>
-
-                <div className="flex-1 flex flex-col items-center justify-center">
-                    <h2 className="text-3xl font-bold mb-8">{t('studyMode.answerStyle')}</h2>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mb-12">
-                        <button
-                            onClick={() => startSession('manual_self')}
-                            className="flex flex-col items-center p-6 rounded-2xl bg-card border border-border hover:border-primary/50 hover:bg-secondary/30 transition-all"
-                        >
-                            <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center mb-4">
-                                <MonitorPlay className="w-6 h-6" />
-                            </div>
-                            <h3 className="font-semibold mb-1">{t('studyMode.selfCheck')}</h3>
-                            <p className="text-xs text-muted-foreground text-center">{t('studyMode.selfCheckDesc')}</p>
-                        </button>
-
-                        <button
-                            onClick={() => startSession('manual_type')}
-                            className="flex flex-col items-center p-6 rounded-2xl bg-card border border-border hover:border-primary/50 hover:bg-secondary/30 transition-all"
-                        >
-                            <div className="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 flex items-center justify-center mb-4">
-                                <Type className="w-6 h-6" />
-                            </div>
-                            <h3 className="font-semibold mb-1">{t('studyMode.typeAnswer')}</h3>
-                            <p className="text-xs text-muted-foreground text-center">{t('studyMode.typeAnswerDesc')}</p>
-                        </button>
-
-                        <button
-                            onClick={() => setPhase('choice_setup')}
-                            className="flex flex-col items-center p-6 rounded-2xl bg-card border border-border hover:border-primary/50 hover:bg-secondary/30 transition-all"
-                        >
-                            <div className="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 flex items-center justify-center mb-4">
-                                <List className="w-6 h-6" />
-                            </div>
-                            <h3 className="font-semibold mb-1">{t('studyMode.multipleChoice')}</h3>
-                            <p className="text-xs text-muted-foreground text-center">{t('studyMode.multipleChoiceDesc')}</p>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    if (phase === 'choice_setup') {
-        return (
-            <div className="flex flex-col h-full w-full max-w-4xl mx-auto p-6 animate-in fade-in zoom-in-95 duration-300">
-                {/* Header */}
-                <div className="w-full flex justify-start mb-4">
-                    <button onClick={() => setPhase('manual_setup')} className="text-muted-foreground hover:text-foreground transition-colors text-sm flex items-center gap-1">
-                        <ChevronLeft className="w-4 h-4" />
-                        {t('common.back')}
-                    </button>
-                </div>
-
-                <div className="flex-1 flex flex-col items-center justify-center">
-                    <h2 className="text-3xl font-bold mb-8">{t('studyMode.multipleChoice')}</h2>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mb-12">
-                        <button
-                            onClick={() => startSession('manual_choice', 'def-to-word')}
-                            className="flex flex-col items-center p-6 rounded-2xl bg-card border border-border hover:border-primary/50 hover:bg-secondary/30 transition-all group"
+                            onClick={() => startExtendedSession(ExtendedLearningMode.DISCOVERY)}
+                            className="flex flex-col items-center p-6 rounded-2xl bg-card border border-border hover:border-primary/50 hover:bg-secondary/30 transition-all cursor-pointer group text-center"
                         >
                             <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                                <List className="w-6 h-6" />
+                                <MonitorPlay className="w-6 h-6" />
                             </div>
-                            <h3 className="font-semibold mb-1">{t('studyMode.matchWord')}</h3>
-                            <p className="text-xs text-muted-foreground text-center">{t('studyMode.matchWordDesc')}</p>
+                            <h3 className="font-semibold mb-1">Discovery Mode</h3>
+                            <p className="text-xs text-muted-foreground">Self-paced flashcard tap translation (Native to Target)</p>
                         </button>
 
+                        {/* Tile 2: Precision */}
                         <button
-                            onClick={() => startSession('manual_choice', 'word-to-def')}
-                            className="flex flex-col items-center p-6 rounded-2xl bg-card border border-border hover:border-primary/50 hover:bg-secondary/30 transition-all group"
+                            onClick={() => startExtendedSession(ExtendedLearningMode.PRECISION)}
+                            className="flex flex-col items-center p-6 rounded-2xl bg-card border border-border hover:border-primary/50 hover:bg-secondary/30 transition-all cursor-pointer group text-center"
                         >
-                            <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                                <List className="w-6 h-6" />
+                            <div className="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                <Type className="w-6 h-6" />
                             </div>
-                            <h3 className="font-semibold mb-1">{t('studyMode.matchDef')}</h3>
-                            <p className="text-xs text-muted-foreground text-center">{t('studyMode.matchDefDesc')}</p>
+                            <h3 className="font-semibold mb-1">Precision Mode</h3>
+                            <p className="text-xs text-muted-foreground">Strict zero-error typing reset pool (Target to Native)</p>
                         </button>
 
+                        {/* Tile 3: The Sprint */}
                         <button
-                            onClick={() => startSession('manual_choice', 'mix')}
-                            className="flex flex-col items-center p-6 rounded-2xl bg-card border border-border hover:border-primary/50 hover:bg-secondary/30 transition-all group"
+                            onClick={() => startExtendedSession(ExtendedLearningMode.THE_SPRINT)}
+                            className="flex flex-col items-center p-6 rounded-2xl bg-card border border-border hover:border-primary/50 hover:bg-secondary/30 transition-all cursor-pointer group text-center"
                         >
                             <div className="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                <Timer className="w-6 h-6" />
+                            </div>
+                            <h3 className="font-semibold mb-1">The Sprint</h3>
+                            <p className="text-xs text-muted-foreground">3.0s timed multiple choice selection (Target to Native)</p>
+                        </button>
+
+                        {/* Tile 4: The Reflex */}
+                        <button
+                            onClick={() => startExtendedSession(ExtendedLearningMode.THE_REFLEX)}
+                            className="flex flex-col items-center p-6 rounded-2xl bg-card border border-border hover:border-primary/50 hover:bg-secondary/30 transition-all cursor-pointer group text-center"
+                        >
+                            <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                <Mic className="w-6 h-6" />
+                            </div>
+                            <h3 className="font-semibold mb-1">The Reflex</h3>
+                            <p className="text-xs text-muted-foreground">4.0s reversal audio production or self-report (Native to Target)</p>
+                        </button>
+
+                        {/* Tile 5: Echo Race */}
+                        <button
+                            onClick={() => startExtendedSession(ExtendedLearningMode.ECHO_RACE)}
+                            className="flex flex-col items-center p-6 rounded-2xl bg-card border border-border hover:border-primary/50 hover:bg-secondary/30 transition-all cursor-pointer group text-center"
+                        >
+                            <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                <Flame className="w-6 h-6" />
+                            </div>
+                            <h3 className="font-semibold mb-1">Echo Race</h3>
+                            <p className="text-xs text-muted-foreground">2.0s auditory match with hidden text prompt (Audio to Native)</p>
+                        </button>
+
+                        {/* Tile 6: The Chaos */}
+                        <button
+                            onClick={() => startExtendedSession(ExtendedLearningMode.THE_CHAOS)}
+                            className="flex flex-col items-center p-6 rounded-2xl bg-card border border-border hover:border-primary/50 hover:bg-secondary/30 transition-all cursor-pointer group text-center"
+                        >
+                            <div className="w-12 h-12 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                                 <Shuffle className="w-6 h-6" />
                             </div>
-                            <h3 className="font-semibold mb-1">{t('studyMode.mixedMode')}</h3>
-                            <p className="text-xs text-muted-foreground text-center">{t('studyMode.mixedModeDesc')}</p>
+                            <h3 className="font-semibold mb-1">The Chaos</h3>
+                            <p className="text-xs text-muted-foreground">Interleaved variable context jitter matrix (Random mixture of all modes)</p>
                         </button>
                     </div>
                 </div>
@@ -983,13 +1141,12 @@ const StudyMode: React.FC<StudyModeProps> = ({ cards, onExit, settings, onSaveSe
                         <Flashcard
                             word={currentCard}
                             isFlipped={isFlipped}
-                            onFlip={() => { if (inputMode === 'manual_self' || matchStatus === 'match' || attempts >= 3) setIsFlipped(!isFlipped) }}
-                            // Remove onReport prop so internal flag doesn't render
-                            // onReport={handleReport} 
+                            onFlip={() => { if (getCurrentActiveMode() === ExtendedLearningMode.DISCOVERY || matchStatus === 'match' || attempts >= 3) setIsFlipped(!isFlipped) }}
                             settings={settings}
-                            overrideFront={inputMode === 'manual_choice' && currentQuestionType === 'def-to-word' ? currentCard.definition : undefined}
-                            overrideBack={inputMode === 'manual_choice' && currentQuestionType === 'def-to-word' ? currentCard.word : undefined}
-                            hideFlipHint={inputMode === 'manual_choice'}
+                            overrideFront={getCurrentActiveMode() === ExtendedLearningMode.ECHO_RACE ? "[🔊 AUDIO INCOMING]" : (getCurrentActiveMode() === ExtendedLearningMode.DISCOVERY || getCurrentActiveMode() === ExtendedLearningMode.THE_REFLEX ? currentCard.definition : undefined)}
+                            overrideBack={getCurrentActiveMode() === ExtendedLearningMode.ECHO_RACE ? currentCard.definition : (getCurrentActiveMode() === ExtendedLearningMode.DISCOVERY || getCurrentActiveMode() === ExtendedLearningMode.THE_REFLEX ? currentCard.word : undefined)}
+                            hideFlipHint={getCurrentActiveMode() === ExtendedLearningMode.THE_SPRINT || getCurrentActiveMode() === ExtendedLearningMode.ECHO_RACE}
+                            blurFrontText={getCurrentActiveMode() === ExtendedLearningMode.ECHO_RACE}
                             overlayHeader={
                                 <>
                                     {/* Top Left: Counter */}
@@ -999,7 +1156,7 @@ const StudyMode: React.FC<StudyModeProps> = ({ cards, onExit, settings, onSaveSe
 
                                     {/* Center: Feedback Overlay */}
                                     <div className="flex-1 flex justify-center mx-2 pointer-events-none relative z-50">
-                                        {(matchStatus !== 'none' || (inputMode === 'voice' && !isFlipped) || (inputMode === 'manual_type' && matchStatus !== 'none')) && (
+                                        {(matchStatus !== 'none' || timeLeft !== null || (inputMode === 'voice' && !isFlipped) || (inputMode === 'manual_type' && matchStatus !== 'none')) && (
                                             <div className={`pointer-events-auto p-1.5 px-4 rounded-full shadow-lg backdrop-blur-md border transition-all duration-300 animate-in fade-in zoom-in
                                                 ${matchStatus === 'match' ? 'bg-green-100/90 dark:bg-green-900/40 border-green-500/30' :
                                                     matchStatus === 'nomatch' ? 'bg-yellow-100/90 dark:bg-yellow-900/40 border-yellow-500/30' :
@@ -1017,7 +1174,7 @@ const StudyMode: React.FC<StudyModeProps> = ({ cards, onExit, settings, onSaveSe
                                                     )}
                                                     <div>
                                                         <h3 className={`text-sm font-bold whitespace-nowrap ${matchStatus === 'match' ? 'text-green-800 dark:text-green-300' : matchStatus === 'nomatch' ? 'text-yellow-800 dark:text-yellow-300' : 'text-foreground'}`}>
-                                                            {statusMessage || (inputMode === 'voice' ? (isListening ? t('studyMode.listening') : t('studyMode.tapToSpeak')) : "")}
+                                                            {statusMessage || (timeLeft !== null ? `⏱️ Time Left: ${timeLeft.toFixed(1)}s` : (inputMode === 'voice' ? (isListening ? t('studyMode.listening') : t('studyMode.tapToSpeak')) : ""))}
                                                         </h3>
                                                         {subMessage && <p className={`text-[10px] font-bold ${matchStatus === 'match' ? 'text-green-700 dark:text-green-400' : 'opacity-80'}`}>{subMessage}</p>}
                                                     </div>

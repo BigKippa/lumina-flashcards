@@ -14,11 +14,12 @@ interface FlashcardProps {
     overrideBack?: string;
     overlayHeader?: React.ReactNode;
     hideFlipHint?: boolean; // Optional flag to hide "Tap to reveal" hint
+    blurFrontText?: boolean;
 }
 
 type AudioSection = 'none' | 'front-word' | 'back-word' | 'back-definition';
 
-const Flashcard: React.FC<FlashcardProps> = ({ word, isFlipped, onFlip, onReport, settings, overrideFront, overrideBack, overlayHeader, hideFlipHint = false }) => {
+const Flashcard: React.FC<FlashcardProps> = ({ word, isFlipped, onFlip, onReport, settings, overrideFront, overrideBack, overlayHeader, hideFlipHint = false, blurFrontText = false }) => {
     const categoryStyle = (settings && word.category) ? settings.categories[word.category] : undefined;
 
     // Default or Custom Colors
@@ -213,7 +214,7 @@ const Flashcard: React.FC<FlashcardProps> = ({ word, isFlipped, onFlip, onReport
                         )}
 
                         <h2
-                            className="text-4xl font-bold text-foreground mb-2 transition-colors duration-300"
+                            className={`text-4xl font-bold text-foreground mb-2 transition-colors duration-300 ${blurFrontText ? 'blur-md select-none pointer-events-none' : ''}`}
                             style={titleStyle}
                         >
                             {overrideFront || word.word}
@@ -222,7 +223,7 @@ const Flashcard: React.FC<FlashcardProps> = ({ word, isFlipped, onFlip, onReport
 
                         <div className="flex flex-col items-center gap-1 mt-2">
                             <div className="flex items-center gap-3">
-                                {word.phonetic && !overrideFront && <p className="text-muted-foreground text-lg font-mono">{word.phonetic}</p>}
+                                {word.phonetic && !overrideFront && <p className={`text-muted-foreground text-lg font-mono ${blurFrontText ? 'blur-md select-none pointer-events-none' : ''}`}>{word.phonetic}</p>}
                                 {renderAudioButton('front-word', handlePlayFrontWord, overrideFront ? "Listen to definition" : "Listen to word")}
                             </div>
                             {word.customPronunciation && !overrideFront && (
