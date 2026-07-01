@@ -952,13 +952,12 @@ function App() {
                 alert("No cards available for random mix!");
                 return;
             }
-            setActiveDeckId('random-mix');
-            setMode('deck');
+            navigate('deck', 'random-mix');
             return;
         }
 
         if (category === 'vocabulary') {
-            setMode('topic-selection');
+            navigate('topic-selection');
             return;
         }
 
@@ -978,8 +977,7 @@ function App() {
                 return;
             }
             const sessionDeckId = `session-${category}`;
-            setActiveDeckId(sessionDeckId);
-            setMode('deck');
+            navigate('deck', sessionDeckId);
 
             // Save Last Session
             const updatedUser = { ...user };
@@ -1233,7 +1231,7 @@ function App() {
                                     <div ref={profileMenuRef} className="relative">
                                         <button
                                             onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                                            className="flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 hover:bg-secondary transition-colors text-foreground border border-border hover:border-primary/20"
+                                            className="flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 hover:bg-secondary border border-border hover:border-primary/20 text-foreground transition-all duration-200 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                                         >
                                             {(() => {
                                                 const isSuperAdmin = user.id === 'admin';
@@ -1369,8 +1367,7 @@ function App() {
                             {mode === 'topic-selection' && (
                                 <TopicSelectionScreen
                                     onSelect={(topicId, _label) => {
-                                        setActiveDeckId(`session-${topicId}`);
-                                        setMode('deck');
+                                        navigate('deck', `session-${topicId}`);
                                     }}
                                     onBack={goHome}
                                     favorites={user?.favorites || []}

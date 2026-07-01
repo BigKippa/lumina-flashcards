@@ -100,7 +100,7 @@ export const LanguageSelector: React.FC = () => {
             <div className="relative">
                 <button
                     onClick={() => setIsOpen(!isOpen)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-full bg-secondary hover:bg-secondary/80 border-2 border-primary/10 text-foreground shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                    className="flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 hover:bg-secondary border border-border hover:border-primary/20 text-foreground transition-all duration-200 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                     title="Change Language"
                     aria-haspopup="listbox"
                     aria-expanded={isOpen}

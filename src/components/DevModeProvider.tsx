@@ -46,11 +46,60 @@ const generateStructuralPath = (element: HTMLElement | null): string | null => {
     return path.join(' > ');
 };
 
+const getFilteredStyles = (
+    styles: React.CSSProperties, 
+    flags: { background: boolean; borders: boolean; text: boolean }, 
+    isPrimary: boolean
+): React.CSSProperties => {
+    if (isPrimary) return styles;
+    
+    const filtered: React.CSSProperties = {};
+    const s = styles as any;
+    const f = filtered as any;
+    
+    if (flags.background) {
+        if (styles.backgroundColor !== undefined) filtered.backgroundColor = styles.backgroundColor;
+        if (s._backgroundColorBase !== undefined) f._backgroundColorBase = s._backgroundColorBase;
+        if (s._backgroundColorStrength !== undefined) f._backgroundColorStrength = s._backgroundColorStrength;
+        if (s._backgroundColorOpacity !== undefined) f._backgroundColorOpacity = s._backgroundColorOpacity;
+    }
+    
+    if (flags.borders) {
+        if (styles.borderColor !== undefined) filtered.borderColor = styles.borderColor;
+        if (s._borderColorBase !== undefined) f._borderColorBase = s._borderColorBase;
+        if (s._borderColorStrength !== undefined) f._borderColorStrength = s._borderColorStrength;
+        if (s._borderColorOpacity !== undefined) f._borderColorOpacity = s._borderColorOpacity;
+        if (styles.borderWidth !== undefined) filtered.borderWidth = styles.borderWidth;
+        if (styles.borderStyle !== undefined) filtered.borderStyle = styles.borderStyle;
+        if (styles.borderRadius !== undefined) filtered.borderRadius = styles.borderRadius;
+    }
+    
+    if (flags.text) {
+        if (styles.color !== undefined) filtered.color = styles.color;
+        if (s._colorBase !== undefined) f._colorBase = s._colorBase;
+        if (s._colorStrength !== undefined) f._colorStrength = s._colorStrength;
+        if (s._colorOpacity !== undefined) f._colorOpacity = s._colorOpacity;
+        if (styles.fontSize !== undefined) filtered.fontSize = styles.fontSize;
+        if (styles.fontWeight !== undefined) filtered.fontWeight = styles.fontWeight;
+        if (styles.fontFamily !== undefined) filtered.fontFamily = styles.fontFamily;
+    }
+    
+    return filtered;
+};
+
 export const DevModeProvider: React.FC<{ children: React.ReactNode; isAdmin: boolean }> = ({ children, isAdmin }) => {
     const [isDevMode, setIsDevMode] = useState(false);
     const [enableDevStyling, setEnableDevStyling] = useState(false);
     const [hoveredElement, setHoveredElement] = useState<HTMLElement | null>(null);
-    const [selectedElement, setSelectedElement] = useState<HTMLElement | null>(null);
+    const [selectedElements, setSelectedElements] = useState<HTMLElement[]>([]);
+    const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
+    const selectedElement = selectedElements[0] || null;
+    
+    // Sync settings for multi-element editing
+    const [syncBackground, setSyncBackground] = useState(false);
+    const [syncBorders, setSyncBorders] = useState(false);
+    const [syncText, setSyncText] = useState(false);
+    const [isSyncEditingEnabled, setIsSyncEditingEnabled] = useState(false);
     
     // Theme Management
     const [showThemeModal, setShowThemeModal] = useState(false);
@@ -124,13 +173,13 @@ export const DevModeProvider: React.FC<{ children: React.ReactNode; isAdmin: boo
         if (!isAdmin) {
             if (isDevMode) setIsDevMode(false);
             setHoveredElement(null);
-            setSelectedElement(null);
+            setSelectedElements([]);
             return;
         }
 
         if (!isDevMode) {
             setHoveredElement(null);
-            setSelectedElement(null);
+            setSelectedElements([]);
             return;
         }
 
@@ -156,7 +205,12 @@ export const DevModeProvider: React.FC<{ children: React.ReactNode; isAdmin: boo
                 return;
             }
 
-            setHoveredElement(el);
+            let targetEl = el;
+            const styledParent = el.closest('button, label, [data-dev-id]');
+            if (styledParent) {
+                targetEl = styledParent as HTMLElement;
+            }
+            setHoveredElement(targetEl);
         };
 
         const handleMouseOut = () => {
@@ -185,16 +239,28 @@ export const DevModeProvider: React.FC<{ children: React.ReactNode; isAdmin: boo
                 e.preventDefault();
                 e.stopPropagation();
                 
-                let targetEl = el;
-                // No more forced bubbling. They click exactly what they click.
-                // The DevMode saves its structural path instead of a random ID via generateStructuralPath!
+                let targetEl = hoveredElement || el;
                 
-                if (selectedElement && selectedElement !== targetEl) {
-                    // Auto-commit any unsaved drafts from the previous element to the global history
-                    commitPreviewToHistory();
+                const toggle = e.ctrlKey || e.metaKey || isMultiSelectMode;
+                if (toggle) {
+                    setSelectedElements(prev => {
+                        const exists = prev.includes(targetEl);
+                        if (exists) {
+                            return prev.filter(item => item !== targetEl);
+                        } else {
+                            return [...prev, targetEl];
+                        }
+                    });
+                } else {
+                    if (selectedElements.length > 1 || (selectedElements.length === 1 && selectedElements[0] !== targetEl)) {
+                        commitPreviewToHistory();
+                    }
+                    setSelectedElements([targetEl]);
+                    setSyncBackground(false);
+                    setSyncBorders(false);
+                    setSyncText(false);
+                    setIsSyncEditingEnabled(false);
                 }
-                
-                setSelectedElement(targetEl);
             }
         };
 
@@ -207,7 +273,7 @@ export const DevModeProvider: React.FC<{ children: React.ReactNode; isAdmin: boo
             document.removeEventListener('mouseout', handleMouseOut);
             document.removeEventListener('click', handleClick, { capture: true });
         };
-    }, [isDevMode, hoveredElement, selectedElement, previewOverrides, currentOverrides, currentIndex, history, enableDevStyling]);
+    }, [isDevMode, hoveredElement, selectedElements, isMultiSelectMode, previewOverrides, currentOverrides, currentIndex, history, enableDevStyling]);
 
     const commitPreviewToHistory = () => {
         if (Object.keys(previewOverrides).length === 0) return;
@@ -229,18 +295,7 @@ export const DevModeProvider: React.FC<{ children: React.ReactNode; isAdmin: boo
         setPreviewOverrides({});
     };
 
-    const handleApplyStyle = (newStyles: React.CSSProperties, commit: boolean = false) => {
-        if (!selectedElement) return;
-        const selector = generateStructuralPath(selectedElement);
-        if (!selector) return;
-        
-        let newOverrides = { ...currentOverrides };
-        newOverrides[selector] = { ...newOverrides[selector], ...newStyles };
-        
-        if (commit) {
-            commitPreviewToHistory();
-        }
-    };
+
 
     const canUndo = currentIndex > 0;
     const canRedo = currentIndex < history.length - 1;
@@ -340,40 +395,30 @@ export const DevModeProvider: React.FC<{ children: React.ReactNode; isAdmin: boo
                             <input type="checkbox" checked={enableDevStyling} onChange={(e) => setEnableDevStyling(e.target.checked)} className="accent-primary" />
                             <span className="text-[10px] font-bold text-foreground tracking-tight uppercase">Style Dev UI</span>
                         </label>
-                        <div className="relative group flex flex-col items-center">
-                            <button onClick={handleUndo} disabled={!canUndo} className={`p-2 rounded-full hover:bg-secondary transition-colors ${!canUndo ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                                <Undo className="w-5 h-5" />
-                            </button>
-                            <span id="tooltip-undo" className={`absolute -top-10 bg-card text-foreground border border-border shadow-md px-2 py-1 text-[10px] rounded transition-opacity whitespace-nowrap z-[10000] font-bold uppercase tracking-wider pointer-events-auto ${selectedElement?.id === 'tooltip-undo' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>Undo Last Change</span>
-                        </div>
+                        <button onClick={() => canUndo && handleUndo()} className={`relative group p-2 rounded-full hover:bg-secondary transition-colors ${!canUndo && !enableDevStyling ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                            <Undo className="w-5 h-5" />
+                            <span id="tooltip-undo" className={`absolute -top-10 left-1/2 -translate-x-1/2 bg-card text-foreground border border-border shadow-md px-2 py-1 text-[10px] rounded transition-opacity whitespace-nowrap z-[10000] font-bold uppercase tracking-wider ${selectedElement?.id === 'tooltip-undo' ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none group-hover:opacity-100'}`}>Undo Last Change</span>
+                        </button>
                         
-                        <div className="relative group flex flex-col items-center">
-                            <button onClick={handleRedo} disabled={!canRedo} className={`p-2 rounded-full hover:bg-secondary transition-colors ${!canRedo ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                                <Redo className="w-5 h-5" />
-                            </button>
-                            <span id="tooltip-redo" className={`absolute -top-10 bg-card text-foreground border border-border shadow-md px-2 py-1 text-[10px] rounded transition-opacity whitespace-nowrap z-[10000] font-bold uppercase tracking-wider pointer-events-auto ${selectedElement?.id === 'tooltip-redo' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>Redo Last Change</span>
-                        </div>
+                        <button onClick={() => canRedo && handleRedo()} className={`relative group p-2 rounded-full hover:bg-secondary transition-colors ${!canRedo && !enableDevStyling ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                            <Redo className="w-5 h-5" />
+                            <span id="tooltip-redo" className={`absolute -top-10 left-1/2 -translate-x-1/2 bg-card text-foreground border border-border shadow-md px-2 py-1 text-[10px] rounded transition-opacity whitespace-nowrap z-[10000] font-bold uppercase tracking-wider ${selectedElement?.id === 'tooltip-redo' ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none group-hover:opacity-100'}`}>Redo Last Change</span>
+                        </button>
                         
-                        <div className="relative group flex flex-col items-center">
-                            <button onClick={() => setShowPublishModal(true)} className="p-2 rounded-full bg-green-500/20 text-green-600 hover:bg-green-500/30 transition-colors flex items-center justify-center">
-                                <Check className="w-5 h-5" />
-                            </button>
-                            <span id="tooltip-publish" className={`absolute -top-10 bg-card text-foreground border border-border shadow-md px-2 py-1 text-[10px] rounded transition-opacity whitespace-nowrap z-[10000] font-bold uppercase tracking-wider pointer-events-auto ${selectedElement?.id === 'tooltip-publish' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>Publish Changes</span>
-                        </div>
+                        <button onClick={() => setShowPublishModal(true)} className="relative group p-2 rounded-full bg-green-500/20 text-green-600 hover:bg-green-500/30 transition-colors flex items-center justify-center">
+                            <Check className="w-5 h-5" />
+                            <span id="tooltip-publish" className={`absolute -top-10 left-1/2 -translate-x-1/2 bg-card text-foreground border border-border shadow-md px-2 py-1 text-[10px] rounded transition-opacity whitespace-nowrap z-[10000] font-bold uppercase tracking-wider ${selectedElement?.id === 'tooltip-publish' ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none group-hover:opacity-100'}`}>Publish Changes</span>
+                        </button>
                         
-                        <div className="relative group flex flex-col items-center">
-                            <button onClick={() => setShowThemeModal(true)} className="p-2 rounded-full bg-blue-500/20 text-blue-600 hover:bg-blue-500/30 transition-colors flex items-center justify-center">
-                                <Bookmark className="w-5 h-5" />
-                            </button>
-                            <span id="tooltip-themes" className={`absolute -top-10 bg-card text-foreground border border-border shadow-md px-2 py-1 text-[10px] rounded transition-opacity whitespace-nowrap z-[10000] font-bold uppercase tracking-wider pointer-events-auto ${selectedElement?.id === 'tooltip-themes' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>Themes</span>
-                        </div>
+                        <button onClick={() => setShowThemeModal(true)} className="relative group p-2 rounded-full bg-blue-500/20 text-blue-600 hover:bg-blue-500/30 transition-colors flex items-center justify-center">
+                            <Bookmark className="w-5 h-5" />
+                            <span id="tooltip-themes" className={`absolute -top-10 left-1/2 -translate-x-1/2 bg-card text-foreground border border-border shadow-md px-2 py-1 text-[10px] rounded transition-opacity whitespace-nowrap z-[10000] font-bold uppercase tracking-wider ${selectedElement?.id === 'tooltip-themes' ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none group-hover:opacity-100'}`}>Themes</span>
+                        </button>
                         
-                        <div className="relative group flex flex-col items-center">
-                            <button onClick={() => { setHistory([{}]); setCurrentIndex(0); }} className="p-2 rounded-full bg-red-500/20 text-red-600 hover:bg-red-500/30 transition-colors flex items-center justify-center">
-                                <X className="w-5 h-5" />
-                            </button>
-                            <span id="tooltip-discard" className={`absolute -top-10 bg-card text-foreground border border-border shadow-md px-2 py-1 text-[10px] rounded transition-opacity whitespace-nowrap z-[10000] font-bold uppercase tracking-wider pointer-events-auto ${selectedElement?.id === 'tooltip-discard' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>Discard Changes</span>
-                        </div>
+                        <button onClick={() => { setHistory([{}]); setCurrentIndex(0); }} className="relative group p-2 rounded-full bg-red-500/20 text-red-600 hover:bg-red-500/30 transition-colors flex items-center justify-center">
+                            <X className="w-5 h-5" />
+                            <span id="tooltip-discard" className={`absolute -top-10 left-1/2 -translate-x-1/2 bg-card text-foreground border border-border shadow-md px-2 py-1 text-[10px] rounded transition-opacity whitespace-nowrap z-[10000] font-bold uppercase tracking-wider ${selectedElement?.id === 'tooltip-discard' ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none group-hover:opacity-100'}`}>Discard Changes</span>
+                        </button>
                     </div>
                 )}
                 <button 
@@ -395,7 +440,7 @@ export const DevModeProvider: React.FC<{ children: React.ReactNode; isAdmin: boo
                             <div className="flex items-center gap-2">
                                 <button onClick={() => {
                                     const modal = document.getElementById('dev-theme-modal-content');
-                                    if (modal) setSelectedElement(modal);
+                                    if (modal) setSelectedElements([modal]);
                                 }} className="text-[10px] uppercase font-black text-purple-600 bg-purple-500/20 px-2 py-0.5 rounded hover:bg-purple-500/40 border border-purple-500/30 transition-colors">Edit Window</button>
                                 <button onClick={() => setShowThemeModal(false)} className="p-2 hover:bg-muted rounded-full">
                                     <X className="w-5 h-5"/>
@@ -469,7 +514,7 @@ export const DevModeProvider: React.FC<{ children: React.ReactNode; isAdmin: boo
                             <div className="flex items-center gap-2">
                                 <button onClick={() => {
                                     const modal = document.getElementById('dev-publish-modal-content');
-                                    if (modal) setSelectedElement(modal);
+                                    if (modal) setSelectedElements([modal]);
                                 }} className="text-[10px] uppercase font-black text-purple-600 bg-purple-500/20 px-2 py-0.5 rounded hover:bg-purple-500/40 border border-purple-500/30 transition-colors">Edit Window</button>
                                 <button onClick={() => setShowPublishModal(false)} className="p-2 hover:bg-muted rounded-full">
                                     <X className="w-5 h-5"/>
@@ -511,7 +556,7 @@ export const DevModeProvider: React.FC<{ children: React.ReactNode; isAdmin: boo
             )}
 
             {/* Hover Highlight Overlay */}
-            {isDevMode && hoveredElement && !selectedElement && (
+            {isDevMode && hoveredElement && !selectedElements.includes(hoveredElement) && (
                 <div 
                     className="fixed pointer-events-none z-[9998] border-2 border-orange-500 border-dashed bg-transparent flex items-start justify-end animate-pulse"
                     style={{
@@ -522,44 +567,116 @@ export const DevModeProvider: React.FC<{ children: React.ReactNode; isAdmin: boo
                     }}
                 >
                     <div className="bg-orange-500 text-white p-1 rounded-bl-lg shadow-sm">
-                        <Settings className="w-4 h-4" /> {/* The "Edit Pencil" equivalent */}
+                        <Settings className="w-4 h-4" />
                     </div>
                 </div>
             )}
 
+            {/* Selected Elements Highlight Overlays */}
+            {isDevMode && selectedElements.map((el, index) => {
+                const rect = el.getBoundingClientRect();
+                return (
+                    <div 
+                        key={`sel-highlight-${index}`}
+                        className="fixed pointer-events-none z-[9998] border-2 border-purple-500 bg-purple-500/10 flex items-start justify-end shadow-md"
+                        style={{
+                            top: rect.top,
+                            left: rect.left,
+                            width: rect.width,
+                            height: rect.height,
+                        }}
+                    >
+                        <div className="bg-purple-500 text-white px-1.5 py-0.5 text-[9px] font-bold rounded-bl-lg flex items-center gap-1 shadow-sm">
+                            <span>#{index + 1}</span>
+                        </div>
+                    </div>
+                );
+            })}
+
             {/* Editor Modal */}
-            {isDevMode && selectedElement && (() => {
-                const selector = generateStructuralPath(selectedElement);
+            {isDevMode && selectedElements.length > 0 && (() => {
+                const primaryElement = selectedElements[0];
+                const selector = generateStructuralPath(primaryElement);
                 if (!selector) return null;
                 return (
                     <EditorModal 
-                        key={selector}
-                        element={selectedElement} 
+                        key="dev-editor-modal"
+                        element={primaryElement} 
+                        elements={selectedElements}
+                        isMultiSelectMode={isMultiSelectMode}
+                        setIsMultiSelectMode={setIsMultiSelectMode}
+                        isSyncEditingEnabled={isSyncEditingEnabled}
+                        setIsSyncEditingEnabled={setIsSyncEditingEnabled}
+                        syncBackground={syncBackground}
+                        setSyncBackground={setSyncBackground}
+                        syncBorders={syncBorders}
+                        setSyncBorders={setSyncBorders}
+                        syncText={syncText}
+                        setSyncText={setSyncText}
                         currentStyles={currentOverrides[selector] || {}}
                         draftStyles={previewOverrides[selector] || {}}
                         onPreviewUpdate={(styles) => {
+                            const newPreviews: Record<string, React.CSSProperties> = {};
+                            selectedElements.forEach((el, index) => {
+                                const sel = generateStructuralPath(el);
+                                if (sel) {
+                                    newPreviews[sel] = getFilteredStyles(styles, {
+                                        background: isSyncEditingEnabled && syncBackground,
+                                        borders: isSyncEditingEnabled && syncBorders,
+                                        text: isSyncEditingEnabled && syncText
+                                    }, index === 0);
+                                }
+                            });
                             setPreviewOverrides(prev => ({
                                 ...prev,
-                                [selector]: styles
+                                ...newPreviews
                             }));
                         }}
                         onEditPanelRequest={() => {
                             const panel = document.getElementById('dev-editor-panel');
-                            if (panel) setSelectedElement(panel);
+                            if (panel) setSelectedElements([panel]);
                         }}
-                        onClose={() => setSelectedElement(null)} 
+                        onClose={() => {
+                            setSelectedElements([]);
+                            setSyncBackground(false);
+                            setSyncBorders(false);
+                            setSyncText(false);
+                            setIsSyncEditingEnabled(false);
+                        }} 
                         onSave={(styles) => {
-                            handleApplyStyle(styles, true);
-                            const newPreviews = {...previewOverrides};
-                            delete newPreviews[selector];
-                            setPreviewOverrides(newPreviews);
-                            setSelectedElement(null);
+                            let newOverrides = { ...currentOverrides };
+                            selectedElements.forEach((el, index) => {
+                                const sel = generateStructuralPath(el);
+                                if (sel) {
+                                    const filtered = getFilteredStyles(styles, {
+                                        background: isSyncEditingEnabled && syncBackground,
+                                        borders: isSyncEditingEnabled && syncBorders,
+                                        text: isSyncEditingEnabled && syncText
+                                    }, index === 0);
+                                    newOverrides[sel] = { ...newOverrides[sel], ...filtered };
+                                }
+                            });
+                            let newHistory = history.slice(0, currentIndex + 1);
+                            newHistory.push(newOverrides);
+                            if (newHistory.length > 30) {
+                                newHistory = newHistory.slice(-30);
+                            }
+                            setHistory(newHistory);
+                            setCurrentIndex(newHistory.length - 1);
+                            setPreviewOverrides({});
+                            setSelectedElements([]);
+                            setSyncBackground(false);
+                            setSyncBorders(false);
+                            setSyncText(false);
+                            setIsSyncEditingEnabled(false);
                         }}
                         onRevert={() => {
-                            const newPreviews = {...previewOverrides};
-                            delete newPreviews[selector];
-                            setPreviewOverrides(newPreviews);
-                            setSelectedElement(null);
+                            setPreviewOverrides({});
+                            setSelectedElements([]);
+                            setSyncBackground(false);
+                            setSyncBorders(false);
+                            setSyncText(false);
+                            setIsSyncEditingEnabled(false);
                         }}
                     />
                 );
@@ -570,6 +687,17 @@ export const DevModeProvider: React.FC<{ children: React.ReactNode; isAdmin: boo
 
 interface EditorModalProps {
     element: HTMLElement;
+    elements: HTMLElement[];
+    isMultiSelectMode: boolean;
+    setIsMultiSelectMode: (val: boolean) => void;
+    isSyncEditingEnabled: boolean;
+    setIsSyncEditingEnabled: (val: boolean) => void;
+    syncBackground: boolean;
+    setSyncBackground: (val: boolean) => void;
+    syncBorders: boolean;
+    setSyncBorders: (val: boolean) => void;
+    syncText: boolean;
+    setSyncText: (val: boolean) => void;
     currentStyles: React.CSSProperties;
     draftStyles: React.CSSProperties;
     onPreviewUpdate: (styles: React.CSSProperties) => void;
@@ -579,7 +707,63 @@ interface EditorModalProps {
     onRevert: () => void;
 }
 
-const EditorModal: React.FC<EditorModalProps> = ({ element, currentStyles, draftStyles, onPreviewUpdate, onEditPanelRequest, onClose, onSave, onRevert }) => {
+const isColorLight = (color: string): boolean => {
+    const cleaned = color.trim().toLowerCase();
+    
+    // Check transparent
+    if (cleaned === 'transparent') return true;
+    
+    // Check theme variables
+    if (cleaned.includes('--color-5') || cleaned.includes('--color-6') || cleaned.includes('--color-7')) {
+        return false; // These are dark colors, so mix with white to lighten
+    }
+    if (cleaned.includes('--color-')) {
+        return true; // Other theme colors (1, 2, 3, 4, 8, 9, 10) are light/medium, so mix with black to darken
+    }
+    
+    // Check hex colors
+    if (cleaned.startsWith('#')) {
+        const hex = cleaned.substring(1);
+        let r = 255, g = 255, b = 255;
+        if (hex.length === 3) {
+            r = parseInt(hex[0] + hex[0], 16);
+            g = parseInt(hex[1] + hex[1], 16);
+            b = parseInt(hex[2] + hex[2], 16);
+        } else if (hex.length === 6) {
+            r = parseInt(hex.substring(0, 2), 16);
+            g = parseInt(hex.substring(2, 4), 16);
+            b = parseInt(hex.substring(4, 6), 16);
+        }
+        // YIQ brightness formula
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        return brightness >= 128;
+    }
+    
+    // Check rgb / rgba
+    if (cleaned.startsWith('rgb')) {
+        const matches = cleaned.match(/\d+/g);
+        if (matches && matches.length >= 3) {
+            const r = parseInt(matches[0]);
+            const g = parseInt(matches[1]);
+            const b = parseInt(matches[2]);
+            const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+            return brightness >= 128;
+        }
+    }
+    
+    // Check hsl / hsla
+    if (cleaned.startsWith('hsl')) {
+        const matches = cleaned.match(/\d+/g);
+        if (matches && matches.length >= 3) {
+            const l = parseInt(matches[2]); // lightness %
+            return l >= 50;
+        }
+    }
+    
+    return true; // Default to light
+};
+
+const EditorModal: React.FC<EditorModalProps> = ({ element, elements, isMultiSelectMode, setIsMultiSelectMode, isSyncEditingEnabled, setIsSyncEditingEnabled, syncBackground, setSyncBackground, syncBorders, setSyncBorders, syncText, setSyncText, currentStyles, draftStyles, onPreviewUpdate, onEditPanelRequest, onClose, onSave, onRevert }) => {
     const [localStylesHistory, setLocalStylesHistory] = useState<React.CSSProperties[]>([{ ...currentStyles, ...draftStyles }]);
     const [historyIndex, setHistoryIndex] = useState(0);
 
@@ -629,6 +813,8 @@ const EditorModal: React.FC<EditorModalProps> = ({ element, currentStyles, draft
         const currentBase = (localStyles[`_${propToUpdate}Base` as keyof React.CSSProperties] as string) || 'transparent';
         const currentStrengthStr = localStyles[`_${propToUpdate}Strength` as keyof React.CSSProperties] as string;
         const currentStrength = currentStrengthStr ? parseInt(currentStrengthStr, 10) : 100;
+        const currentOpacityStr = localStyles[`_${propToUpdate}Opacity` as keyof React.CSSProperties] as string;
+        const currentOpacity = currentOpacityStr ? parseInt(currentOpacityStr, 10) : 100;
 
         return (
             <div className="flex flex-col gap-2">
@@ -688,6 +874,29 @@ const EditorModal: React.FC<EditorModalProps> = ({ element, currentStyles, draft
                         ))}
                     </div>
                 </div>
+
+                {/* Opacity / Transparency Slider */}
+                <div className="mt-2 bg-color6/20 p-2 rounded-lg border border-color6/20">
+                    <div className="flex justify-between items-center text-[10px] uppercase font-bold text-color1/80 mb-2">
+                        <span>Opacity (Solidness)</span>
+                        <div className="flex items-center gap-1">
+                            <input type="number" min="0" max="100" value={currentOpacity} onChange={e => {
+                                let val = parseInt(e.target.value);
+                                if(isNaN(val)) val = 100;
+                                applyColorWithOptions(propToUpdate, currentBase, currentStrength, Math.min(100, Math.max(0, val)));
+                            }} className="w-10 bg-color5/50 border border-color6 text-right px-1 py-0.5 rounded outline-none" />
+                            <span>%</span>
+                        </div>
+                    </div>
+                    <input type="range" min="0" max="100" value={currentOpacity} onChange={e => applyColorWithOptions(propToUpdate, currentBase, currentStrength, parseInt(e.target.value))} className="w-full h-1.5 bg-color6/50 rounded-lg appearance-none cursor-pointer mb-3 accent-color4" />
+                    <div className="flex justify-between gap-1">
+                        {[100, 75, 50, 25, 0].map(pct => (
+                            <button key={pct} onClick={() => applyColorWithOptions(propToUpdate, currentBase, currentStrength, pct)} className={`flex-1 text-[10px] font-bold py-1 rounded transition-colors ${currentOpacity === pct ? 'bg-color4 text-color1 scale-105' : 'bg-color5 text-color1/60 hover:text-color1 hover:bg-color5/80'}`}>
+                                {pct}%
+                            </button>
+                        ))}
+                    </div>
+                </div>
             </div>
         );
     };
@@ -704,28 +913,54 @@ const EditorModal: React.FC<EditorModalProps> = ({ element, currentStyles, draft
         setHistoryIndex(newHistory.length - 1);
     };
 
-    const applyColorWithOptions = (prop: 'backgroundColor' | 'color' | 'borderColor', baseVal: string, strength: number) => {
+    const applyColorWithOptions = (
+        prop: 'backgroundColor' | 'color' | 'borderColor', 
+        baseVal: string, 
+        strength: number,
+        opacity?: number
+    ) => {
         const newHistory = localStylesHistory.slice(0, historyIndex + 1);
-        const finalColor = baseVal === 'transparent' ? 'transparent' : `color-mix(in srgb, ${baseVal} ${strength}%, transparent)`;
+        
+        // Retrieve current values if not provided
+        const currentOpacityStr = localStyles[`_${prop}Opacity` as keyof React.CSSProperties] as string;
+        const finalOpacity = opacity !== undefined ? opacity : (currentOpacityStr ? parseInt(currentOpacityStr, 10) : 100);
+        
+        const mixTarget = isColorLight(baseVal) ? 'black' : 'white';
+        const solidColor = baseVal === 'transparent' ? 'transparent' : `color-mix(in srgb, ${baseVal} ${strength}%, ${mixTarget})`;
+        const finalColor = (solidColor === 'transparent' || finalOpacity === 100) 
+            ? solidColor 
+            : `color-mix(in srgb, ${solidColor} ${finalOpacity}%, transparent)`;
+            
         newHistory.push({ 
             ...localStyles, 
             [prop]: finalColor,
             [`_${prop}Base` as keyof React.CSSProperties]: baseVal,
-            [`_${prop}Strength` as keyof React.CSSProperties]: strength.toString()
+            [`_${prop}Strength` as keyof React.CSSProperties]: strength.toString(),
+            [`_${prop}Opacity` as keyof React.CSSProperties]: finalOpacity.toString()
         });
         setLocalStylesHistory(newHistory);
         setHistoryIndex(newHistory.length - 1);
     };
 
+    const updateElementText = (el: HTMLElement, val: string) => {
+        if (el.isConnected) {
+            el.textContent = val;
+        } else if (el.id) {
+            const liveEl = document.getElementById(el.id);
+            if (liveEl) liveEl.textContent = val;
+        }
+    };
+
     const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        setCustomText(e.target.value);
-        if (element) {
-            if (element.isConnected) {
-                element.textContent = e.target.value;
-            } else if (element.id) {
-                const liveEl = document.getElementById(element.id);
-                if (liveEl) liveEl.textContent = e.target.value;
-            }
+        const val = e.target.value;
+        setCustomText(val);
+        updateElementText(element, val);
+        if (elements.length > 1 && isSyncEditingEnabled && syncText) {
+            elements.forEach((el, idx) => {
+                if (idx > 0) {
+                    updateElementText(el, val);
+                }
+            });
         }
     };
 
@@ -741,10 +976,64 @@ const EditorModal: React.FC<EditorModalProps> = ({ element, currentStyles, draft
             
             <div className="p-4 space-y-6 overflow-y-auto max-h-[60vh] custom-scrollbar text-sm">
                 
+                {/* Selection Mode Control */}
+                <div className="bg-color6/20 p-3 rounded-xl border border-color6/30 space-y-2">
+                    <div className="flex items-center justify-between">
+                        <span className="font-bold text-color4 text-xs uppercase tracking-wider">Selection Mode</span>
+                        <span className="text-[10px] bg-color4/20 text-color4 px-2 py-0.5 rounded-full font-bold">
+                            {elements.length} selected
+                        </span>
+                    </div>
+                    <label className="flex items-center gap-2 cursor-pointer select-none py-1">
+                        <input 
+                            type="checkbox" 
+                            checked={isMultiSelectMode} 
+                            onChange={(e) => setIsMultiSelectMode(e.target.checked)} 
+                            className="w-4 h-4 rounded border-color6 bg-color5 accent-color4 cursor-pointer" 
+                        />
+                        <span className="text-xs font-semibold text-color1/80">Multi-Select (Ctrl/Cmd + click to add)</span>
+                    </label>
+                    {elements.length > 1 && (
+                        <label className="flex items-center gap-2 cursor-pointer select-none py-1 border-t border-color6/20 pt-2 mt-1">
+                            <input 
+                                type="checkbox" 
+                                checked={isSyncEditingEnabled} 
+                                onChange={(e) => {
+                                    setIsSyncEditingEnabled(e.target.checked);
+                                    if (!e.target.checked) {
+                                        setSyncBackground(false);
+                                        setSyncBorders(false);
+                                        setSyncText(false);
+                                        setTimeout(() => onPreviewUpdate(localStyles), 0);
+                                    }
+                                }} 
+                                className="w-4 h-4 rounded border-color6 bg-color5 accent-color4 cursor-pointer" 
+                            />
+                            <span className="text-xs font-semibold text-color1/80">Synchronized Editing</span>
+                        </label>
+                    )}
+                </div>
+                
                 {/* Background Color */}
                 <div className="space-y-5">
                     <div className="flex items-center justify-between border-b border-color6/30 pb-1">
-                        <h3 className="font-bold text-color4">Background</h3>
+                        <div className="flex items-center gap-2">
+                            <h3 className="font-bold text-color4">Background</h3>
+                            {elements.length > 1 && isSyncEditingEnabled && (
+                                <label className="flex items-center gap-1 cursor-pointer select-none text-[10px] text-color1/60 hover:text-color1">
+                                    <input 
+                                        type="checkbox" 
+                                        checked={syncBackground} 
+                                        onChange={(e) => {
+                                            setSyncBackground(e.target.checked);
+                                            setTimeout(() => onPreviewUpdate(localStyles), 0);
+                                        }} 
+                                        className="w-3.5 h-3.5 rounded border-color6 bg-color5 accent-color4 cursor-pointer" 
+                                    />
+                                    <span>Sync</span>
+                                </label>
+                            )}
+                        </div>
                         <button onClick={() => setIsEditingPalette(!isEditingPalette)} className="text-xs text-color1/70 hover:text-color1 underline">
                             {isEditingPalette ? 'Done Editing' : 'Edit Palette'}
                         </button>
@@ -772,7 +1061,25 @@ const EditorModal: React.FC<EditorModalProps> = ({ element, currentStyles, draft
 
                 {/* Border Options */}
                 <div className="space-y-4">
-                    <h3 className="font-bold text-color4 border-b border-color6/30 pb-1 flex items-center gap-2 mt-2"><Square className="w-4 h-4"/> Borders</h3>
+                    <div className="flex items-center justify-between border-b border-color6/30 pb-1 mt-2">
+                        <div className="flex items-center gap-2">
+                            <h3 className="font-bold text-color4 flex items-center gap-2"><Square className="w-4 h-4"/> Borders</h3>
+                            {elements.length > 1 && isSyncEditingEnabled && (
+                                <label className="flex items-center gap-1 cursor-pointer select-none text-[10px] text-color1/60 hover:text-color1">
+                                    <input 
+                                        type="checkbox" 
+                                        checked={syncBorders} 
+                                        onChange={(e) => {
+                                            setSyncBorders(e.target.checked);
+                                            setTimeout(() => onPreviewUpdate(localStyles), 0);
+                                        }} 
+                                        className="w-3.5 h-3.5 rounded border-color6 bg-color5 accent-color4 cursor-pointer" 
+                                    />
+                                    <span>Sync</span>
+                                </label>
+                            )}
+                        </div>
+                    </div>
                     
                     <div className="bg-color5/30 p-2 rounded-lg border border-color6/10">
                         <label className="block mb-2 font-semibold text-color1 text-xs uppercase tracking-wider">Border Color</label>
@@ -806,7 +1113,25 @@ const EditorModal: React.FC<EditorModalProps> = ({ element, currentStyles, draft
 
                 {/* Typography */}
                 <div className="space-y-4">
-                    <h3 className="font-bold text-color4 border-b border-color6/30 pb-1 flex items-center gap-2"><Type className="w-4 h-4"/> Typography</h3>
+                    <div className="flex items-center justify-between border-b border-color6/30 pb-1">
+                        <div className="flex items-center gap-2">
+                            <h3 className="font-bold text-color4 flex items-center gap-2"><Type className="w-4 h-4"/> Typography</h3>
+                            {elements.length > 1 && isSyncEditingEnabled && (
+                                <label className="flex items-center gap-1 cursor-pointer select-none text-[10px] text-color1/60 hover:text-color1">
+                                    <input 
+                                        type="checkbox" 
+                                        checked={syncText} 
+                                        onChange={(e) => {
+                                            setSyncText(e.target.checked);
+                                            setTimeout(() => onPreviewUpdate(localStyles), 0);
+                                        }} 
+                                        className="w-3.5 h-3.5 rounded border-color6 bg-color5 accent-color4 cursor-pointer" 
+                                    />
+                                    <span>Sync</span>
+                                </label>
+                            )}
+                        </div>
+                    </div>
                     
                     <div className="bg-color5/30 p-2 rounded-lg border border-color6/10">
                         <label className="block mb-2 font-semibold text-color1 text-xs uppercase tracking-wider">Text Color</label>
