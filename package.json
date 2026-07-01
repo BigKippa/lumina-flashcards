@@ -9,7 +9,9 @@
     "build": "tsc && vite build",
     "build:beta": "tsc && vite build --mode staging",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "backup": "node scripts/create-backup.js beta",
+    "backup:prod": "node scripts/create-backup.js prod"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
