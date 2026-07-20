@@ -7,12 +7,12 @@
         },
         "subtitle": "What would you like to master today?",
         "categories": {
-            "random": "Random Mix",
-            "vocabulary": "Vocabulary",
-            "idioms": "Idioms & Sayings",
-            "phrasal_verbs": "Phrasal Verbs",
-            "collocations": "Phrases & Collocations",
-            "prepositions": "Prepositions"
+            "random": "Study",
+            "vocabulary": "Learning Library",
+            "idioms": "Messages",
+            "phrasal_verbs": "Learning Stats",
+            "collocations": "To Do",
+            "prepositions": "Calendar"
         },
         "start_session": "Start Session",
         "quick_start": "Quick Start",

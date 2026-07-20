@@ -31,10 +31,10 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ user, onSelect, la
         switch (id) {
             case 'random': return "Shuffle words from all topics and test your knowledge.";
             case 'vocabulary': return "Explore words, definitions, and usage in daily conversation.";
-            case 'idioms': return "Check feedback, updates, and chat with your tutors.";
-            case 'phrasal-verbs': return "Track your progress, study streak, and performance.";
-            case 'collocations': return "View your assignments, scheduled tasks, and goals.";
-            case 'prepositions': return "Check scheduled study sessions and upcoming tests.";
+            case 'idioms': return "Master figurative expressions and common idioms.";
+            case 'phrasal-verbs': return "Understand verbs combined with prepositions or adverbs.";
+            case 'collocations': return "Learn natural word pairings and common phrases.";
+            case 'prepositions': return "Practice prepositions of time, place, and movement.";
             default: return "Start a new interactive study session.";
         }
     };

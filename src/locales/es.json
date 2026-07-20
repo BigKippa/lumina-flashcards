@@ -7,12 +7,12 @@
     },
     "subtitle": "¿Qué te gustaría aprender hoy?",
     "categories": {
-      "random": "Mezcla Aleatoria",
-      "vocabulary": "Vocabulario",
-      "idioms": "Modismos y Refranes",
-      "phrasal_verbs": "Verbos Frasales",
-      "collocations": "Frases y Colocaciones",
-      "prepositions": "Preposiciones"
+      "random": "Estudiar",
+      "vocabulary": "Biblioteca de Aprendizaje",
+      "idioms": "Mensajes",
+      "phrasal_verbs": "Estadísticas de Aprendizaje",
+      "collocations": "Por Hacer",
+      "prepositions": "Calendario"
     },
     "start_session": "Iniciar Sesión",
     "quick_start": "Inicio Rápido",
